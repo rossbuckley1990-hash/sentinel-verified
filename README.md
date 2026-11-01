@@ -32,7 +32,7 @@ npm run build
 node dist/cli.js demo
 ```
 
-The offline core needs no model authentication. See [measured installation and demo runs](docs/V0.2-VALIDATION.md); v0.1 timings are retained separately from the v0.2 release measurements. Node, npm and Git installation time is excluded.
+A fresh public clone with an empty npm cache reached its first contradiction in **27.75 seconds** and completed install/build/demo in **41.70 seconds** on Apple Silicon macOS. Node, npm and Git were already installed. This is one measured trial, not a speed guarantee; [exact timings and limits](docs/V0.2-VALIDATION.md).
 No API key, subscription or model download is needed. The controlled demonstration runs real code and real Vitest tests:
 
 1. A deliberately faulty patch passes the ordinary tests.

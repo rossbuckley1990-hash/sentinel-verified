@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-01T15:02:22.545Z",
+  "platform": "darwin",
+  "arch": "arm64",
+  "node": "v26.12.0",
+  "commit": "5d0b19531f9b3f04b3176661d6cf50fb0ab52e03",
+  "ref": "codex/v0.2.0-frictionless",
+  "emptyNpmCache": true,
+  "preinstalled": [
+    "Node.js",
+    "npm",
+    "Git"
+  ],
+  "firstMeaningfulMs": 27747,
+  "totalMs": 41699,
+  "under90Seconds": true,
+  "steps": [
+    {
+      "command": [
+        "git",
+        "clone",
+        "--branch",
+        "codex/v0.2.0-frictionless",
+        "https://github.com/rossbuckley1990-hash/sentinel-verified.git",
+        "project"
+      ],
+      "exitCode": 0,
+      "durationMs": 1007
+    },
+    {
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exitCode": 0,
+      "durationMs": 40
+    },
+    {
+      "command": [
+        "npm",
+        "ci"
+      ],
+      "exitCode": 0,
+      "durationMs": 6099
+    },
+    {
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exitCode": 0,
+      "durationMs": 8094
+    },
+    {
+      "command": [
+        "/opt/homebrew/Cellar/node/26.12.0/bin/node",
+        "dist/cli.js",
+        "demo"
+      ],
+      "exitCode": 0,
+      "durationMs": 26438
+    }
+  ]
+}

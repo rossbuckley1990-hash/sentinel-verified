@@ -37,7 +37,7 @@
   ✓ VERIFIED             Keep personalised greetings
   ✓ VERIFIED             Observed behaviour: other-greeting
 
-  CONTRADICTED · 2.85s · local advisory verification
+  CONTRADICTED · 10.64s · local advisory verification
   Results cover the executed checks. They do not prove arbitrary correctness.
 
   · Simulating an interrupted adapter; implementation and evidence remain on disk
@@ -66,14 +66,15 @@
   ✓ VERIFIED             Keep personalised greetings
   ✓ VERIFIED             Observed behaviour: other-greeting
 
-  VERIFIED · 2.50s · local advisory verification
+  VERIFIED · 9.03s · local advisory verification
   Results cover the executed checks. They do not prove arbitrary correctness.
 
-  Session     s-mvxvzycy-780b26b7 · verified
-  Workspace   <store>/workspaces/s-mvxvzycy-780b26b7
-  Evidence    b034e2bb3c3a4c29ad86dcad9c5084d39bfcf9c4fb0b21cf34bb4b84c707f06a
-  False success report  <store>/sessions/s-mvxvzycy-780b26b7/false-success.html
-  Final report          <store>/sessions/s-mvxvzycy-780b26b7/report.html
-  First result          3.21s from demo start (installation excluded)
-  Full demonstration    6.00s
-  Continue this session: sentinel continue --agent codex
+  Session     s-mvxyl5gy-8248a6f9 · verified
+  Workspace   <store>/workspaces/s-mvxyl5gy-8248a6f9
+  Evidence    be9d05ffb3d8d9d1535989b54e4852dc812547f5fc2cd4432a3ae4235fa71472
+  False success report  <store>/sessions/s-mvxyl5gy-8248a6f9/false-success.html
+  Final report          <store>/sessions/s-mvxyl5gy-8248a6f9/report.html
+  First result          12.09s from demo start (installation excluded)
+  Full demonstration    21.90s
+  Open report           sentinel report --session s-mvxyl5gy-8248a6f9 --store '<store>' --open
+  Continue this session: sentinel continue --session s-mvxyl5gy-8248a6f9 --store '<store>' --agent codex
