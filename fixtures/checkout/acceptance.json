@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 3,
+  "objective": "Fix checkout tax rounding and show the correct total while preserving validation and exact totals",
+  "approvedBy": "Bundled controlled demonstration specification; not a live developer approval",
+  "requirements": [],
+  "allowedPaths": [
+    "src/quote.js"
+  ],
+  "application": {
+    "command": [
+      "node",
+      "server.mjs"
+    ],
+    "readyPath": "/health",
+    "startupTimeoutMs": 15000
+  },
+  "scenarios": [
+    {
+      "id": "rounded-api",
+      "kind": "must-change",
+      "description": "Round the complete checkout tax to the nearest cent",
+      "type": "http",
+      "method": "POST",
+      "path": "/api/quote",
+      "body": {
+        "unitPriceCents": 1999,
+        "quantity": 3,
+        "taxBasisPoints": 825
+      },
+      "expected": {
+        "status": 200,
+        "bodyType": "json",
+        "body": {
+          "subtotalCents": 5997,
+          "taxCents": 495,
+          "totalCents": 6492
+        }
+      }
+    },
+    {
+      "id": "rounded-browser",
+      "kind": "must-change",
+      "description": "Show the independently specified checkout total and tax in the React interface",
+      "type": "browser",
+      "path": "/",
+      "steps": [
+        {
+          "action": "fill",
+          "selector": "[data-testid=quantity]",
+          "value": "3"
+        },
+        {
+          "action": "click",
+          "selector": "[data-testid=update]"
+        }
+      ],
+      "assertions": [
+        {
+          "selector": "[data-testid=total]",
+          "property": "text",
+          "expected": "$64.92"
+        },
+        {
+          "selector": "[data-testid=tax]",
+          "property": "text",
+          "expected": "$4.95"
+        }
+      ]
+    },
+    {
+      "id": "whole-dollar-api",
+      "kind": "must-preserve",
+      "description": "Preserve exact whole-dollar tax and totals",
+      "type": "http",
+      "method": "POST",
+      "path": "/api/quote",
+      "body": {
+        "unitPriceCents": 10000,
+        "quantity": 2,
+        "taxBasisPoints": 1000
+      },
+      "expected": {
+        "status": 200,
+        "bodyType": "json",
+        "body": {
+          "subtotalCents": 20000,
+          "taxCents": 2000,
+          "totalCents": 22000
+        }
+      }
+    },
+    {
+      "id": "invalid-quantity",
+      "kind": "must-preserve",
+      "description": "Reject a zero item quantity with an explicit validation response",
+      "type": "http",
+      "method": "POST",
+      "path": "/api/quote",
+      "body": {
+        "unitPriceCents": 1999,
+        "quantity": 0,
+        "taxBasisPoints": 825
+      },
+      "expected": {
+        "status": 400,
+        "bodyType": "json",
+        "body": {
+          "error": "Invalid checkout input"
+        }
+      }
+    }
+  ],
+  "coverage": {
+    "confirmed": true,
+    "aspects": [
+      {
+        "id": "tax",
+        "description": "Round checkout tax to the nearest cent and preserve valid totals and validation",
+        "requirementIds": [
+          "rounded-api",
+          "rounded-browser",
+          "whole-dollar-api",
+          "invalid-quantity"
+        ]
+      }
+    ]
+  }
+}

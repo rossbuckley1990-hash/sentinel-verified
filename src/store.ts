@@ -16,6 +16,7 @@ export async function atomicJson(file: string, value: unknown): Promise<void> {
   await fs.rename(temp, file);
 }
 export async function putObject(store: string, value: string | Buffer): Promise<string> {
+  if(Buffer.byteLength(value)>32_000_000)throw new Error('Evidence object exceeds the 32 MB limit');
   const hash = digest(value); const dir = path.join(store, 'objects'); await fs.mkdir(dir, { recursive: true });
   const file = path.join(dir, hash);
   const temp=path.join(dir,`.${hash}.${randomUUID()}.tmp`);
@@ -27,7 +28,8 @@ export async function putObject(store: string, value: string | Buffer): Promise<
 }
 export async function getObject(store: string, hash: string): Promise<Buffer> {
   if (!hashPattern.test(hash)) throw new Error('Invalid object hash');
-  const bytes = await fs.readFile(path.join(store, 'objects', hash));
+  const file=path.join(store,'objects',hash);const stat=await fs.lstat(file);if(!stat.isFile()||stat.size>32_000_000)throw new Error('Evidence object must be a regular file of at most 32 MB');
+  const bytes = await fs.readFile(file);if(bytes.length>32_000_000)throw new Error('Evidence object exceeds the 32 MB limit');
   if (digest(bytes) !== hash) throw new Error(`Evidence integrity failure: ${hash}`); return bytes;
 }
 // Missing objects must fail locally, never launch a promisor remote helper or

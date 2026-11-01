@@ -1,0 +1,1 @@
+{"name":"sentinel-checkout-demo","private":true,"type":"module","sentinelFixture":"controlled-checkout-v1","scripts":{"start":"node server.mjs","test":"vitest run"}}

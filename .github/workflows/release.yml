@@ -32,11 +32,19 @@ jobs:
           test "$(node -p "'v' + require('./package.json').version")" = "$RELEASE_TAG"
           test "$(git rev-parse HEAD)" = "$(git rev-parse "$RELEASE_TAG^{commit}")"
       - run: npm ci
+      - name: Install explicit test browser
+        run: npx playwright-core install --with-deps chromium
       - run: npm run build
       - run: npm test
+        env:
+          SENTINEL_TEST_BROWSER: "1"
       - run: node dist/cli.js demo --store "$RUNNER_TEMP/sentinel-demo"
       - run: npm run benchmark
       - run: npm run benchmark:public
+      - name: Public API and React release gate
+        run: |
+          npm ci --prefix benchmarks/web/runtime --ignore-scripts
+          node benchmarks/web/run.mjs --allow-local --out=benchmark-results/public-web.json
       - run: npm pack
       - name: Publish GitHub release archive
         env:

@@ -1,6 +1,6 @@
 {
   "name": "sentinel-verified",
-  "version": "0.2.0",
+  "version": "1.0.0-rc.1",
   "description": "Evidence-backed verification and continuity for AI coding agents",
   "type": "module",
   "license": "MIT",
@@ -12,8 +12,11 @@
     "fixtures",
     "README.md",
     "LICENSE",
-    "docs",
-    "benchmarks"
+    "docs/THREAT-MODEL.md",
+    "docs/INTEGRATIONS.md",
+    "docs/CONTRACT-DISCOVERY.md",
+    "docs/REPAIR-AND-REVIEW.md",
+    "docs/ISOLATION.md"
   ],
   "engines": {
     "node": "^22.12.0 || ^24.0.0 || >=26.0.0"
@@ -26,13 +29,18 @@
     "benchmark": "node dist/benchmark.js",
     "prepack": "npm run build",
     "benchmark:public": "node dist/public-benchmark.js",
-    "benchmark:handoff": "node dist/handoff-benchmark.js --allow-local"
+    "benchmark:handoff": "node dist/handoff-benchmark.js --allow-local",
+    "benchmark:web": "node benchmarks/web/run.mjs --allow-local"
   },
   "dependencies": {
+    "esbuild": "0.28.2",
+    "playwright-core": "1.64.1",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
     "tsx": "4.23.15",
+    "typescript": "5.9.3",
     "vitest": "5.0.5",
-    "zod": "4.6.7",
-    "typescript": "5.9.3"
+    "zod": "4.6.7"
   },
   "devDependencies": {
     "@types/node": "22.18.10"

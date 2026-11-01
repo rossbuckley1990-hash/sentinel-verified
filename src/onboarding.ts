@@ -1,3 +1,4 @@
+import { discoverApplication, approveApplicationPlan } from './app-onboarding.js';
 import { createInterface } from 'node:readline/promises';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
@@ -118,7 +119,7 @@ export async function consentToExecution(io:PromptIO,runner:RunnerChoice,localCo
  io.write('  EXECUTION · Source and tests will run locally under your OS account. This is not a sandbox.');
  if(!io.interactive||(await io.ask('  Allow local execution for this session? Type allow: ')).toLowerCase()!=='allow')throw new Error('Local execution not authorised. Review the source and use --allow-local, or configure Docker for verification.');
 }
-export interface PrepareOptions {repo:string;objective:string;store:string;contractPath?:string;agent?:AgentName;localConsent:boolean;isolatedConsent:boolean;runner:RunnerChoice;io:PromptIO}
+export interface PrepareOptions {repo:string;objective:string;store:string;contractPath?:string;agent?:AgentName;localConsent:boolean;isolatedConsent:boolean;runner:RunnerChoice;io:PromptIO;proposeWith?:'codex'}
 export async function prepareRun(options:PrepareOptions){
  const {io,store}=options;await fs.mkdir(store,{recursive:true,mode:0o700});
  io.write('  DISCOVERY · Reading repository evidence (no project code execution)');
@@ -127,7 +128,10 @@ export async function prepareRun(options:PrepareOptions){
  io.write(`  DISCOVERY · ${plan.files.sources.length} source files · ${plan.files.tests.length} test files · ${plan.environment.packageManager} / ${plan.environment.testFramework}`);
  const existing=await repositorySession(store,plan.repo);if(existing)io.write(`  Existing session ${existing}; sentinel continue resumes it. This command starts a new task.`);
  let contractPath=options.contractPath;
- if(!contractPath){const baseline=await captureSnapshot(plan.repo,store);contractPath=(await approvePlan(plan,store,baseline,io)).contractPath;}
+ if(!contractPath){const baseline=await captureSnapshot(plan.repo,store);const app=await discoverApplication(plan,baseline,store);
+  const explicitFunction=plan.proposed.some(p=>p.requirement.kind==='must-change');
+  contractPath=(app&&!explicitFunction?await approveApplicationPlan(plan,baseline,store,io,app,options.proposeWith):await approvePlan(plan,store,baseline,io)).contractPath;
+ }
  else {const contract=parseContract(JSON.parse(await readLimitedText(path.resolve(contractPath),1000000)));if(contract.objective!==options.objective)throw new Error('Task objective differs from the supplied reviewed contract.');io.write(`  CONTRACT · Using supplied reviewed contract (${contract.requirements.length} requirements).`);}
  const agent=await chooseAgent(store,plan.repo,io,options.agent);
  await consentToExecution(io,options.runner,options.localConsent,options.isolatedConsent);

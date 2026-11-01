@@ -20,8 +20,12 @@ jobs:
           node-version: ${{ matrix.node }}
           cache: npm
       - run: npm ci
+      - name: Install explicit test browser
+        run: npx playwright-core install --with-deps chromium
       - run: npm run build
       - run: npm test
+        env:
+          SENTINEL_TEST_BROWSER: "1"
       - run: node dist/cli.js demo --store "$RUNNER_TEMP/sentinel-demo"
       - name: Adversarial benchmark
         if: matrix.os == 'ubuntu-latest' && matrix.node == 22
@@ -29,6 +33,11 @@ jobs:
       - name: Public provenance and outcome evaluation
         if: matrix.os == 'ubuntu-latest' && matrix.node == 22
         run: npm run benchmark:public
+      - name: Public API and React evaluation
+        if: matrix.os == 'ubuntu-latest' && matrix.node == 22
+        run: |
+          npm ci --prefix benchmarks/web/runtime --ignore-scripts
+          node benchmarks/web/run.mjs --allow-local --out=benchmark-results/public-web.json
       - name: Retain reproducible benchmark evidence
         if: always() && matrix.os == 'ubuntu-latest' && matrix.node == 22
         uses: actions/upload-artifact@v4

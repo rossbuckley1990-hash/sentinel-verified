@@ -56,12 +56,17 @@ export async function runAgent(name: AgentName, options: AgentOptions): Promise<
   const startedAt = new Date().toISOString();
   if (name.startsWith('fixture-')) {
     const pkg = JSON.parse(await readFile(join(options.workspace, 'package.json'), 'utf8')) as { sentinelFixture?: string };
-    if (pkg.sentinelFixture !== 'controlled-demo-v1') throw new Error('Fixture adapters only operate on the labelled controlled demonstration.');
+    if (!['controlled-demo-v1','controlled-checkout-v1'].includes(pkg.sentinelFixture ?? '')) throw new Error('Fixture adapters only operate on the labelled controlled demonstration.');
     await mkdir(join(options.workspace, 'src'), { recursive: true });
-    if (!options.signal?.aborted) await writeFile(join(options.workspace, 'src/access.ts'), name === 'fixture-fix' ? corrected : faulty);
+    if (!options.signal?.aborted) {
+      if (pkg.sentinelFixture === 'controlled-checkout-v1') {
+        const variant = new URL(`../fixtures/checkout-variants/${name === 'fixture-fix' ? 'correct' : 'faulty'}.js`, import.meta.url);
+        await writeFile(join(options.workspace, 'src/quote.js'), await readFile(variant));
+      } else await writeFile(join(options.workspace, 'src/access.ts'), name === 'fixture-fix' ? corrected : faulty);
+    }
     const interrupted = name === 'fixture-interrupt' || options.signal?.aborted;
     options.onProgress?.(interrupted ? 'Controlled fixture agent interrupted; source changes preserved.' : `Controlled fixture adapter ${name} completed.`);
-    return { agent: name, startedAt, completedAt: new Date().toISOString(), outcome: interrupted ? 'interrupted' : 'completed', statement: name === 'fixture-fix' ? 'SIMULATED AGENT STATEMENT: added strict numeric validation; independent verification still required.' : 'SIMULATED AGENT STATEMENT: the visible tests pass, so the task is complete. This claim is not verification evidence.' };
+    return { agent: name, startedAt, completedAt: new Date().toISOString(), outcome: interrupted ? 'interrupted' : 'completed', statement: name === 'fixture-fix' ? 'SIMULATED AGENT STATEMENT: applied the controlled correction; independent verification still required.' : 'SIMULATED AGENT STATEMENT: the visible tests pass, so the task is complete. This claim is not verification evidence.' };
   }
   const capabilities = await detectAgents(options.workspace);
   const capability = capabilities.find(c => c.name === name);

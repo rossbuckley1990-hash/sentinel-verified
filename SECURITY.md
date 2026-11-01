@@ -1,6 +1,6 @@
 # Security policy
 
-SENTINEL 0.1 is local advisory software. Read the [threat model](docs/THREAT-MODEL.md) before executing a repository. Local execution and agent integrations can run code with your operating-system account's privileges.
+SENTINEL provides local advisory execution and an optional function-verification container. Read the [threat model](docs/THREAT-MODEL.md) before executing a repository. Local execution and agent integrations can run code with your operating-system account's privileges.
 
 ## Report a vulnerability
 
@@ -12,7 +12,7 @@ Do not test against other people's repositories or services without permission. 
 
 ## Supported versions
 
-The current 0.1 release line receives security fixes. This is an early release with a deliberately narrow scope. No response-time guarantee, bug bounty or hostile-code sandbox is implied.
+The latest stable release is the supported security-fix target; prior releases remain available for reproducibility. Supported execution is deliberately bounded. No response-time guarantee, bug bounty or hostile-code sandbox is implied.
 
 ## Handling reports
 

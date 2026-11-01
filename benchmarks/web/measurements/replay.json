@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-01T19:40:49.479Z",
+  "results": [
+    {
+      "id": "express-correct-repair",
+      "sourceRepositoryRemoved": true,
+      "originalReceipt": "4d018859ab754c323e0aa36e8adfd56e11713e129ab36f9f8d152805a8fd97bd",
+      "replayedReceipt": "3600d6637f0d76a982b84c8f521ee4fa743a4bf8237ced5359802ce651afe5f8",
+      "expectedStatus": "VERIFIED",
+      "observedStatus": "VERIFIED",
+      "exitCode": 0,
+      "identityMatch": true,
+      "matches": true,
+      "durationMs": 5474,
+      "command": [
+        "node",
+        "<frozen-build>/dist/cli.js",
+        "replay",
+        "4d018859ab754c323e0aa36e8adfd56e11713e129ab36f9f8d152805a8fd97bd",
+        "--store",
+        "<evidence-store>",
+        "--repo",
+        "<benchmark-runtime>",
+        "--allow-local",
+        "--check-timeout",
+        "20000"
+      ]
+    },
+    {
+      "id": "react-trim-regression",
+      "sourceRepositoryRemoved": true,
+      "originalReceipt": "45d373c204f13d5dcb4873efbeb86026d528a78eb7695e952ff6c02876861e93",
+      "replayedReceipt": "e02e5ef41ed0eba95f309c709a9cae7cdc5744847a5c4c4dea80e1f5fddc3b27",
+      "expectedStatus": "CONTRADICTED",
+      "observedStatus": "CONTRADICTED",
+      "exitCode": 1,
+      "identityMatch": true,
+      "matches": true,
+      "durationMs": 14248,
+      "command": [
+        "node",
+        "<frozen-build>/dist/cli.js",
+        "replay",
+        "45d373c204f13d5dcb4873efbeb86026d528a78eb7695e952ff6c02876861e93",
+        "--store",
+        "<evidence-store>",
+        "--repo",
+        "<benchmark-runtime>",
+        "--allow-local",
+        "--check-timeout",
+        "20000"
+      ]
+    }
+  ],
+  "rawMeasurementSha256": "022231786a715882e07f1418de1a24ad92bfdea2d9c64c0626e0368c2792b73c",
+  "notes": "Actual CLI replays after deleting each disposable original source checkout. Exact baseline/candidate/contract hashes matched. Dependencies reused from the explicitly pinned benchmark runtime. Full original output retained locally."
+}
