@@ -31,9 +31,9 @@ Measured Apple Silicon macOS run: first contradiction 24.09 s; full demo 41.72 s
 - Fresh public candidate clone `4f02ce08be188659e6a001d4fa1921935fef294b`, empty npm cache: first contradiction 48.391 s; clone/install/build/full demo 67.318 s. Preinstalled Node/npm/Git/browser excluded. [Record](v1/fresh-clone.json).
 - Production dependency audit: 0 vulnerabilities at the observed check.
 
-## Remaining release gates
+## Release confirmation
 
-Final fresh package installation, exact-candidate macOS/Linux CI and public artifact installation are pending. Claude 2.1.301 is installed but unauthenticated. Codex 0.163.0 is authenticated. npm publication authentication returns E401; a public GitHub archive remains the available distribution path.
+Publication requires exact-candidate macOS/Linux CI and installation of the actual public artifact. The completed service confirmations, exact release commit and public-download measurements are recorded in the [v1.0.0 release notes and attached validation JSON](https://github.com/rossbuckley1990-hash/sentinel-verified/releases/tag/v1.0.0). A prepared package or tag alone is not evidence that these checks passed. Claude 2.1.301 is installed but unauthenticated. Codex 0.163.0 is authenticated. npm publication authentication returns E401; a public GitHub archive remains the available distribution path.
 
 The optional authenticated read-only Codex proposal adapter was executed on the public Express task. It returned zero invented scenarios and three concrete questions about missing exact response expectations. No suggestion was approved automatically. [Recorded proposal](v1/model-proposal.json).
 
