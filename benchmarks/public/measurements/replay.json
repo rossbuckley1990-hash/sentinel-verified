@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-11-01T14:54:56.759Z",
+  "originalReceipt": "4c499b6b1e8ddc765c3cf1bc9572556d59fef67547868b82039452d6445116da",
+  "replayedReceipt": "4a34d9a402fd3a6cee973491d509817e26392cdca917cb378e98c72c171e4471",
+  "baselineHash": "e8b880cd6b02474461a400810aa9957c98142d21f5afab6b97441fe689e06555",
+  "candidateHash": "0c2f47424eb2b6408c3e0f4ce1a61bfb723396c4576e5d3251af15ba65f3e975",
+  "contractHash": "17272c2f8fb2e083dcac7df8e8e9fd14b5f20b1a0a8eb4a5bd66f7996ee09ae0",
+  "sourceWorkspaceExists": false,
+  "identitiesMatch": true,
+  "command": "node dist/cli.js replay <receipt> --store <benchmark-output>/store --repo <benchmark-output> --allow-local --check-timeout 120000",
+  "helperCommand": "node benchmarks/public/replay.mjs <receipt> --allow-local",
+  "exitCode": 1,
+  "durationMs": 5164,
+  "ordinaryTests": "VERIFIED",
+  "requirement": {
+    "status": "CONTRADICTED",
+    "args": [
+      " "
+    ],
+    "expected": false,
+    "observed": true
+  },
+  "interpretation": "Exit 1 correctly reports the reproduced requirement contradiction. The original temporary source checkout was absent; the content-addressed snapshots and restored pinned dependencies supplied the replay.",
+  "preflight": "A final completed-run receipt was selected after checking its source workspace was absent. Earlier interrupted-run temporary source was retained, so it was not used to establish the post-cleanup claim."
+}

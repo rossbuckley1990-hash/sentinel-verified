@@ -4,8 +4,8 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { exportSession, importSession } from '../src/portable.js';
-import { continuationContext, continueSession, loadCheckpoint, startSession } from '../src/session.js';
-import { digest, getObject, readSnapshot } from '../src/store.js';
+import { continuationContext, continueSession, loadCheckpoint, startSession, saveCheckpoint } from '../src/session.js';
+import { digest, getObject, readSnapshot, putObject } from '../src/store.js';
 import type { Checkpoint, Receipt } from '../src/types.js';
 
 const temporary: string[] = [];
@@ -126,4 +126,14 @@ describe('portable evidence checkpoints', () => {
     await expect(startSession({ repo: p.repo, store: p.store, objective: p.objective, contractPath: p.contractPath, agent: 'fixture-interrupt', localConsent: true })).rejects.toThrow('at most 1000000 bytes');
     expect((await stat(p.contractPath)).size).toBe(1000001);
   });
+});
+
+
+it('carries exact acknowledged context and rejects missing or mismatched handoff input',async()=>{
+ const p=await project();const context=await continuationContext(p.store,p.checkpoint);const contextHash=await putObject(p.store,context);
+ const now=new Date().toISOString();p.checkpoint.agents.push({agent:'codex',startedAt:now,completedAt:now,outcome:'interrupted',statement:'Protocol fixture only',handoff:{contextHash,acknowledged:true,sourceHash:p.checkpoint.candidateHash,contractHash:p.checkpoint.contractHash},command:{command:['protocol-fixture'],input:context,cwd:p.checkpoint.workspace,exitCode:0,signal:null,stdout:'',stderr:'',durationMs:0,timedOut:false,truncated:false}});
+ await saveCheckpoint(p.store,p.checkpoint);await exportSession(p.store,p.checkpoint.id,p.bundle);
+ const imported=await importSession(join(p.directory,'good'),p.bundle);expect((await getObject(join(p.directory,'good'),imported.agents.at(-1)!.handoff!.contextHash)).toString()).toBe(context);
+ const missing=await readBundle(p.bundle);delete missing.objects[contextHash];const missingPath=join(p.directory,'missing-context.json');await writeFile(missingPath,JSON.stringify(missing));await expect(importSession(join(p.directory,'bad'),missingPath)).rejects.toThrow('missing required object');
+ const wrong=await readBundle(p.bundle);wrong.checkpoint.agents.at(-1)!.command!.input='different';replaceCheckpoint(wrong);const wrongPath=join(p.directory,'wrong-context.json');await writeFile(wrongPath,JSON.stringify(wrong));await expect(importSession(join(p.directory,'bad'),wrongPath)).rejects.toThrow('Handoff context differs');
 });

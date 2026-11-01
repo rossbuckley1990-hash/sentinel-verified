@@ -1,0 +1,373 @@
+{
+  "schemaVersion": 1,
+  "configuration": {
+    "timeoutMs": 120000
+  },
+  "runtime": {
+    "before": {
+      "public-benchmark.js": "d2a12f21d8f6d825c2c4b27f090c19040fed9b8e386d2925f176b1447d920572",
+      "verifier.js": "1f98bc6d1028f9a528206a51a291539da3f76d70bb678094bda0dfc3e3bc4297",
+      "store.js": "9d7add2b3fa37fb7762ced66a881e628c88b0ddaab049c52c102487b49d1dce0",
+      "process.js": "83ee2febfee392b1174c46dd2b69083c6475f3dcb09cd7bb08accba1a8cdb3d3",
+      "probe-worker.js": "c16009148648f57d65398d7741a6d805170a278ea3329f781dc4d005bb2c85ad",
+      "schema.js": "c89ed5cc0ca37532be829acb290c6fc54e03c77975efb5e9c8fc7357ea25f6d7"
+    },
+    "after": {
+      "public-benchmark.js": "d2a12f21d8f6d825c2c4b27f090c19040fed9b8e386d2925f176b1447d920572",
+      "verifier.js": "1f98bc6d1028f9a528206a51a291539da3f76d70bb678094bda0dfc3e3bc4297",
+      "store.js": "9d7add2b3fa37fb7762ced66a881e628c88b0ddaab049c52c102487b49d1dce0",
+      "process.js": "83ee2febfee392b1174c46dd2b69083c6475f3dcb09cd7bb08accba1a8cdb3d3",
+      "probe-worker.js": "c16009148648f57d65398d7741a6d805170a278ea3329f781dc4d005bb2c85ad",
+      "schema.js": "c89ed5cc0ca37532be829acb290c6fc54e03c77975efb5e9c8fc7357ea25f6d7"
+    },
+    "stable": true
+  },
+  "loadAverages": [
+    98.60107421875,
+    162.75341796875,
+    147.85107421875
+  ],
+  "createdAt": "2026-11-01T14:52:43.545Z",
+  "sentinelVersion": "0.2.0",
+  "environment": {
+    "node": "v26.12.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "vitest": "5.0.5"
+  },
+  "casesHash": "0a299e85ce4a51de20f243b9455610b8075c02079d18bca261909f519b7476f8",
+  "provenanceHash": "000b3fbb53cc37339ca81b855584d370be03bf10ebe81000abced18ab808b654",
+  "results": [
+    {
+      "id": "is-number-historical-nonfix",
+      "project": "is-number",
+      "origin": "historical-bug",
+      "classification": "defect",
+      "expectedCheck": "req:whitespace",
+      "expectedStatus": "CONTRADICTED",
+      "actualStatus": "CONTRADICTED",
+      "matched": true,
+      "receiptStatus": "CONTRADICTED",
+      "receiptHash": "4c499b6b1e8ddc765c3cf1bc9572556d59fef67547868b82039452d6445116da",
+      "baselineHash": "e8b880cd6b02474461a400810aa9957c98142d21f5afab6b97441fe689e06555",
+      "candidateHash": "0c2f47424eb2b6408c3e0f4ce1a61bfb723396c4576e5d3251af15ba65f3e975",
+      "contractHash": "17272c2f8fb2e083dcac7df8e8e9fd14b5f20b1a0a8eb4a5bd66f7996ee09ae0",
+      "ordinaryStatus": "VERIFIED",
+      "ordinaryPassed": true,
+      "durationMs": 26485,
+      "ordinaryDurationMs": 6300,
+      "reproduced": true,
+      "counterexamples": [
+        {
+          "requirement": "Issue #3: whitespace-only strings are not numbers",
+          "args": [
+            " "
+          ],
+          "expected": false,
+          "observed": true
+        }
+      ],
+      "changes": [
+        {
+          "path": "index.js",
+          "kind": "modified",
+          "classification": "VERIFIED",
+          "reason": "Path authorised by the supplied contract; behaviour is checked separately"
+        }
+      ]
+    },
+    {
+      "id": "is-number-upstream-fix",
+      "project": "is-number",
+      "origin": "historical-fix",
+      "classification": "correct",
+      "expectedCheck": "req:whitespace",
+      "expectedStatus": "VERIFIED",
+      "actualStatus": "VERIFIED",
+      "matched": true,
+      "receiptStatus": "VERIFIED",
+      "receiptHash": "6c971d4b152340ff2eac234b68506c9f742871c4d5a9f4caaf194179eb8eb6db",
+      "baselineHash": "8507dec682b2a767c3cf5aef8bab1ce857975ca9af39b57808d7cfaf5d6477ec",
+      "candidateHash": "bfd59df674a01596335b7e8d69361f528b6577b7d9c4a5a001ea0b5f8d6a57dd",
+      "contractHash": "edd83861559c74fab3e319b1d0bf906766f5125d5c875b23e65fca35c7e415db",
+      "ordinaryStatus": "VERIFIED",
+      "ordinaryPassed": true,
+      "durationMs": 30735,
+      "ordinaryDurationMs": 7329,
+      "reproduced": true,
+      "counterexamples": [],
+      "changes": [
+        {
+          "path": "index.js",
+          "kind": "modified",
+          "classification": "VERIFIED",
+          "reason": "Path authorised by the supplied contract; behaviour is checked separately"
+        }
+      ]
+    },
+    {
+      "id": "is-number-incomplete-repair",
+      "project": "is-number",
+      "origin": "seeded-repair",
+      "classification": "defect",
+      "expectedCheck": "req:whitespace",
+      "expectedStatus": "CONTRADICTED",
+      "actualStatus": "CONTRADICTED",
+      "matched": true,
+      "receiptStatus": "CONTRADICTED",
+      "receiptHash": "45a2b5e97091fc55f7b8d61bd38f4c5a825b434a5da757f4523140c0f4fd0efc",
+      "baselineHash": "3664af908c18f7793bdc1b81322bf6ef4490a08329bdeeee63ccedcacb82699a",
+      "candidateHash": "22ef44bd8dc026da46dc722fa02b5de07deea28f8b77e504288ea427a8c2a83c",
+      "contractHash": "6ff64a023f678424c4633ef6829d341c1e1ed54c5fd794db81ca7949317c69b0",
+      "ordinaryStatus": "VERIFIED",
+      "ordinaryPassed": true,
+      "durationMs": 38683,
+      "ordinaryDurationMs": 5776,
+      "reproduced": true,
+      "counterexamples": [
+        {
+          "requirement": "Issue #3: whitespace-only strings are not numbers",
+          "args": [
+            "\r\n\t"
+          ],
+          "expected": false,
+          "observed": true
+        }
+      ],
+      "changes": [
+        {
+          "path": "index.js",
+          "kind": "modified",
+          "classification": "VERIFIED",
+          "reason": "Path authorised by the supplied contract; behaviour is checked separately"
+        }
+      ]
+    },
+    {
+      "id": "is-number-narrow-contract-miss",
+      "project": "is-number",
+      "origin": "specification-gap",
+      "classification": "known-miss",
+      "expectedCheck": "req:valid-values",
+      "expectedStatus": "VERIFIED",
+      "actualStatus": "VERIFIED",
+      "matched": true,
+      "receiptStatus": "VERIFIED",
+      "receiptHash": "f2616fb8379b06a8ff53f3ce0eeae82dbec2cb26838c80669ec3df70dd435459",
+      "baselineHash": "e3c46533355cc2f200542e2e61d20687c1b9fc3a42fbac090c703cf7bb78f358",
+      "candidateHash": "e16edd9a52a34b379b0d89817bd3eefb90a3d24d4f950856a38ed29939383498",
+      "contractHash": "884db1735a828b727d390232223cb912b559027f25a77a7b12332b834c4010bc",
+      "ordinaryStatus": "VERIFIED",
+      "ordinaryPassed": true,
+      "durationMs": 12874,
+      "ordinaryDurationMs": 4147,
+      "reproduced": true,
+      "counterexamples": [],
+      "changes": [
+        {
+          "path": "index.js",
+          "kind": "modified",
+          "classification": "VERIFIED",
+          "reason": "Path authorised by the supplied contract; behaviour is checked separately"
+        }
+      ]
+    },
+    {
+      "id": "normalize-path-benign-refactor",
+      "project": "normalize-path",
+      "origin": "seeded-refactor",
+      "classification": "correct",
+      "expectedCheck": "req:path-behaviour",
+      "expectedStatus": "VERIFIED",
+      "actualStatus": "VERIFIED",
+      "matched": true,
+      "receiptStatus": "VERIFIED",
+      "receiptHash": "b4134c53a2fea92ff14038915670c17262e075c8c43b0f96c7f83f0a05a80a1e",
+      "baselineHash": "d86c4d29680e3ff1a5573a946ebd0cfe2dc7c68676bcbb5a6557f5c218f1b6f3",
+      "candidateHash": "7d95c10fb6b0f2426a8ac4da85bdacc558d95fe7499dee0b1e5668b811aaea48",
+      "contractHash": "6eb6d695da9c098236174fb92b3b8aa7b95becaba70c8dececde000391bb38b9",
+      "ordinaryStatus": "VERIFIED",
+      "ordinaryPassed": true,
+      "durationMs": 15351,
+      "ordinaryDurationMs": 2801,
+      "reproduced": true,
+      "counterexamples": [],
+      "changes": [
+        {
+          "path": "index.js",
+          "kind": "modified",
+          "classification": "VERIFIED",
+          "reason": "Path authorised by the supplied contract; behaviour is checked separately"
+        }
+      ]
+    },
+    {
+      "id": "normalize-path-trailing-regression",
+      "project": "normalize-path",
+      "origin": "seeded-regression",
+      "classification": "defect",
+      "expectedCheck": "req:path-behaviour",
+      "expectedStatus": "CONTRADICTED",
+      "actualStatus": "CONTRADICTED",
+      "matched": true,
+      "receiptStatus": "CONTRADICTED",
+      "receiptHash": "7d1b9f5dd38dd0746ca3ac842b4b3c7443c31f55d44c8829873311f60fa34c68",
+      "baselineHash": "ab3406c6b272612fd32a880b72d14d910293e439cebd2a106937143d041771a0",
+      "candidateHash": "a61773a14590707efed1be87b85f02ccbacc9063f89dcf0b3f4d26c5f090d834",
+      "contractHash": "fef3d966d6968923f526fb3598bbfa66c9e2984cecfd2e45b958d35cf9e9ad62",
+      "ordinaryStatus": "CONTRADICTED",
+      "ordinaryPassed": false,
+      "durationMs": 13289,
+      "ordinaryDurationMs": 3220,
+      "reproduced": true,
+      "counterexamples": [
+        {
+          "requirement": "Normalise separators and preserve explicitly requested trailing slash",
+          "args": [
+            "foo/bar/baz/",
+            false
+          ],
+          "expected": "foo/bar/baz/",
+          "observed": "foo/bar/baz"
+        }
+      ],
+      "changes": [
+        {
+          "path": "index.js",
+          "kind": "modified",
+          "classification": "VERIFIED",
+          "reason": "Path authorised by the supplied contract; behaviour is checked separately"
+        }
+      ]
+    },
+    {
+      "id": "normalize-path-weakened-tests",
+      "project": "normalize-path",
+      "origin": "seeded-test-weakening",
+      "classification": "defect",
+      "expectedCheck": "preserved-tests",
+      "expectedStatus": "CONTRADICTED",
+      "actualStatus": "CONTRADICTED",
+      "matched": true,
+      "receiptStatus": "CONTRADICTED",
+      "receiptHash": "470b86ba9ee1864407576bee252d8e3538648aa4d32c24adbedfae46b8770880",
+      "baselineHash": "ac83ecd32ff282ff69133963d2fabe91b62341e708d40f9ede11d55995a1b6df",
+      "candidateHash": "53e0c687de913f9e5e648b8c57a9bf842c06c5b1b3969fb9cd839062df20cda2",
+      "contractHash": "ba88be80ef11feb15f7434c9da377d3dbb36ccf8959b64338525524543e7047b",
+      "ordinaryStatus": "VERIFIED",
+      "ordinaryPassed": true,
+      "durationMs": 9261,
+      "ordinaryDurationMs": 1764,
+      "reproduced": true,
+      "counterexamples": [
+        {
+          "requirement": "Normalise separators and preserve explicitly requested trailing slash",
+          "args": [
+            "foo/bar/baz/",
+            false
+          ],
+          "expected": "foo/bar/baz/",
+          "observed": "foo/bar/baz"
+        }
+      ],
+      "changes": [
+        {
+          "path": "index.js",
+          "kind": "modified",
+          "classification": "VERIFIED",
+          "reason": "Path authorised by the supplied contract; behaviour is checked separately"
+        },
+        {
+          "path": "test.js",
+          "kind": "modified",
+          "classification": "REVIEW REQUIRED",
+          "reason": "Changed path has no explicit authorisation in allowedPaths; review is required, not an accusation"
+        },
+        {
+          "path": "upstream-adapter.test.ts",
+          "kind": "modified",
+          "classification": "REVIEW REQUIRED",
+          "reason": "Test changed: inspect preserved-check results and approve test edits separately"
+        }
+      ]
+    },
+    {
+      "id": "normalize-path-unrelated-drift",
+      "project": "normalize-path",
+      "origin": "seeded-regression",
+      "classification": "defect",
+      "expectedCheck": "probe:namespace",
+      "expectedStatus": "REVIEW REQUIRED",
+      "actualStatus": "REVIEW REQUIRED",
+      "matched": true,
+      "receiptStatus": "CONTRADICTED",
+      "receiptHash": "6e175dca20ff6ed4b3f89857766a0f23b96ff7ff24d0cde2cea8f7c2a7154232",
+      "baselineHash": "23fa8aafecd5872a119cbc70e6ef27883ee110e6cce00e9c69b6ac7ec15f1176",
+      "candidateHash": "37c4a4ddd08a113c411081d4c5314a52e397af7f95fd82431a5187a6e4355bb4",
+      "contractHash": "513d8b047334dcdf587fd8f662a49b27b024a68585fbcf42d0799da5c329a7ac",
+      "ordinaryStatus": "CONTRADICTED",
+      "ordinaryPassed": false,
+      "durationMs": 8551,
+      "ordinaryDurationMs": 1923,
+      "reproduced": true,
+      "counterexamples": [],
+      "changes": [
+        {
+          "path": "index.js",
+          "kind": "modified",
+          "classification": "VERIFIED",
+          "reason": "Path authorised by the supplied contract; behaviour is checked separately"
+        }
+      ]
+    },
+    {
+      "id": "normalize-path-insufficient-intent",
+      "project": "normalize-path",
+      "origin": "missing-contract",
+      "classification": "unknown",
+      "expectedCheck": "intent",
+      "expectedStatus": "UNVERIFIED",
+      "actualStatus": "UNVERIFIED",
+      "matched": true,
+      "receiptStatus": "REVIEW REQUIRED",
+      "receiptHash": "623793b92981a3dd2772c1de55416206e7551cb9a1b018d54681fd401646f80c",
+      "baselineHash": "fd2725c4564e64f029001c4e587cfe44192b6f04a8426572b2fda2d51b39c4df",
+      "candidateHash": "fcdff22ac869128edc30ef825d86667c58856261a0151e7836dd5ce9f2b1694b",
+      "contractHash": null,
+      "ordinaryStatus": "VERIFIED",
+      "ordinaryPassed": true,
+      "durationMs": 6549,
+      "ordinaryDurationMs": 1832,
+      "reproduced": true,
+      "counterexamples": [],
+      "changes": [
+        {
+          "path": "index.js",
+          "kind": "modified",
+          "classification": "REVIEW REQUIRED",
+          "reason": "Changed path has no explicit authorisation in allowedPaths; review is required, not an accusation"
+        }
+      ]
+    }
+  ],
+  "metrics": {
+    "cases": 9,
+    "expectedOutcomesMatched": 9,
+    "defectsSignalled": 5,
+    "defectCases": 6,
+    "knownSpecificationMisses": 1,
+    "correctAccepted": 2,
+    "correctCases": 2,
+    "ordinaryDefectsDetected": 2,
+    "replayAgreement": 9,
+    "verificationMs": 161778,
+    "ordinaryMs": 35092
+  },
+  "limitations": [
+    "Two small public projects are a case study, not an externally sampled detection-rate estimate.",
+    "Only is-number issue #3 and its exact fix are historical; normalize-path changes and the partial repair are explicitly seeded evaluation candidates.",
+    "The full upstream assertion bodies run through a declared Mocha-to-Vitest registration adapter; this is not represented as the original upstream CI configuration.",
+    "A deliberate narrow-contract case demonstrates a surviving real defect despite all scoped approved checks passing.",
+    "Competitor timings and independently executed upstream Mocha results are reported separately by compare.mjs; no unavailable result is inferred."
+  ]
+}

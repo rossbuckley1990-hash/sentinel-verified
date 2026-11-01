@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-11-01T14:46:26.088Z",
+  "versions": {
+    "stryker": "10.1.1",
+    "mocha": "11.7.5"
+  },
+  "environment": {
+    "node": "v26.12.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "loadAverages": [
+      196.99365234375,
+      196.58251953125,
+      141.619140625
+    ]
+  },
+  "overallTimeoutMs": 600000,
+  "project": "is-number",
+  "case": "is-number-historical-nonfix",
+  "sourceHash": "d5ba0cd9397c822cb1d98555ddf008be6ce2179a5e56f79a094f74a13c22cb88",
+  "config": {
+    "mutate": [
+      "index.js"
+    ],
+    "testRunner": "command",
+    "commandRunner": {
+      "command": "node <tools>/mocha/bin/mocha.js test.js --reporter dot"
+    },
+    "concurrency": 1,
+    "reporters": [
+      "clear-text",
+      "json"
+    ],
+    "jsonReporter": {
+      "fileName": "mutation.json"
+    },
+    "coverageAnalysis": "off",
+    "timeoutMS": 10000,
+    "timeoutFactor": 2,
+    "cleanTempDir": true
+  },
+  "ordinary": {
+    "exitCode": 0,
+    "durationMs": 8335,
+    "stats": {
+      "suites": 2,
+      "tests": 138,
+      "passes": 138,
+      "pending": 0,
+      "failures": 0,
+      "start": "2026-11-01T14:44:19.571Z",
+      "end": "2026-11-01T14:44:21.018Z",
+      "duration": 1447
+    }
+  },
+  "mutation": {
+    "exitCode": 0,
+    "durationMs": 123400,
+    "statuses": {
+      "Killed": 22,
+      "Survived": 2
+    },
+    "score": 91.66666666666667
+  },
+  "independentObservation": {
+    "input": " ",
+    "observed": true,
+    "expected": false
+  },
+  "limitation": "Mutation testing evaluates the selected test oracle. It does not derive the issue requirement; a surviving mutant is not by itself evidence of the historical whitespace defect.",
+  "survivors": [
+    {
+      "mutatorName": "UnaryOperator",
+      "replacement": "-num",
+      "location": {
+        "end": {
+          "column": 15,
+          "line": 17
+        },
+        "start": {
+          "column": 11,
+          "line": 17
+        }
+      }
+    },
+    {
+      "mutatorName": "EqualityOperator",
+      "replacement": "n - n + 1 > 0",
+      "location": {
+        "end": {
+          "column": 26,
+          "line": 18
+        },
+        "start": {
+          "column": 10,
+          "line": 18
+        }
+      }
+    }
+  ],
+  "survivorInterpretation": "Both surviving arithmetic changes appear equivalent for supported primitive classification inputs. No defect or repairable coverage gap is inferred from survival alone."
+}

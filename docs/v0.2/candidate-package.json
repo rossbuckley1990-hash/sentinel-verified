@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-01T15:04:06.566Z",
+  "archive": "<local built candidate archive>",
+  "version": "SENTINEL 0.2.0",
+  "node": "v26.12.0",
+  "platform": "darwin",
+  "arch": "arm64",
+  "emptyNpmCache": true,
+  "freshInstallPrefix": true,
+  "lifecycleScriptsDisabled": true,
+  "preinstalled": [
+    "Node.js",
+    "npm",
+    "Git"
+  ],
+  "firstMeaningfulMs": 21413,
+  "totalMs": 31452,
+  "under90Seconds": true,
+  "steps": [
+    {
+      "command": [
+        "npm",
+        "install",
+        "--prefix",
+        "<fresh-prefix>",
+        "--ignore-scripts",
+        "--no-audit",
+        "--no-fund",
+        "<local built candidate archive>"
+      ],
+      "exitCode": 0,
+      "durationMs": 7271
+    },
+    {
+      "command": [
+        "/opt/homebrew/Cellar/node/26.12.0/bin/node",
+        "<fresh-prefix>",
+        "--version"
+      ],
+      "exitCode": 0,
+      "durationMs": 967
+    },
+    {
+      "command": [
+        "/opt/homebrew/Cellar/node/26.12.0/bin/node",
+        "<fresh-prefix>",
+        "demo",
+        "--store",
+        "<fresh-prefix>"
+      ],
+      "exitCode": 0,
+      "durationMs": 23211
+    }
+  ],
+  "notes": [
+    "Prepublication candidate-package installation. The published GitHub archive is validated separately after release.",
+    "Absolute installation paths replaced by placeholders; outcomes and durations unchanged."
+  ]
+}

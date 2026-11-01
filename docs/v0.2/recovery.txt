@@ -1,0 +1,65 @@
+
+  SENTINEL  /  verified progress survives
+
+  Task        Fix whitespace-only strings being accepted as numbers without rejecting numeric strings or numeric values; isNumber("   ") must return false; isNumber("\r\n\t") must return false.
+  Agent       codex
+  Repository  <EVIDENCE_STORE>/workspaces/s-mvxxqszc-ceee22e0
+
+  IMPLEMENTATION · Running
+  · codex codex-cli 0.163.0: editing the managed workspace.
+  · codex is working (10s; 6 output events received).
+  · codex is working (20s; 27 output events received).
+  · codex is working (30s; 28 output events received).
+  · codex is working (40s; 32 output events received).
+  · codex is working (50s; 34 output events received).
+  · codex is working (60s; 37 output events received).
+  · codex is working (70s; 47 output events received).
+  · Receiving agent acknowledged the source and contract (agent statement, not independent evidence).
+  VERIFICATION · Running
+  · Agent finished. Checking the source independently.
+  · Checking clean baseline tests
+  VERIFIED · Baseline tests
+  · Running candidate ordinary tests
+  VERIFIED · Candidate ordinary tests
+  · Re-running preserved baseline tests against candidate source
+  VERIFIED · Preserved baseline tests
+  · Checking must-change: isNumber("   ") returns false
+  VERIFIED · isNumber("   ") returns false
+  · Checking must-change: isNumber("\r\n\t") returns false
+  VERIFIED · isNumber("\r\n\t") returns false
+  · Checking must-preserve: isNumber("3a") returns false
+  VERIFIED · isNumber("3a") returns false
+  · Checking must-preserve: isNumber("") returns false
+  VERIFIED · isNumber("") returns false
+  · Checking must-preserve: isNumber("   56\r\n  ") returns true
+  VERIFIED · isNumber("   56\r\n  ") returns true
+  · Checking must-preserve: isNumber("5e3") returns true
+  VERIFIED · isNumber("5e3") returns true
+  · Checking must-preserve: isNumber(0) returns true
+  VERIFIED · isNumber(0) returns true
+  · Checking must-preserve: isNumber(37) returns true
+  VERIFIED · isNumber(37) returns true
+  EVIDENCE · Saved · CONTINUATION · Ready
+  TASK → AGENT → CHANGES → VERIFICATION → EVIDENCE → CONTINUATION
+
+  Fix whitespace-only strings being accepted as numbers without rejecting numeric strings or numeric values; isNumber("   ") must return false; isNumber("\r\n\t") must return false.
+
+  ✓ VERIFIED             Baseline tests
+  ✓ VERIFIED             Candidate ordinary tests
+    141/141 ordinary tests passed; these do not establish the approved intent
+  ✓ VERIFIED             Preserved baseline tests
+  ✓ VERIFIED             isNumber("   ") returns false
+  ✓ VERIFIED             isNumber("\r\n\t") returns false
+  ✓ VERIFIED             isNumber("3a") returns false
+  ✓ VERIFIED             isNumber("") returns false
+  ✓ VERIFIED             isNumber("   56\r\n  ") returns true
+  ✓ VERIFIED             isNumber("5e3") returns true
+  ✓ VERIFIED             isNumber(0) returns true
+  ✓ VERIFIED             isNumber(37) returns true
+
+  VERIFIED · 70.36s · local advisory verification
+  Results cover the executed checks. They do not prove arbitrary correctness.
+  Report      <EVIDENCE_STORE>/sessions/s-mvxxqszc-ceee22e0/report.html
+  Session     s-mvxxqszc-ceee22e0 · verified
+  Workspace   <EVIDENCE_STORE>/workspaces/s-mvxxqszc-ceee22e0
+  Evidence    67e705d6eff275bb9b939ea5e5bb520784abadbb0580c610f51b46facace2a74

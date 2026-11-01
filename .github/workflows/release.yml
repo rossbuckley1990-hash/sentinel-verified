@@ -36,6 +36,7 @@ jobs:
       - run: npm test
       - run: node dist/cli.js demo --store "$RUNNER_TEMP/sentinel-demo"
       - run: npm run benchmark
+      - run: npm run benchmark:public
       - run: npm pack
       - name: Publish GitHub release archive
         env:

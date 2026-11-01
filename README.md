@@ -18,7 +18,7 @@ SENTINEL connects those problems: it checks code against developer-approved beha
 TASK → AGENT → CHANGES → VERIFICATION → EVIDENCE → CONTINUATION
 ```
 
-SENTINEL is a local-first TypeScript CLI. Version 0.1 focuses on repairs and refactors of existing deterministic exported JavaScript/TypeScript functions, JSON inputs and outputs, and Vitest tests. It works offline except when you choose an external coding agent.
+SENTINEL is a local-first TypeScript CLI. Version 0.2 focuses on repairs and refactors of existing deterministic exported JavaScript/TypeScript functions, JSON inputs and outputs, and Vitest tests. It works offline except when you choose an external coding agent.
 
 ## See it work
 
@@ -32,8 +32,7 @@ npm run build
 node dist/cli.js demo
 ```
 
-A measured fresh public clone with an empty npm cache reached its first result in **6.00 seconds**, and completed install/build/demo in **8.58 seconds**, on Apple Silicon macOS with Node/npm/Git already installed. This is one trial; [measurement details and limits](docs/VALIDATION.md).
-
+A fresh public clone with an empty npm cache reached its first contradiction in **27.75 seconds** and completed install/build/demo in **41.70 seconds** on Apple Silicon macOS. Node, npm and Git were already installed. This is one measured trial, not a speed guarantee; [exact timings and limits](docs/V0.2-VALIDATION.md).
 No API key, subscription or model download is needed. The controlled demonstration runs real code and real Vitest tests:
 
 1. A deliberately faulty patch passes the ordinary tests.
@@ -56,78 +55,44 @@ npm link
 sentinel demo
 ```
 
-No npm registry publication is assumed. You can always replace `sentinel` with the absolute path to `node /path/to/sentinel-verified/dist/cli.js`.
+The npm registry account was unauthenticated during release preparation; no registry publication or `npx` availability is claimed. You can always replace `sentinel` with the absolute path to `node /path/to/sentinel-verified/dist/cli.js`.
 
 ## Use your repository
 
 Install your project's dependencies first. Review the source before allowing it to execute locally. SENTINEL's workspaces are **not a security sandbox**.
 
-Create a contract **outside the repository the agent can edit**. For a module at `src/access.ts` exporting `isAdult` and `greeting`, a small contract looks like this:
-
-```json
-{
-  "schemaVersion": 1,
-  "objective": "Reject malformed ages while preserving valid age checks and greetings",
-  "approvedBy": "developer",
-  "allowedPaths": ["src/access.ts"],
-  "requirements": [
-    {
-      "id": "reject-string-ages",
-      "kind": "must-change",
-      "description": "A string must never be accepted as an age",
-      "module": "src/access.ts",
-      "export": "isAdult",
-      "cases": [{ "args": ["18"], "expected": false }],
-      "invariant": {
-        "argument": 0,
-        "domain": "string",
-        "seeds": ["00018"],
-        "args": [null],
-        "expected": false
-      }
-    },
-    {
-      "id": "preserve-valid-ages",
-      "kind": "must-preserve",
-      "description": "Adults qualify; minors do not",
-      "module": "src/access.ts",
-      "export": "isAdult",
-      "cases": [
-        { "args": [18], "expected": true },
-        { "args": [17], "expected": false },
-        { "args": [42], "expected": true }
-      ]
-    },
-    {
-      "id": "preserve-greetings",
-      "kind": "must-preserve",
-      "description": "Keep the greeting format",
-      "module": "src/access.ts",
-      "export": "greeting",
-      "cases": [{ "args": ["Ada"], "expected": "Hello, Ada!" }]
-    }
-  ]
-}
-```
-
-`approvedBy` records your approval label; it is not an authenticated signature. A contract is authoritative because you reviewed and supplied it. SENTINEL does not silently promote inferred requirements to approved requirements. The optional invariant explicitly says that the same expected value applies throughout its declared input domain; this permits input reduction. Individual examples alone do not justify that assumption.
-
-Start an agent-assisted task:
+Start from your project root:
 
 ```sh
-sentinel run "Reject malformed ages while preserving valid age checks and greetings" \
-  --repo /path/to/project \
-  --contract /path/outside/project/acceptance.json \
-  --agent codex \
-  --allow-local
+sentinel run "Fix the bug"
 ```
 
-Use the exact objective from the approved contract. SENTINEL creates a managed workspace, preserves the baseline and approved contract, runs the agent and records independent checks. The original repository stays available; the command identifies the managed workspace containing the changes.
+SENTINEL reads exported functions, literal test assertions and documentation without executing the project. It proposes **must-change** and **must-preserve** checks, with source references and unresolved questions. Review, edit, remove or add examples in the terminal, then approve. You give execution consent separately. If several supported agents are installed, your choice is remembered.
+
+For a precise objective, include a concrete example in ordinary text:
+
+```sh
+sentinel run 'Reject whitespace-only numbers; isNumber("   ") must return false.'
+```
+
+Discovery is a bounded static parser, not a language model that knows your intent. A vague objective may require you to add an input and expected result. Existing tests propose preservation checks; they do not establish that a bug is fixed. You can explicitly approve reduced scope, but unresolved intent keeps the overall result **UNVERIFIED**. No noninteractive flag silently approves generated requirements.
+
+Approved contracts and their proposal evidence are stored outside the managed agent workspace. They bind to the reviewed baseline. Contract approval labels are local records, not authenticated signatures. See [discovery coverage and limits](docs/CONTRACT-DISCOVERY.md).
+
+Advanced and automated workflows can still supply a reviewed version-1 JSON contract, such as [the controlled demo contract](fixtures/demo/contract.json), copied outside the input repository:
+
+```sh
+sentinel run "YOUR EXACT APPROVED OBJECTIVE" \
+  --contract /path/outside/project/acceptance.json --agent codex --allow-local
+```
+
+With a manual contract, use its exact objective. SENTINEL creates a managed workspace, preserves the baseline and approved contract, runs the agent and records independent checks. The original repository stays available; the command identifies the managed workspace containing the changes.
 
 Continue from its recorded state with another adapter:
 
 ```sh
-sentinel continue --agent claude
+sentinel continue                # reuse the session’s agent
+sentinel continue --agent claude # switch when installed and authenticated
 ```
 
 The receiving agent gets the objective, approved requirements, source identity, observed failures, unresolved questions and next actions. It receives evidence-backed context, not another model's hidden reasoning. Source identity and checkpoint integrity are checked before continuation.
@@ -147,6 +112,7 @@ Inspect or render the latest session, select an older one, or replay a receipt:
 
 ```sh
 sentinel inspect
+sentinel report --open
 sentinel report --session SESSION_ID
 sentinel replay RECEIPT_HASH --allow-local
 sentinel doctor
@@ -166,7 +132,7 @@ sentinel --help
 sentinel export --out task.sentinel.json
 # On the receiving machine, after installing SENTINEL:
 sentinel import task.sentinel.json
-sentinel continue --agent codex --allow-local
+sentinel continue --session IMPORTED_SESSION_ID --agent codex --allow-local
 ```
 
 The bundle includes the selected source, contracts, receipts and agent logs. Review it before sharing. Import validates content hashes and schemas, restores a new managed workspace and marks prior results historical. Dependencies are not bundled; install reviewed project dependencies in the reported workspace when needed. The receiving machine must explicitly consent to local execution and rerun checks.
@@ -189,7 +155,7 @@ Passing a test suite does not prove arbitrary software correct. Neither does pas
 
 Receipts bind results to source snapshots, contract content, command arguments and captured outputs. Content-addressed records and versioned checkpoints make accidental corruption and stale source detectable. Protected verification inputs live outside the agent's working directory.
 
-This is **local advisory verification**. A process with unrestricted access to the same operating-system account can alter the store, dependencies or verifier. Hashes are not signatures. Git copies and worktrees are not isolation boundaries. Version 0.1 does not supply an isolated runner or remotely enforced merge gate. Arbitrary project execution requires `--allow-local`; use an independently isolated disposable environment for source you do not trust.
+This is **local advisory verification**. A process with unrestricted access to the same operating-system account can alter the store, dependencies or verifier. Hashes are not signatures. Git copies and worktrees are not isolation boundaries. Local execution requires explicit consent. Version 0.2 also supports an opt-in Docker verifier: build a reviewed runner image, then use `--runner docker`. It disables networking, limits resources and mounts only selected input objects read-only. A requested Docker run never falls back to local execution. The coding agent still runs on the host under its own CLI permissions. Container images, Docker and the host kernel remain trusted. See [setup, tested controls and remaining boundaries](docs/ISOLATION.md). No remotely enforced merge gate is supplied.
 
 The HTML report presents the same receipt and continuation state. It contains no remote assets, JavaScript or analytics. It is not a second application or a source of new claims.
 
@@ -206,9 +172,10 @@ The HTML report presents the same receipt and continuation state. It contains no
 | Offline adapters | `fixture-broken`, `fixture-interrupt`, `fixture-fix`; controlled demo only. |
 | Model adapters | Codex CLI and Claude Code, subject to installed capability checks and authentication. |
 | Browser/UI, live services, nondeterminism | Outside the initial verification scope. |
-| Hostile-code isolation, signed attestation, remote merge gate | Not supplied by this release. |
+| Configured verifier isolation | Optional Docker runner; host coding-agent execution remains separate. |
+| Signed attestation, remote merge gate | Not supplied by this release. |
 
-A live authenticated Codex 0.163.0 run repaired the controlled project and passed independent verification. Claude 2.1.301 was installed but unauthenticated on the release machine: its adapter has CLI capability/protocol tests, but live Claude execution was not validated.
+A developer-approved live Codex 0.163.0 session repaired the historical public `is-number` bug, survived controlled interruption and passed all 141 supported test instances plus eight independent behavioural requirements on recovery. [Recorded experiment](docs/V0.2-VALIDATION.md). Claude 2.1.301 was installed but unauthenticated on the release machine: its adapter has CLI capability/protocol tests, but live Claude execution was not validated.
 
 See [integration details](docs/INTEGRATIONS.md) for inspected CLI interfaces and the distinction between deterministic tests and live model validation.
 
@@ -219,11 +186,16 @@ npm ci
 npm run build
 npm test
 npm run benchmark
+npm run benchmark:public
 ```
 
 In the measured synthetic corpus, SENTINEL flagged **12/12 problem cases** whose ordinary tests passed, accepted **3/3 legitimate fixes/refactors**, reproduced **15/15** code-case outcomes, and passed **5/5** continuity/integrity scenarios. This is a small public corpus, not a production detection-rate estimate.
 
 The benchmark includes explicit expected outcomes for legitimate changes, deceptive green tests, invalid behaviour and continuity failures. Results distinguish ordinary Vitest outcomes from SENTINEL's bounded checks. They measure the included corpus, not all software or all agent behaviour. See [benchmark methodology and recorded results](benchmarks/README.md).
+
+The [public-project evaluation](docs/PUBLIC-EVALUATION.md) adds pinned, licensed historical source, independently declared case labels and comparisons with ordinary tests, trustbut and Stryker. It matched 9/9 declared outcomes, accepted 2/2 correct candidates, and signalled 5/6 defective candidate/contract combinations. It includes a contract-coverage miss. Neither that corpus nor the synthetic benchmark establishes a production detection rate or competitive superiority.
+
+The [handoff comparison](docs/HANDOFF-COMPARISON.md) measures repeated function executions when a counterexample is retained or omitted. Its informative-summary control removes the difference; no model-productivity advantage is claimed.
 
 ## Design and contribution
 

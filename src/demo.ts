@@ -29,7 +29,7 @@ export async function demo(store:string){
  displayReceipt(bad);
  if(bad.checks.find(c=>c.id==='candidate-tests')?.status!=='VERIFIED'||!bad.checks.some(c=>c.status==='CONTRADICTED'))throw new Error('Demo failed its acceptance gate: expected green ordinary tests and an independent contradiction.');
  const firstResultMs=Math.round(performance.now()-started);
- const reportDir=path.join(store,'sessions',broken.id);await writeReport(path.join(reportDir,'false-success.html'),bad,broken);
+ const reportDir=path.join(store,'sessions',broken.id);await writeReport(path.join(reportDir,'false-success.html'),bad,broken,store);
  line();progress('Simulating an interrupted adapter; implementation and evidence remain on disk');
  const stopped=await continueSession({store,id:broken.id,agent:'fixture-interrupt',onProgress:progress});
  if(stopped.state!=='interrupted')throw new Error('Interruption checkpoint was not preserved');
@@ -37,11 +37,12 @@ export async function demo(store:string){
  const fixed=await continueSession({store,id:broken.id,agent:'fixture-fix',onProgress:progress});
  const finalHash=fixed.receipts.at(-1)!;const good=JSON.parse((await getObject(store,finalHash)).toString()) as Receipt;
  displayReceipt(good);if(good.status!=='VERIFIED')throw new Error('Corrected demo did not pass the preserved acceptance checks.');
- await writeReport(path.join(reportDir,'report.html'),good,fixed);
+ await writeReport(path.join(reportDir,'report.html'),good,fixed,store);
  const metrics={schemaVersion:1,controlledDemo:true,node:process.version,platform:process.platform,arch:process.arch,firstResultMs,totalMs:Math.round(performance.now()-started),session:fixed.id,initialReceipt:firstHash,finalReceipt:finalHash};
  await atomicJson(path.join(reportDir,'demo-metrics.json'),metrics);
  line();displayCheckpoint(fixed);line(`  False success report  ${path.join(reportDir,'false-success.html')}`);line(`  Final report          ${path.join(reportDir,'report.html')}`);line(`  First result          ${(metrics.firstResultMs/1000).toFixed(2)}s from demo start (installation excluded)`);
  line(`  Full demonstration    ${(metrics.totalMs/1000).toFixed(2)}s`);
- line('  Continue this session: sentinel continue --agent codex');
+ line(`  Open report           sentinel report --session ${fixed.id} --store '${store.replaceAll("'","'\"'\"'")}' --open`);
+ line(`  Continue this session: sentinel continue --session ${fixed.id} --store '${store.replaceAll("'","'\"'\"'")}' --agent codex`);
  return {checkpoint:fixed,metrics,bad,good};
 }

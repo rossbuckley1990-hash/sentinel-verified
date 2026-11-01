@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "setupFailure": {
+    "issue": "Initial archived dependency realpath layout prevented kind-of from resolving is-buffer.",
+    "corrected": "Use node_modules as the actual directory name.",
+    "countedAsDefectDetection": false
+  },
+  "overloadedAttempt": {
+    "perCommandTimeoutMs": 30000,
+    "observedLoadAverages": [
+      209.08,
+      190.87,
+      119.5
+    ],
+    "status": "Stopped after timeouts under extreme unrelated host load. No speed or aggregate detection claim from this attempt.",
+    "environmentFailures": [
+      {
+        "receiptHash": "7a257885377f7327230e9e615e9e34a7a203e1a5c7b2d0ba18d8cf083e11af75",
+        "createdAt": "2026-11-01T14:37:55.838Z",
+        "objective": "A seeded repair rejects literal spaces but still accepts tabs/newlines. This is an evaluation change, not an upstream commit.",
+        "status": "ENVIRONMENT FAILURE",
+        "durationMs": 98164,
+        "checks": [
+          {
+            "id": "preserved-tests",
+            "status": "ENVIRONMENT FAILURE",
+            "durationMs": 30457,
+            "timedOut": true,
+            "detail": "Test execution did not complete reliably"
+          }
+        ]
+      },
+      {
+        "receiptHash": "ef3755f7f7e70053932211de0b6a79ac20c0e717f1fe08eda14df4c29ec99a83",
+        "createdAt": "2026-11-01T14:36:17.656Z",
+        "objective": "A seeded repair rejects literal spaces but still accepts tabs/newlines. This is an evaluation change, not an upstream commit.",
+        "status": "ENVIRONMENT FAILURE",
+        "durationMs": 132820,
+        "checks": [
+          {
+            "id": "preserved-tests",
+            "status": "ENVIRONMENT FAILURE",
+            "durationMs": 30251,
+            "timedOut": true,
+            "detail": "Test execution did not complete reliably"
+          }
+        ]
+      }
+    ]
+  },
+  "strykerAttempts": [
+    {
+      "status": "ENVIRONMENT FAILURE",
+      "reason": "Shell sandbox blocked local logging server listen; retried with approved execution permission."
+    },
+    {
+      "status": "ENVIRONMENT FAILURE",
+      "reason": "180-second outer bound expired after instrumentation and initial tests under extreme host load; no mutation score inferred."
+    }
+  ]
+}

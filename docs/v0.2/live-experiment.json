@@ -1,0 +1,721 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-01T14:51:05.115Z",
+  "kind": "Authenticated public-project Codex run, controlled SIGINT and live Codex recovery",
+  "approval": {
+    "source": "Explicit human response in the initiating Codex conversation, forwarded to actual CLI approval and local execution prompts",
+    "approved": true,
+    "contractHash": "d1d340eee6cff0a6c7aa59e5c7181e3b26abf56f471abd448289568673f088b9",
+    "proposalHash": "88e4fbe3b3137545147492550e277009ab09177f5d9cc3d4278e645676872e6c",
+    "requirements": [
+      {
+        "id": "discovered-01b70d5bec2b",
+        "kind": "must-change",
+        "description": "isNumber(\"   \") returns false",
+        "module": "index.js",
+        "export": "default",
+        "cases": [
+          {
+            "args": [
+              "   "
+            ],
+            "expected": false
+          }
+        ]
+      },
+      {
+        "id": "discovered-4bb41969232e",
+        "kind": "must-change",
+        "description": "isNumber(\"\\r\\n\\t\") returns false",
+        "module": "index.js",
+        "export": "default",
+        "cases": [
+          {
+            "args": [
+              "\r\n\t"
+            ],
+            "expected": false
+          }
+        ]
+      },
+      {
+        "id": "discovered-138df26b8a03",
+        "kind": "must-preserve",
+        "description": "isNumber(\"3a\") returns false",
+        "module": "index.js",
+        "export": "default",
+        "cases": [
+          {
+            "args": [
+              "3a"
+            ],
+            "expected": false
+          }
+        ]
+      },
+      {
+        "id": "discovered-e8932205aa13",
+        "kind": "must-preserve",
+        "description": "isNumber(\"\") returns false",
+        "module": "index.js",
+        "export": "default",
+        "cases": [
+          {
+            "args": [
+              ""
+            ],
+            "expected": false
+          }
+        ]
+      },
+      {
+        "id": "discovered-0cd16bf5cc3c",
+        "kind": "must-preserve",
+        "description": "isNumber(\"   56\\r\\n  \") returns true",
+        "module": "index.js",
+        "export": "default",
+        "cases": [
+          {
+            "args": [
+              "   56\r\n  "
+            ],
+            "expected": true
+          }
+        ]
+      },
+      {
+        "id": "discovered-6f2ae391ccb4",
+        "kind": "must-preserve",
+        "description": "isNumber(\"5e3\") returns true",
+        "module": "index.js",
+        "export": "default",
+        "cases": [
+          {
+            "args": [
+              "5e3"
+            ],
+            "expected": true
+          }
+        ]
+      },
+      {
+        "id": "discovered-caa7ec4a796c",
+        "kind": "must-preserve",
+        "description": "isNumber(0) returns true",
+        "module": "index.js",
+        "export": "default",
+        "cases": [
+          {
+            "args": [
+              0
+            ],
+            "expected": true
+          }
+        ]
+      },
+      {
+        "id": "discovered-ecc811585b0b",
+        "kind": "must-preserve",
+        "description": "isNumber(37) returns true",
+        "module": "index.js",
+        "export": "default",
+        "cases": [
+          {
+            "args": [
+              37
+            ],
+            "expected": true
+          }
+        ]
+      }
+    ]
+  },
+  "upstream": {
+    "repo": "https://github.com/jonschlinkert/is-number",
+    "buggyCommit": "204c885659b8ee1946534c61db91603b9a16d661",
+    "adapterCommit": "471650756367de2e8e60d5e4fd48773cfed11a50"
+  },
+  "source": {
+    "baselineHash": "9e5e07b9cb46c9908db13a56b7b7b6d2283574099766651f43b6bbe018fb93d6",
+    "candidateHash": "1da61b6ff938582f2d256c26f3b07b8d92d531d1775ff05c019f458855c3b65e",
+    "baselineImplementationHash": "1b572fa10d2a238af614189c499ceff034ab2549f4795cffaa85e5976a3f87a6",
+    "candidateImplementationHash": "7feb0289f0100e6369c0cc13193e87c54869ae687ac07cb3c3b0125b33b1bdb3"
+  },
+  "agents": [
+    {
+      "agent": "codex",
+      "outcome": "completed",
+      "startedAt": "2026-11-01T14:38:56.619Z",
+      "completedAt": "2026-11-01T14:40:45.562Z",
+      "durationMs": 101650,
+      "exitCode": 0,
+      "signal": null,
+      "handoff": {
+        "contextHash": "8b04379f2652b9cf5c9efa60d6793feb67f59c204927a12f8a3596827826f284",
+        "acknowledged": true,
+        "sourceHash": "d93a374f8ad629b356718d90d592b4f09c47cf35bafb8ecb4e2c453e71c13746",
+        "contractHash": "d1d340eee6cff0a6c7aa59e5c7181e3b26abf56f471abd448289568673f088b9"
+      }
+    },
+    {
+      "agent": "codex",
+      "outcome": "interrupted",
+      "startedAt": "2026-11-01T14:46:19.522Z",
+      "completedAt": "2026-11-01T14:47:02.071Z",
+      "durationMs": 37365,
+      "exitCode": 0,
+      "signal": "SIGINT",
+      "handoff": {
+        "contextHash": "0f2b3a6d7f75681f170a3482ba5133a2808bfd7fbc41871f5381e58cb6db8dc3",
+        "acknowledged": false,
+        "sourceHash": "96bc2a409c2f27e58308af0029df127294578d734e439734bc5b766585c0c214",
+        "contractHash": "d1d340eee6cff0a6c7aa59e5c7181e3b26abf56f471abd448289568673f088b9"
+      }
+    },
+    {
+      "agent": "codex",
+      "outcome": "completed",
+      "startedAt": "2026-11-01T14:47:44.102Z",
+      "completedAt": "2026-11-01T14:49:01.758Z",
+      "durationMs": 71190,
+      "exitCode": 0,
+      "signal": null,
+      "handoff": {
+        "contextHash": "7359a0258067ce5caf01fedcc0fc65f192765cc39e0f6f9c557de6ece97567dd",
+        "acknowledged": true,
+        "sourceHash": "96bc2a409c2f27e58308af0029df127294578d734e439734bc5b766585c0c214",
+        "contractHash": "d1d340eee6cff0a6c7aa59e5c7181e3b26abf56f471abd448289568673f088b9"
+      }
+    }
+  ],
+  "interruption": {
+    "state": "interrupted",
+    "candidateHash": "96bc2a409c2f27e58308af0029df127294578d734e439734bc5b766585c0c214",
+    "contractHash": "d1d340eee6cff0a6c7aa59e5c7181e3b26abf56f471abd448289568673f088b9",
+    "receipts": [
+      "5f2dbb1075b2ad4660e4ef981a0950862d8c8c6d00fac0515983a909d8ceaeae"
+    ]
+  },
+  "receipts": [
+    {
+      "hash": "5f2dbb1075b2ad4660e4ef981a0950862d8c8c6d00fac0515983a909d8ceaeae",
+      "status": "ENVIRONMENT FAILURE",
+      "durationMs": 150368,
+      "sourceHash": "96bc2a409c2f27e58308af0029df127294578d734e439734bc5b766585c0c214",
+      "checks": [
+        {
+          "id": "baseline-tests",
+          "status": "ENVIRONMENT FAILURE",
+          "detail": "Test execution did not complete reliably",
+          "durationMs": 15128,
+          "timedOut": true
+        },
+        {
+          "id": "candidate-tests",
+          "status": "ENVIRONMENT FAILURE",
+          "detail": "Test execution did not complete reliably",
+          "durationMs": 15114,
+          "timedOut": true
+        },
+        {
+          "id": "preserved-tests",
+          "status": "ENVIRONMENT FAILURE",
+          "detail": "Test execution did not complete reliably",
+          "durationMs": 15123,
+          "timedOut": true
+        },
+        {
+          "id": "req:discovered-01b70d5bec2b",
+          "status": "VERIFIED",
+          "detail": "1 approved examples passed twice. Baseline met 0/1.",
+          "args": [
+            "   "
+          ],
+          "expected": false,
+          "observed": false,
+          "durationMs": 2785,
+          "timedOut": false
+        },
+        {
+          "id": "baseline:discovered-01b70d5bec2b",
+          "status": "VERIFIED",
+          "detail": "Historical observations only; not a claim that baseline meets the requirement",
+          "durationMs": 4652,
+          "timedOut": false
+        },
+        {
+          "id": "req:discovered-4bb41969232e",
+          "status": "VERIFIED",
+          "detail": "1 approved examples passed twice. Baseline met 0/1.",
+          "args": [
+            "\r\n\t"
+          ],
+          "expected": false,
+          "observed": false,
+          "durationMs": 3530,
+          "timedOut": false
+        },
+        {
+          "id": "baseline:discovered-4bb41969232e",
+          "status": "VERIFIED",
+          "detail": "Historical observations only; not a claim that baseline meets the requirement",
+          "durationMs": 3925,
+          "timedOut": false
+        },
+        {
+          "id": "req:discovered-138df26b8a03",
+          "status": "VERIFIED",
+          "detail": "1 approved examples passed twice. Baseline met 1/1.",
+          "args": [
+            "3a"
+          ],
+          "expected": false,
+          "observed": false,
+          "durationMs": 3537,
+          "timedOut": false
+        },
+        {
+          "id": "baseline:discovered-138df26b8a03",
+          "status": "VERIFIED",
+          "detail": "Historical observations only; not a claim that baseline meets the requirement",
+          "durationMs": 4239,
+          "timedOut": false
+        },
+        {
+          "id": "req:discovered-e8932205aa13",
+          "status": "VERIFIED",
+          "detail": "1 approved examples passed twice. Baseline met 1/1.",
+          "args": [
+            ""
+          ],
+          "expected": false,
+          "observed": false,
+          "durationMs": 8624,
+          "timedOut": false
+        },
+        {
+          "id": "baseline:discovered-e8932205aa13",
+          "status": "VERIFIED",
+          "detail": "Historical observations only; not a claim that baseline meets the requirement",
+          "durationMs": 3624,
+          "timedOut": false
+        },
+        {
+          "id": "req:discovered-0cd16bf5cc3c",
+          "status": "VERIFIED",
+          "detail": "1 approved examples passed twice. Baseline met 1/1.",
+          "args": [
+            "   56\r\n  "
+          ],
+          "expected": true,
+          "observed": true,
+          "durationMs": 6010,
+          "timedOut": false
+        },
+        {
+          "id": "baseline:discovered-0cd16bf5cc3c",
+          "status": "VERIFIED",
+          "detail": "Historical observations only; not a claim that baseline meets the requirement",
+          "durationMs": 5683,
+          "timedOut": false
+        },
+        {
+          "id": "req:discovered-6f2ae391ccb4",
+          "status": "VERIFIED",
+          "detail": "1 approved examples passed twice. Baseline met 1/1.",
+          "args": [
+            "5e3"
+          ],
+          "expected": true,
+          "observed": true,
+          "durationMs": 4790,
+          "timedOut": false
+        },
+        {
+          "id": "baseline:discovered-6f2ae391ccb4",
+          "status": "VERIFIED",
+          "detail": "Historical observations only; not a claim that baseline meets the requirement",
+          "durationMs": 3015,
+          "timedOut": false
+        },
+        {
+          "id": "req:discovered-caa7ec4a796c",
+          "status": "VERIFIED",
+          "detail": "1 approved examples passed twice. Baseline met 1/1.",
+          "args": [
+            0
+          ],
+          "expected": true,
+          "observed": true,
+          "durationMs": 2520,
+          "timedOut": false
+        },
+        {
+          "id": "baseline:discovered-caa7ec4a796c",
+          "status": "VERIFIED",
+          "detail": "Historical observations only; not a claim that baseline meets the requirement",
+          "durationMs": 4716,
+          "timedOut": false
+        },
+        {
+          "id": "req:discovered-ecc811585b0b",
+          "status": "VERIFIED",
+          "detail": "1 approved examples passed twice. Baseline met 1/1.",
+          "args": [
+            37
+          ],
+          "expected": true,
+          "observed": true,
+          "durationMs": 2697,
+          "timedOut": false
+        },
+        {
+          "id": "baseline:discovered-ecc811585b0b",
+          "status": "VERIFIED",
+          "detail": "Historical observations only; not a claim that baseline meets the requirement",
+          "durationMs": 2611,
+          "timedOut": false
+        },
+        {
+          "id": "mutation:discovered-01b70d5bec2b",
+          "status": "VERIFIED",
+          "detail": "Deliberately wrong constant export was checked against the approved example",
+          "durationMs": 4232,
+          "timedOut": false
+        },
+        {
+          "id": "mutation:discovered-4bb41969232e",
+          "status": "VERIFIED",
+          "detail": "Deliberately wrong constant export was checked against the approved example",
+          "durationMs": 3431,
+          "timedOut": false
+        },
+        {
+          "id": "mutation:discovered-138df26b8a03",
+          "status": "VERIFIED",
+          "detail": "Deliberately wrong constant export was checked against the approved example",
+          "durationMs": 3322,
+          "timedOut": false
+        },
+        {
+          "id": "mutation:discovered-e8932205aa13",
+          "status": "VERIFIED",
+          "detail": "Deliberately wrong constant export was checked against the approved example",
+          "durationMs": 3438,
+          "timedOut": false
+        },
+        {
+          "id": "mutation:discovered-0cd16bf5cc3c",
+          "status": "VERIFIED",
+          "detail": "Deliberately wrong constant export was checked against the approved example",
+          "durationMs": 4231,
+          "timedOut": false
+        },
+        {
+          "id": "mutation:discovered-6f2ae391ccb4",
+          "status": "VERIFIED",
+          "detail": "Deliberately wrong constant export was checked against the approved example",
+          "durationMs": 4492,
+          "timedOut": false
+        },
+        {
+          "id": "mutation:discovered-caa7ec4a796c",
+          "status": "VERIFIED",
+          "detail": "Deliberately wrong constant export was checked against the approved example",
+          "durationMs": 3492,
+          "timedOut": false
+        },
+        {
+          "id": "mutation:discovered-ecc811585b0b",
+          "status": "VERIFIED",
+          "detail": "Deliberately wrong constant export was checked against the approved example",
+          "durationMs": 5178,
+          "timedOut": false
+        }
+      ],
+      "changes": [
+        {
+          "path": "index.js",
+          "kind": "modified",
+          "classification": "VERIFIED",
+          "reason": "Path authorised by the supplied contract; behaviour is checked separately"
+        }
+      ],
+      "runtime": {
+        "node": "v26.12.0",
+        "platform": "darwin",
+        "arch": "arm64",
+        "verifierVersion": "0.2.0",
+        "vitest": "5.0.5",
+        "workerSha256": "c16009148648f57d65398d7741a6d805170a278ea3329f781dc4d005bb2c85ad"
+      }
+    },
+    {
+      "hash": "67e705d6eff275bb9b939ea5e5bb520784abadbb0580c610f51b46facace2a74",
+      "status": "VERIFIED",
+      "durationMs": 70361,
+      "sourceHash": "1da61b6ff938582f2d256c26f3b07b8d92d531d1775ff05c019f458855c3b65e",
+      "checks": [
+        {
+          "id": "baseline-tests",
+          "status": "VERIFIED",
+          "detail": "141/141 ordinary tests passed; these do not establish the approved intent",
+          "durationMs": 7551,
+          "timedOut": false
+        },
+        {
+          "id": "candidate-tests",
+          "status": "VERIFIED",
+          "detail": "141/141 ordinary tests passed; these do not establish the approved intent",
+          "durationMs": 8175,
+          "timedOut": false
+        },
+        {
+          "id": "preserved-tests",
+          "status": "VERIFIED",
+          "detail": "141/141 ordinary tests passed; these do not establish the approved intent",
+          "durationMs": 11644,
+          "timedOut": false
+        },
+        {
+          "id": "req:discovered-01b70d5bec2b",
+          "status": "VERIFIED",
+          "detail": "1 approved examples passed twice. Baseline met 0/1.",
+          "args": [
+            "   "
+          ],
+          "expected": false,
+          "observed": false,
+          "durationMs": 3042,
+          "timedOut": false
+        },
+        {
+          "id": "baseline:discovered-01b70d5bec2b",
+          "status": "VERIFIED",
+          "detail": "Historical observations only; not a claim that baseline meets the requirement",
+          "durationMs": 3002,
+          "timedOut": false
+        },
+        {
+          "id": "req:discovered-4bb41969232e",
+          "status": "VERIFIED",
+          "detail": "1 approved examples passed twice. Baseline met 0/1.",
+          "args": [
+            "\r\n\t"
+          ],
+          "expected": false,
+          "observed": false,
+          "durationMs": 2744,
+          "timedOut": false
+        },
+        {
+          "id": "baseline:discovered-4bb41969232e",
+          "status": "VERIFIED",
+          "detail": "Historical observations only; not a claim that baseline meets the requirement",
+          "durationMs": 3125,
+          "timedOut": false
+        },
+        {
+          "id": "req:discovered-138df26b8a03",
+          "status": "VERIFIED",
+          "detail": "1 approved examples passed twice. Baseline met 1/1.",
+          "args": [
+            "3a"
+          ],
+          "expected": false,
+          "observed": false,
+          "durationMs": 2755,
+          "timedOut": false
+        },
+        {
+          "id": "baseline:discovered-138df26b8a03",
+          "status": "VERIFIED",
+          "detail": "Historical observations only; not a claim that baseline meets the requirement",
+          "durationMs": 2317,
+          "timedOut": false
+        },
+        {
+          "id": "req:discovered-e8932205aa13",
+          "status": "VERIFIED",
+          "detail": "1 approved examples passed twice. Baseline met 1/1.",
+          "args": [
+            ""
+          ],
+          "expected": false,
+          "observed": false,
+          "durationMs": 1288,
+          "timedOut": false
+        },
+        {
+          "id": "baseline:discovered-e8932205aa13",
+          "status": "VERIFIED",
+          "detail": "Historical observations only; not a claim that baseline meets the requirement",
+          "durationMs": 3120,
+          "timedOut": false
+        },
+        {
+          "id": "req:discovered-0cd16bf5cc3c",
+          "status": "VERIFIED",
+          "detail": "1 approved examples passed twice. Baseline met 1/1.",
+          "args": [
+            "   56\r\n  "
+          ],
+          "expected": true,
+          "observed": true,
+          "durationMs": 1175,
+          "timedOut": false
+        },
+        {
+          "id": "baseline:discovered-0cd16bf5cc3c",
+          "status": "VERIFIED",
+          "detail": "Historical observations only; not a claim that baseline meets the requirement",
+          "durationMs": 969,
+          "timedOut": false
+        },
+        {
+          "id": "req:discovered-6f2ae391ccb4",
+          "status": "VERIFIED",
+          "detail": "1 approved examples passed twice. Baseline met 1/1.",
+          "args": [
+            "5e3"
+          ],
+          "expected": true,
+          "observed": true,
+          "durationMs": 908,
+          "timedOut": false
+        },
+        {
+          "id": "baseline:discovered-6f2ae391ccb4",
+          "status": "VERIFIED",
+          "detail": "Historical observations only; not a claim that baseline meets the requirement",
+          "durationMs": 1278,
+          "timedOut": false
+        },
+        {
+          "id": "req:discovered-caa7ec4a796c",
+          "status": "VERIFIED",
+          "detail": "1 approved examples passed twice. Baseline met 1/1.",
+          "args": [
+            0
+          ],
+          "expected": true,
+          "observed": true,
+          "durationMs": 1042,
+          "timedOut": false
+        },
+        {
+          "id": "baseline:discovered-caa7ec4a796c",
+          "status": "VERIFIED",
+          "detail": "Historical observations only; not a claim that baseline meets the requirement",
+          "durationMs": 952,
+          "timedOut": false
+        },
+        {
+          "id": "req:discovered-ecc811585b0b",
+          "status": "VERIFIED",
+          "detail": "1 approved examples passed twice. Baseline met 1/1.",
+          "args": [
+            37
+          ],
+          "expected": true,
+          "observed": true,
+          "durationMs": 918,
+          "timedOut": false
+        },
+        {
+          "id": "baseline:discovered-ecc811585b0b",
+          "status": "VERIFIED",
+          "detail": "Historical observations only; not a claim that baseline meets the requirement",
+          "durationMs": 937,
+          "timedOut": false
+        },
+        {
+          "id": "mutation:discovered-01b70d5bec2b",
+          "status": "VERIFIED",
+          "detail": "Deliberately wrong constant export was checked against the approved example",
+          "durationMs": 1466,
+          "timedOut": false
+        },
+        {
+          "id": "mutation:discovered-4bb41969232e",
+          "status": "VERIFIED",
+          "detail": "Deliberately wrong constant export was checked against the approved example",
+          "durationMs": 1046,
+          "timedOut": false
+        },
+        {
+          "id": "mutation:discovered-138df26b8a03",
+          "status": "VERIFIED",
+          "detail": "Deliberately wrong constant export was checked against the approved example",
+          "durationMs": 939,
+          "timedOut": false
+        },
+        {
+          "id": "mutation:discovered-e8932205aa13",
+          "status": "VERIFIED",
+          "detail": "Deliberately wrong constant export was checked against the approved example",
+          "durationMs": 1161,
+          "timedOut": false
+        },
+        {
+          "id": "mutation:discovered-0cd16bf5cc3c",
+          "status": "VERIFIED",
+          "detail": "Deliberately wrong constant export was checked against the approved example",
+          "durationMs": 1035,
+          "timedOut": false
+        },
+        {
+          "id": "mutation:discovered-6f2ae391ccb4",
+          "status": "VERIFIED",
+          "detail": "Deliberately wrong constant export was checked against the approved example",
+          "durationMs": 973,
+          "timedOut": false
+        },
+        {
+          "id": "mutation:discovered-caa7ec4a796c",
+          "status": "VERIFIED",
+          "detail": "Deliberately wrong constant export was checked against the approved example",
+          "durationMs": 784,
+          "timedOut": false
+        },
+        {
+          "id": "mutation:discovered-ecc811585b0b",
+          "status": "VERIFIED",
+          "detail": "Deliberately wrong constant export was checked against the approved example",
+          "durationMs": 1379,
+          "timedOut": false
+        }
+      ],
+      "changes": [
+        {
+          "path": "index.js",
+          "kind": "modified",
+          "classification": "VERIFIED",
+          "reason": "Path authorised by the supplied contract; behaviour is checked separately"
+        }
+      ],
+      "runtime": {
+        "node": "v26.12.0",
+        "platform": "darwin",
+        "arch": "arm64",
+        "verifierVersion": "0.2.0",
+        "vitest": "5.0.5",
+        "workerSha256": "c16009148648f57d65398d7741a6d805170a278ea3329f781dc4d005bb2c85ad"
+      }
+    }
+  ],
+  "finalState": "verified",
+  "limitations": [
+    "First attempt hit default 15000ms test timeouts under extreme host load; failure receipt retained.",
+    "Recovery explicitly used --check-timeout 120000 with unchanged requirements.",
+    "Codex live authenticated; Claude unauthenticated, no live cross-model claim.",
+    "Published terminal recordings replace absolute experiment paths with labelled placeholders; original recordings and hash-bound complete evidence are retained locally.",
+    "The historical original Mocha suite is run through a documented Vitest registration adapter; additional literal preservation assertions yield 141 test instances."
+  ],
+  "originalTranscriptHashes": {
+    "onboarding": "13a9ce371cbe39c681f1fcd43ecd213bb36436ffc4f84e6819065abe12528b49",
+    "interruption": "a3e224e1f598d6d83a9c443b611af2673ad708b94b3c83b1201f25b62faeca08",
+    "recovery": "a8218a4fa3f23ef3ec5b4876f02e7f81040bde3a5672c82bdb5fa8042b1230b0"
+  },
+  "completeLocalBundleHash": "7529515be82efb20afac1e6d7e6c26335ebae45f41e43ac6f00731aca4eade76"
+}

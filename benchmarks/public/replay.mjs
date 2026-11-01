@@ -1,0 +1,20 @@
+/** Restore archived fixture dependencies, then use SENTINEL's actual replay command. */
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { parseArgs } from 'node:util';
+import { promises as fs } from 'node:fs';
+import { preparePublicDependencies, validatePublicProvenance } from '../../dist/public-benchmark.js';
+import { getObject } from '../../dist/store.js';
+import { runCommand } from '../../dist/process.js';
+const {values,positionals}=parseArgs({allowPositionals:true,options:{'allow-local':{type:'boolean'},output:{type:'string'}}});
+const hash=positionals[0],outputArgument=values.output??'benchmark-results/public';
+if(!values['allow-local'])throw new Error('Replaying a receipt executes repository code locally. Review the public fixture and pass --allow-local to consent.');
+if(!hash||!/^[a-f0-9]{64}$/.test(hash))throw new Error('Usage: node benchmarks/public/replay.mjs <receipt-hash> --allow-local [--output benchmark-directory]');
+const output=path.resolve(outputArgument),root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
+await validatePublicProvenance();
+const original=JSON.parse((await getObject(path.join(output,'store'),hash)).toString());
+if(original.schemaVersion!==1||!Array.isArray(original.checks))throw new Error('Expected a verification receipt');
+await preparePublicDependencies(path.join(output,'node_modules'));
+const result=await runCommand([process.execPath,path.join(root,'dist/cli.js'),'replay',hash,'--store',path.join(output,'store'),'--repo',output,'--allow-local','--check-timeout','120000'],root,{timeoutMs:600000,onOutput:chunk=>process.stdout.write(chunk)});
+await fs.writeFile(path.join(output,'last-replay.json'),JSON.stringify(result,null,2)+'\n');
+process.exitCode=result.exitCode??2;

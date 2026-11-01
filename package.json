@@ -1,6 +1,6 @@
 {
   "name": "sentinel-verified",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Evidence-backed verification and continuity for AI coding agents",
   "type": "module",
   "license": "MIT",
@@ -24,15 +24,22 @@
     "check": "tsc --noEmit",
     "demo": "node dist/cli.js demo",
     "benchmark": "node dist/benchmark.js",
-    "prepack": "npm run build"
+    "prepack": "npm run build",
+    "benchmark:public": "node dist/public-benchmark.js",
+    "benchmark:handoff": "node dist/handoff-benchmark.js --allow-local"
   },
   "dependencies": {
     "tsx": "4.23.15",
     "vitest": "5.0.5",
-    "zod": "4.6.7"
+    "zod": "4.6.7",
+    "typescript": "5.9.3"
   },
   "devDependencies": {
-    "@types/node": "22.18.10",
-    "typescript": "5.9.3"
-  }
+    "@types/node": "22.18.10"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rossbuckley1990-hash/sentinel-verified.git"
+  },
+  "homepage": "https://github.com/rossbuckley1990-hash/sentinel-verified#readme"
 }
