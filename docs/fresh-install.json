@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-01T13:52:04.793Z",
+  "platform": "darwin",
+  "arch": "arm64",
+  "node": "v26.12.0",
+  "commit": "7425e64f7139bb539714800a3238bebe36156199",
+  "emptyNpmCache": true,
+  "preinstalled": [
+    "Node.js",
+    "npm",
+    "Git"
+  ],
+  "firstMeaningfulMs": 6002,
+  "totalMs": 8583,
+  "under90Seconds": true,
+  "steps": [
+    {
+      "command": [
+        "git",
+        "clone",
+        "https://github.com/rossbuckley1990-hash/sentinel-verified.git",
+        "project"
+      ],
+      "exitCode": 0,
+      "durationMs": 597
+    },
+    {
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "exitCode": 0,
+      "durationMs": 8
+    },
+    {
+      "command": [
+        "npm",
+        "ci"
+      ],
+      "exitCode": 0,
+      "durationMs": 1179
+    },
+    {
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exitCode": 0,
+      "durationMs": 830
+    },
+    {
+      "command": [
+        "/opt/homebrew/Cellar/node/26.12.0/bin/node",
+        "dist/cli.js",
+        "demo"
+      ],
+      "exitCode": 0,
+      "durationMs": 5967
+    }
+  ]
+}

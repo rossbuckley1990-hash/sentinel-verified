@@ -32,6 +32,8 @@ npm run build
 node dist/cli.js demo
 ```
 
+A measured fresh public clone with an empty npm cache reached its first result in **6.00 seconds**, and completed install/build/demo in **8.58 seconds**, on Apple Silicon macOS with Node/npm/Git already installed. This is one trial; [measurement details and limits](docs/VALIDATION.md).
+
 No API key, subscription or model download is needed. The controlled demonstration runs real code and real Vitest tests:
 
 1. A deliberately faulty patch passes the ordinary tests.
