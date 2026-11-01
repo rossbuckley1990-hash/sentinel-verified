@@ -28,7 +28,7 @@ const check = z.object({
 }).strict();
 const receiptSchema = z.object({
   schemaVersion: z.literal(1), id: short, createdAt: z.string().max(100), objective: short,
-  baselineHash: hash, candidateHash: hash, contractHash: hash.nullable(), git: gitIdentity, runner: z.literal('local-advisory'),
+  baselineHash: hash, candidateHash: hash, contractHash: hash.nullable(), git: gitIdentity, runner: z.enum(['local-advisory','container-isolated']), contract:z.unknown().optional(),
   checks: z.array(check).max(10000), changes: z.array(z.object({ path: z.string().max(8192), kind: z.enum(['added', 'modified', 'deleted']), classification: status, reason: short }).strict()).max(20000),
   status, durationMs: z.number().finite().nonnegative(), runtime: z.record(z.string().max(200), z.string().max(10000)).optional(), limitations: z.array(short).max(1000), nextActions: z.array(short).max(10000),
 }).strict();
@@ -109,11 +109,15 @@ function validateBundle(value: unknown): { bundle: Bundle; checkpoint: Checkpoin
     return bytes;
   };
   if (get(envelope.checkpointHash).toString() !== JSON.stringify(envelope.checkpoint)) throw new Error('Bundle checkpoint does not match its content object.');
-  for (const run of checkpoint.agents) if (run.command) command.parse(run.command);
+  for (const run of checkpoint.agents) {
+    if(run.command) command.parse(run.command);
+    if(run.handoff){const context=get(run.handoff.contextHash).toString();if(run.command?.input!==context)throw new Error('Handoff context differs from the recorded agent input.');if(run.handoff.contractHash!==checkpoint.contractHash)throw new Error('Handoff uses a different approved contract.');}
+  }
   if (checkpoint.contractHash) {
     const bytes = get(checkpoint.contractHash);
     if (bytes.length > 1000000) throw new Error('Approved contract exceeds 1 MB.');
     const contract = parseContract(parseJson(bytes));
+    if(contract.approval){get(contract.approval.proposalHash);if(contract.approval.baselineHash!==checkpoint.baselineHash)throw new Error('Approved baseline differs from checkpoint baseline.');}
     if (contract.objective !== checkpoint.objective) throw new Error('Bundle objective differs from its approved contract.');
   }
   const snapshots = new Map<string, Omit<Snapshot, 'hash'>>();
@@ -136,9 +140,11 @@ function validateBundle(value: unknown): { bundle: Bundle; checkpoint: Checkpoin
   };
   visitSnapshot(checkpoint.baselineHash);
   visitSnapshot(checkpoint.candidateHash);
+  for(const run of checkpoint.agents)if(run.handoff)visitSnapshot(run.handoff.sourceHash);
   for (const receiptHash of checkpoint.receipts) {
     const receipt = receiptSchema.parse(parseJson(get(receiptHash)));
     if (receipt.baselineHash !== checkpoint.baselineHash || receipt.contractHash !== checkpoint.contractHash) throw new Error('Receipt does not belong to the checkpoint baseline and contract.');
+    if(receipt.contract){const embedded=parseContract(receipt.contract);if(!receipt.contractHash||JSON.stringify(embedded)!==JSON.stringify(parseContract(parseJson(get(receipt.contractHash)))))throw new Error('Receipt approved contract differs from its content identity.');}
     visitSnapshot(receipt.baselineHash);
     const candidate = visitSnapshot(receipt.candidateHash);
     if (JSON.stringify(candidate.git) !== JSON.stringify(receipt.git)) throw new Error('Receipt source identity differs from its candidate snapshot.');
@@ -177,7 +183,8 @@ export async function exportSession(store: string, id: string | undefined, outFi
     addBytes(checkpointHash, checkpointBytes);
     await addSnapshot(checkpoint.baselineHash);
     await addSnapshot(checkpoint.candidateHash);
-    if (checkpoint.contractHash) await add(checkpoint.contractHash);
+    for(const run of checkpoint.agents)if(run.handoff){await add(run.handoff.contextHash);await addSnapshot(run.handoff.sourceHash);}
+    if (checkpoint.contractHash) {const contract=parseContract(JSON.parse((await add(checkpoint.contractHash)).toString()));if(contract.approval){await add(contract.approval.proposalHash);await addSnapshot(contract.approval.baselineHash);}}
     for (const key of checkpoint.receipts) {
       const receipt = JSON.parse((await add(key)).toString()) as Receipt;
       await addSnapshot(receipt.baselineHash);
@@ -239,7 +246,7 @@ export async function importSession(store: string, file: string): Promise<Checkp
     const candidate = await captureSnapshot(workspace, store);
     if (JSON.stringify(candidate.files) !== JSON.stringify(previousSource.files)) throw new Error('Imported source differs from the checkpoint snapshot.');
     const checkpoint: Checkpoint = {
-      ...original, id, repo: workspace, workspace, candidateHash: candidate.hash, state: 'interrupted', localConsent: false,
+      ...original, id, repo: workspace, workspace, candidateHash: candidate.hash, state: 'interrupted', localConsent: false, isolatedConsent:false,
       updatedAt: new Date().toISOString(),
       nextActions: ['Review the imported source and any dependency installation commands.', 'Continue with an available agent and --allow-local to rerun independent checks in this environment.'],
       openQuestions: [...original.openQuestions, `Imported from session ${original.id}. Prior receipts retain their original source identities; this environment has not been verified.`, 'Dependencies are not included. Install reviewed dependencies in the imported workspace if needed; never treat a bundle as trusted executable code.'],

@@ -7,9 +7,13 @@ export interface Requirement {
   invariant?: { argument: number; domain: 'string' | 'number' | 'array'; seeds: Json[]; args: Json[]; expected: Json };
 }
 export interface Probe { id: string; module: string; export: string; inputs: Json[][] }
+export interface ContractApproval {
+  method: 'interactive'; approvedAt: string; proposalHash: string; baselineHash: string;
+  requirementIds: string[]; resolvedQuestions: {question:string;reason:string}[];
+}
 export interface Contract {
-  schemaVersion: 1; objective: string; approvedBy: string; requirements: Requirement[];
-  probes?: Probe[]; allowedPaths?: string[];
+  schemaVersion: 1 | 2; objective: string; approvedBy: string; requirements: Requirement[];
+  probes?: Probe[]; allowedPaths?: string[]; approval?: ContractApproval; unresolved?: string[]; discoveryLimits?: string[];
 }
 export interface GitIdentity { root: string; head: string; branch: string; dirty: boolean }
 export interface FileEntry { hash: string; size: number; mode: number }
@@ -24,20 +28,20 @@ export interface Change { path: string; kind: 'added' | 'modified' | 'deleted'; 
 export interface Receipt {
   schemaVersion: 1; id: string; createdAt: string; objective: string;
   baselineHash: string; candidateHash: string; contractHash: string | null;
-  git: GitIdentity; runner: 'local-advisory'; checks: Check[]; changes: Change[];
+  git: GitIdentity; runner: 'local-advisory' | 'container-isolated'; contract?: Contract; checks: Check[]; changes: Change[];
   status: Status; durationMs: number; runtime?: Record<string, string>; limitations: string[]; nextActions: string[];
 }
 export type AgentName = 'codex' | 'claude' | 'fixture-broken' | 'fixture-fix' | 'fixture-interrupt';
-export interface AgentRun { agent: AgentName; startedAt: string; completedAt: string; outcome: 'completed' | 'interrupted' | 'failed'; command?: CommandRecord; statement: string }
+export interface AgentRun { agent: AgentName; startedAt: string; completedAt: string; outcome: 'completed' | 'interrupted' | 'failed'; command?: CommandRecord; statement: string; handoff?: {contextHash:string;acknowledged:boolean;sourceHash:string;contractHash:string|null} }
 export interface Checkpoint {
   schemaVersion: 1; id: string; objective: string; createdAt: string; updatedAt: string;
   repo: string; workspace: string; baselineHash: string; candidateHash: string; contractHash: string | null;
   state: 'ready' | 'running' | 'interrupted' | 'verified' | 'needs-work';
   receipts: string[]; agents: AgentRun[]; nextActions: string[]; openQuestions: string[];
-  unverifiedStatements: string[]; localConsent: boolean;
+  unverifiedStatements: string[]; localConsent: boolean; runner?: {kind:'local'} | {kind:'docker';image:string}; isolatedConsent?:boolean;
 }
 export interface VerificationOptions {
   store: string; baseline: Snapshot; candidate: Snapshot; contract: Contract | null;
   contractHash: string | null; dependencies?: string; timeoutMs?: number;
-  onProgress?: (message: string) => void;
+  onProgress?: (message: string) => void; onCheck?: (check: Check) => void;
 }

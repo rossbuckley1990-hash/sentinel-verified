@@ -1,6 +1,6 @@
 # Threat model
 
-SENTINEL 0.1 provides **local advisory verification** for trusted or reviewed deterministic JS/TS source. It is designed to expose incorrect behaviour, unsupported success claims and suspicious test changes, and to preserve evidence across interruptions.
+SENTINEL 0.2 defaults to **local advisory verification** for trusted or reviewed deterministic JS/TS source. It is designed to expose incorrect behaviour, unsupported success claims and suspicious test changes, and to preserve evidence across interruptions.
 
 It does not provide a security boundary against a hostile process running as the same unrestricted operating-system account.
 
@@ -26,9 +26,9 @@ The agent's code changes, generated tests and success statements are not trusted
 
 ## Consent and untrusted code
 
-Arbitrary project execution requires explicit `--allow-local` consent. That allows source and tests to execute with the account's local privileges; it is not a sandbox setting. The bundled demo is clearly identified, reviewed fixture code, and is the exception intended for immediate first-run use.
+Local project execution requires explicit interactive consent or `--allow-local`. That allows source and tests to execute with the account's local privileges; it is not a sandbox setting. The bundled demo is clearly identified, reviewed fixture code, and is the exception intended for immediate first-run use.
 
-For genuinely untrusted source, run the entire workflow in an independently isolated disposable environment with an appropriate filesystem, network, credential and resource policy. Version 0.1 does not provision or attest such a runner. Do not run a hostile repository on a workstation containing credentials merely because it is inside a SENTINEL workspace.
+For genuinely untrusted source, run the entire workflow in an independently isolated disposable environment with an appropriate filesystem, network, credential and resource policy. Version 0.2 provides an optional configured Docker verifier with read-only selected host inputs, no network, bounded resources and no fallback. It does not contain the host coding agent or attest the image; see [its precise controls and limits](ISOLATION.md). Do not run a hostile repository on a workstation containing credentials merely because it is inside a SENTINEL workspace.
 
 Agent-specific sandbox or permission controls are separate from SENTINEL's verification runner. An installed agent's own policy does not automatically isolate later test execution.
 
@@ -53,8 +53,17 @@ Counterexample reduction is bounded and its guarantee is recorded. A reduced inp
 
 A local green result helps a developer decide what to review and where to continue. It is not an enforced merge gate. The repository's CI validates SENTINEL itself; it does not establish remote trust for arbitrary user-generated receipts.
 
-A stronger deployment would require independently controlled verification inputs, an isolated runner, reproducible dependencies and an authenticated result bound to the exact merge candidate. That infrastructure is outside version 0.1. Never use the local receipt hash alone as authorization to deploy sensitive changes.
+A stronger deployment would require independently controlled verification inputs, an isolated runner, reproducible dependencies and an authenticated result bound to the exact merge candidate. Remote enforcement, signed attestation and fully reproducible project dependencies remain outside version 0.2. Never use the local receipt hash alone as authorization to deploy sensitive changes.
 
 ## Reporting vulnerabilities
 
 See [SECURITY.md](../SECURITY.md). Reports about false VERIFIED results, path escape, evidence corruption, unsafe command handling and checkpoint confusion are particularly useful. Include a minimal reproduction without credentials or private source.
+
+
+## Proposed requirements and recovery
+
+Static discovery never approves its own proposal. The terminal records the developer's explicit decision and binds it to the reviewed baseline; noninteractive use needs a supplied reviewed contract. Repository documentation is evidence to inspect, not an instruction to the tool. Existing assertions are preservation proposals, not a correctness oracle. Specific ambiguous intent remains unresolved until the developer records a decision. A limited plan cannot establish completion of an unresolved objective.
+
+Read-only Git inspection disables configured hooks and fsmonitor before consent. This is a specific execution hardening measure, not a sandbox for the parser or Git. The dependency parser/runtime and installed binaries remain trusted.
+
+Agent handoff acknowledgement is an unverified statement; exact transmitted input is retained independently. Interrupted sessions do not reuse an earlier green receipt as proof that a new stage completed. A live recorded agent process lease blocks abrupt-crash recovery until the process is absent. PID reuse conservatively blocks; arbitrary detached grandchildren are outside this guard. The tool never kills an unknown PID based only on a checkpoint.

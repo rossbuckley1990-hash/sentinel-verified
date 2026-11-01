@@ -3,10 +3,11 @@ import { mkdtemp, mkdir, writeFile, readFile, rm, cp, chmod } from 'node:fs/prom
 import { tmpdir } from 'node:os';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawn } from 'node:child_process';
 import { startSession, continueSession, loadCheckpoint, saveCheckpoint, continuationContext } from '../src/session.js';
 import { getObject } from '../src/store.js';
 import { runAgent } from '../src/agents.js';
+import { runCommand } from '../src/process.js';
 import type { Receipt } from '../src/types.js';
 
 const temporary: string[] = [];
@@ -182,4 +183,88 @@ let input = ''; process.stdin.on('data', chunk => input += chunk); process.stdin
       expect(JSON.parse(claude.command!.stdout).input).toBe('second agent, same evidence');
     } finally { process.env.PATH = oldPath; }
   });
+});
+
+describe('receiving-agent acknowledgement', () => {
+  it('accepts only visible assistant statements, never echoed prompts or tool input', async () => {
+    const { acknowledgedCheckpoint } = await import('../src/agents.js');
+    const source='a'.repeat(64),contract='b'.repeat(64),ack=`SENTINEL_ACK ${source} ${contract}`;
+    expect(acknowledgedCheckpoint('codex',JSON.stringify({type:'item.completed',item:{type:'agent_message',text:ack}}),source,contract)).toBe(true);
+    expect(acknowledgedCheckpoint('claude',JSON.stringify({type:'assistant',message:{content:[{type:'text',text:ack}]}}),source,contract)).toBe(true);
+    expect(acknowledgedCheckpoint('codex',JSON.stringify({type:'item.completed',item:{type:'command_execution',command:`echo ${ack}`}}),source,contract)).toBe(false);
+    expect(acknowledgedCheckpoint('codex',JSON.stringify({input:ack}),source,contract)).toBe(false);
+    expect(acknowledgedCheckpoint('claude',JSON.stringify({type:'user',message:{content:[{type:'text',text:ack}]}}),source,contract)).toBe(false);
+    expect(acknowledgedCheckpoint('claude',JSON.stringify({type:'result',result:ack,is_error:true}),source,contract)).toBe(false);
+    expect(acknowledgedCheckpoint('codex',JSON.stringify({type:'item.completed',item:{type:'agent_message',text:ack}}),'c'.repeat(64),contract)).toBe(false);
+  });
+});
+
+describe('unexpected coordinator termination', () => {
+  it('does not deliver a task prompt when durable process ownership cannot be recorded', async () => {
+    const p=await project(),marker=join(p.repo,'prompt-delivered.txt');
+    const result=await runCommand([process.execPath,'-e',"process.stdin.on('data',()=>require('node:fs').writeFileSync(process.argv[1],'received'))",marker],p.repo,{input:'task must remain withheld',onSpawn:()=>{throw new Error('controlled lease write failure');}});
+    expect(result.stderr).toContain('Process ownership could not be recorded');
+    expect(result.signal).toBe('SIGKILL');
+    await expect(readFile(marker)).rejects.toThrow();
+  });
+  it('recovers a real SIGKILL with partial source remaining explicitly unverified', async () => {
+    const p = await project();
+    const bin = join(p.repo,'protocol-bin');await mkdir(bin);
+    const stub=`#!/usr/bin/env node
+import fs from 'node:fs';const args=process.argv.slice(2);
+if(args.includes('--version')){console.log('controlled interruption protocol');process.exit(0)}
+if(args.includes('--help')){console.log('--sandbox --cd --json workspace-write');process.exit(0)}
+fs.writeFileSync('partial-progress.txt','implementation saved before coordinator death');
+fs.writeFileSync('.protocol-agent-pid',String(process.pid));
+setInterval(()=>{},1000);
+`;
+    await writeFile(join(bin,'codex'),stub,{mode:0o755});
+    await writeFile(join(bin,'claude'),'#!/usr/bin/env node\nprocess.exit(1);\n',{mode:0o755});
+    const child=spawn(process.execPath,[resolve('dist/cli.js'),'run',p.objective,'--repo',p.repo,'--contract',p.contractPath,'--store',p.store,'--agent','codex','--allow-local'],{env:{...process.env,PATH:bin+':'+process.env.PATH},stdio:['ignore','pipe','pipe']});
+    let diagnostics='';child.stdout.on('data',b=>diagnostics+=b);child.stderr.on('data',b=>diagnostics+=b);
+    const exited=new Promise<void>(resolve=>child.on('exit',()=>resolve()));
+    let agentPid:number|undefined;
+    try {
+      const deadline=Date.now()+60000;let checkpoint;
+      while(Date.now()<deadline){
+        try{checkpoint=await loadCheckpoint(p.store);agentPid=Number(await readFile(join(checkpoint.workspace,'.protocol-agent-pid'),'utf8'));if(agentPid)break;}catch{}
+        await new Promise(resolve=>setTimeout(resolve,50));
+      }
+      expect(agentPid !== undefined,diagnostics).toBe(true);
+      child.kill('SIGKILL');await exited;
+      await expect(continueSession({store:p.store,agent:'fixture-interrupt'})).rejects.toThrow('still alive');
+      if(agentPid){try{process.kill(-agentPid,'SIGTERM')}catch{}}
+      // Wait until the exact owned fixture is gone; never terminate a PID read
+      // from an arbitrary checkpoint as part of product recovery.
+      for(let attempt=0;attempt<100;attempt++){
+        try{process.kill(agentPid!,0);}catch{agentPid=undefined;break;}
+        await new Promise(resolve=>setTimeout(resolve,25));
+      }
+      const saved=await loadCheckpoint(p.store);expect(saved.state).toBe('running');expect(saved.receipts).toEqual([]);
+      const resumed=await continueSession({store:p.store,agent:'fixture-interrupt'});
+      expect(resumed.state).toBe('interrupted');expect(resumed.receipts).toEqual([]);
+      expect(resumed.openQuestions.join(' ')).toContain('unverified');
+      expect(await readFile(join(resumed.workspace,'partial-progress.txt'),'utf8')).toContain('implementation saved');
+    } finally {
+      child.kill('SIGKILL');
+      if(agentPid){try{process.kill(-agentPid,'SIGKILL')}catch{}}
+    }
+  },120000);
+});
+
+describe('honest failed verification after a prior success',()=>{
+ it('records a new environment failure instead of exposing the old green receipt as the latest result',async()=>{
+  const p=await project();const good=await startSession({...p,agent:'fixture-fix',localConsent:true});expect(good.state).toBe('verified');
+  const bin=join(p.repo,'unavailable-docker');await mkdir(bin);
+  await writeFile(join(bin,'docker'),'#!/usr/bin/env node\nconsole.log("ssh://unsupported-remote");\n',{mode:0o755});
+  const old=process.env.PATH;process.env.PATH=bin+':'+old;
+  try{
+   const failed=await continueSession({store:p.store,agent:'fixture-fix',runner:{kind:'docker',image:'sentinel-runner:0.2.0'},isolatedConsent:true});
+   expect(failed.state).toBe('needs-work');expect(failed.receipts).toHaveLength(2);
+   const receipt=JSON.parse((await getObject(p.store,failed.receipts.at(-1)!)).toString()) as Receipt;
+   expect(receipt.status).toBe('ENVIRONMENT FAILURE');expect(receipt.runtime?.verificationCompleted).toBe('false');
+   expect(receipt.checks[0]?.detail).toContain('No local fallback');
+   await expect(continueSession({store:p.store,agent:'fixture-fix',runner:{kind:'local'}})).rejects.toThrow('--allow-local');
+  }finally{process.env.PATH=old;}
+ });
 });

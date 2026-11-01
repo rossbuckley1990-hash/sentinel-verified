@@ -26,5 +26,8 @@ jobs:
       - name: Adversarial benchmark
         if: matrix.os == 'ubuntu-latest' && matrix.node == 22
         run: npm run benchmark
+      - name: Public provenance and outcome evaluation
+        if: matrix.os == 'ubuntu-latest' && matrix.node == 22
+        run: npm run benchmark:public
       - name: Check package contents
         run: npm pack --dry-run

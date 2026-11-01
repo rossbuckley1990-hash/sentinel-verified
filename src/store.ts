@@ -30,7 +30,7 @@ export async function getObject(store: string, hash: string): Promise<Buffer> {
   const bytes = await fs.readFile(path.join(store, 'objects', hash));
   if (digest(bytes) !== hash) throw new Error(`Evidence integrity failure: ${hash}`); return bytes;
 }
-async function git(root: string, args: string[]): Promise<string> { return (await exec('git', ['-C',root,...args], { maxBuffer: 32 * 1024 * 1024 })).stdout.trimEnd(); }
+async function git(root: string, args: string[]): Promise<string> { return (await exec('git', ['--no-optional-locks','-c','core.fsmonitor=false','-c','core.hooksPath=/dev/null','-C',root,...args], { maxBuffer: 32 * 1024 * 1024 })).stdout.trimEnd(); }
 export async function gitIdentity(root: string): Promise<GitIdentity> {
   return { root: await fs.realpath(root), head: await git(root,['rev-parse','HEAD']), branch: await git(root,['branch','--show-current']), dirty: !!(await git(root,['status','--porcelain'])) };
 }
@@ -47,7 +47,7 @@ export async function readSnapshot(store: string, hash: string): Promise<Snapsho
 }
 export async function captureSnapshot(root: string, store: string): Promise<Snapshot> {
   const identity = await gitIdentity(root);
-  const listing = (await exec('git',['-C',root,'ls-files','--cached','--others','--exclude-standard','-z'],{maxBuffer:32*1024*1024})).stdout;
+  const listing = (await exec('git',['--no-optional-locks','-c','core.fsmonitor=false','-c','core.hooksPath=/dev/null','-C',root,'ls-files','--cached','--others','--exclude-standard','-z'],{maxBuffer:32*1024*1024})).stdout;
   const files: Record<string,FileEntry> = Object.create(null); let total = 0;
   for (const name of [...new Set(listing.split('\0').filter(Boolean))].sort()) {
     if (!safeRelative(name)) throw new Error(`Unsafe path: ${name}`);
@@ -64,13 +64,13 @@ export async function captureSnapshot(root: string, store: string): Promise<Snap
 export async function captureRevision(root: string, ref: string, store: string): Promise<Snapshot> {
   const commit = await git(root,['rev-parse','--verify',`${ref}^{commit}`]);
   const identity = { ...(await gitIdentity(root)), head: commit, dirty: false };
-  const listing = (await exec('git',['-C',root,'ls-tree','-rz','--full-tree',commit],{maxBuffer:32*1024*1024})).stdout;
+  const listing = (await exec('git',['--no-optional-locks','-c','core.fsmonitor=false','-c','core.hooksPath=/dev/null','-C',root,'ls-tree','-rz','--full-tree',commit],{maxBuffer:32*1024*1024})).stdout;
   const files: Record<string,FileEntry> = Object.create(null); let total=0;
   for(const item of listing.split('\0').filter(Boolean)) {
     const tab=item.indexOf('\t'); const name=item.slice(tab+1); const [mode,type,oid]=item.slice(0,tab).split(' ');
     if(!safeRelative(name) || type!=='blob' || mode==='120000') throw new Error(`Unsupported baseline file: ${name}`);
     if(name.split('/').some(x=>x==='node_modules'||x==='.sentinel')) continue;
-    const {stdout: bytes} = await exec('git',['-C',root,'cat-file','blob',oid!],{encoding:'buffer',maxBuffer:20_000_001});
+    const {stdout: bytes} = await exec('git',['--no-optional-locks','-c','core.fsmonitor=false','-c','core.hooksPath=/dev/null','-C',root,'cat-file','blob',oid!],{encoding:'buffer',maxBuffer:20_000_001});
     total+=bytes.length; if(bytes.length>20_000_000||total>100_000_000) throw new Error('Snapshot size limit exceeded');
     files[name]={hash:await putObject(store,bytes),size:bytes.length,mode:parseInt(mode!,8)&0o777};
   }

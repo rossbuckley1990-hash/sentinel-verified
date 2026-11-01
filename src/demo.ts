@@ -42,6 +42,7 @@ export async function demo(store:string){
  await atomicJson(path.join(reportDir,'demo-metrics.json'),metrics);
  line();displayCheckpoint(fixed);line(`  False success report  ${path.join(reportDir,'false-success.html')}`);line(`  Final report          ${path.join(reportDir,'report.html')}`);line(`  First result          ${(metrics.firstResultMs/1000).toFixed(2)}s from demo start (installation excluded)`);
  line(`  Full demonstration    ${(metrics.totalMs/1000).toFixed(2)}s`);
- line('  Continue this session: sentinel continue --agent codex');
+ line(`  Open report           sentinel report --session ${fixed.id} --store '${store.replaceAll("'","'\"'\"'")}' --open`);
+ line(`  Continue this session: sentinel continue --session ${fixed.id} --store '${store.replaceAll("'","'\"'\"'")}' --agent codex`);
  return {checkpoint:fixed,metrics,bad,good};
 }

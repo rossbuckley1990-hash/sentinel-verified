@@ -26,6 +26,8 @@ The agent changes implementation files. The verifier owns the execution and clas
 | Component | Responsibility |
 | --- | --- |
 | CLI | Parse commands, expose one session flow and report errors with useful exit status. |
+| Discovery and onboarding | Statically propose literal checks, expose uncertainty, record explicit developer approval and separate execution consent. |
+| Configured isolation | Run verification in a bounded Docker container without host credentials, network or a local fallback. |
 | Session orchestration | Preserve task state, invoke adapters, checkpoint interruption and continue from validated source. |
 | Agent adapters | Detect installed capabilities, invoke actual CLI interfaces and record outcomes. |
 | Snapshot store | Record file content, content hashes, file modes and Git identity; materialize execution copies. |
@@ -80,7 +82,7 @@ This is context reconstruction from accessible project state. It is not a transf
 
 ## Schema evolution
 
-Contracts, snapshots, receipts and checkpoints carry `schemaVersion: 1`. The authoritative TypeScript definitions live in `src/types.ts`; parsing rules are in the schema module. Consumers must reject unknown versions rather than silently treating them as version 1.
+Version-1 manual contracts remain readable without rewriting their content. Interactive approval creates a version-2 contract with the proposal hash, approved baseline hash, exact approved requirement IDs, recorded question resolutions, unresolved intent and discovery limits. Snapshots, receipts, checkpoints and portable envelopes retain `schemaVersion: 1` with optional additive fields for the runner, full contract and handoff acknowledgement. A v0.1 reader is not expected to understand v0.2 contracts or the Docker runner; v0.2 reads existing v0.1 evidence unchanged. The authoritative TypeScript definitions live in `src/types.ts`; parsing rules are in the schema module. Consumers must reject unknown versions rather than silently treating them as version 1.
 
 Future migrations should read the old schema, produce a new object with a new hash, retain the original object and record the migration provenance. Never overwrite an old receipt to change its meaning. Migration of summaries cannot turn historical claims into newly verified facts.
 
@@ -89,3 +91,12 @@ Future migrations should read the old schema, produce a new object with a new ha
 No database, hosted service, queue or model is needed for the core. No general semantic-correctness theorem is claimed. No evidence in this project establishes uniqueness of proof-carrying continuity as an idea.
 
 Local snapshots separate responsibilities and catch stale or altered inputs. They do not isolate hostile code. Consult the [threat model](THREAT-MODEL.md) for the boundary between useful local checks and adversarial security enforcement.
+
+
+## v0.2 approval and continuity details
+
+Read-only Git inspection explicitly disables fsmonitor and hooks: even a status/listing command must not execute repository-configured code before consent. Proposal inputs are checked against the reviewed baseline; source changes while the approval screen is open invalidate approval. Adding one explicit example resolves only the generic missing-example question, never an unrelated ambiguous objective.
+
+The per-repository session pointer prevents `continue` from choosing a different repository's global latest task. Imported sessions require their explicit session ID. The preferred agent is the only stored onboarding preference; execution consent belongs to a session and runner and is reset on import.
+
+The exact bounded agent input is a content object. A visible `SENTINEL_ACK` line can acknowledge its source and contract identities. This is an agent statement, not independent evidence of comprehension. The next source is independently verified even when acknowledgement is absent. A new verification infrastructure failure receives its own failure receipt; an older green result cannot represent that failed attempt. Reports label incomplete or source-stale sessions accordingly.

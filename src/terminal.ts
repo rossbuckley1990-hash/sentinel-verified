@@ -15,7 +15,29 @@ export function displayReceipt(receipt:Receipt){
   if(c.counterexample)line(`    Reduced   ${JSON.stringify(c.counterexample.original)} → ${JSON.stringify(c.counterexample.minimal)} (${c.counterexample.attempts} attempts)`);
  }
  for(const c of receipt.changes.filter(c=>c.classification!=='VERIFIED'))line(`  ! REVIEW REQUIRED      ${c.path}: ${c.reason}`);
- line();line(`  ${receipt.status} · ${(receipt.durationMs/1000).toFixed(2)}s · local advisory verification`);
+ line();line(`  ${receipt.status} · ${(receipt.durationMs/1000).toFixed(2)}s · ${receipt.runner==='container-isolated'?'container verification':'local advisory verification'}`);
  line('  Results cover the executed checks. They do not prove arbitrary correctness.');
 }
 export function displayCheckpoint(cp:Checkpoint){line(`  Session     ${cp.id} · ${cp.state}`);line(`  Workspace   ${cp.workspace}`);line(`  Evidence    ${cp.receipts.at(-1)??'No completed verification yet'}`);if(cp.state!=='verified')for(const next of cp.nextActions.slice(0,4))line(`  Next        ${next}`);}
+
+/** A compact view of one session, using ordinary readable lines in headless terminals. */
+export class SessionView {
+ private stage='DISCOVERY'; private passed=0; private contradicted=0; private unknown=0; private live=false;
+ constructor(private verbose=false){}
+ describe(task:string,repo:string,agent:string){line(`  Task        ${task}`);line(`  Agent       ${agent}`);line(`  Repository  ${repo}`);line();}
+ progress=(message:string)=>{
+  const stage=/^(Checking clean|Running candidate|Re-running|Comparing|Challenging|Verification is isolated|Agent finished)/i.test(message)?'VERIFICATION':/agent|editing|working|fixture/i.test(message)?'IMPLEMENTATION':this.stage;
+  if(stage!==this.stage){this.clear();this.stage=stage;line(`  ${stage} · Running`);}
+  if(this.verbose){this.clear();progress(message);}
+  else if(process.stdout.isTTY&&!process.env.NO_COLOR){this.clear();process.stdout.write(`\r  ${this.stage} · ${cleanTerminal(message).slice(0,Math.max(35,(process.stdout.columns??100)-25))}`);this.live=true;}
+ };
+ check=(check:import('./types.js').Check)=>{
+  if(check.id.startsWith('baseline:')||check.id.startsWith('probe-baseline:')||check.id.startsWith('mutation:'))return;
+  if(check.status==='VERIFIED')this.passed++;else if(check.status==='CONTRADICTED')this.contradicted++;else this.unknown++;
+  this.clear();const counts=`${this.passed} passed · ${this.contradicted} contradicted · ${this.unknown} unresolved`;
+  if(check.status!=='VERIFIED'||this.verbose)line(`  ${check.status} · ${check.label}`);
+  if(process.stdout.isTTY&&!process.env.NO_COLOR){process.stdout.write(`\r  VERIFICATION · ${counts}`);this.live=true;}
+ };
+ clear(){if(this.live){process.stdout.write('\r\x1b[2K');this.live=false;}}
+ finish(){this.clear();line('  EVIDENCE · Saved · CONTINUATION · Ready');}
+}

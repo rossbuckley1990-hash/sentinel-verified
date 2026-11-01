@@ -2,6 +2,7 @@ import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { AgentName, AgentRun } from './types.js';
 import { runCommand } from './process.js';
+import { digest } from './store.js';
 
 export interface AgentCapability {
   name: 'codex' | 'claude'; installed: boolean; supported: boolean; version: string; reason: string;
@@ -9,6 +10,8 @@ export interface AgentCapability {
 export interface AgentOptions {
   workspace: string; prompt: string; timeoutMs?: number; signal?: AbortSignal;
   onProgress?: (message: string) => void;
+  onSpawn?: (pid: number) => void;
+  acknowledgement?: { sourceHash: string; contractHash: string | null };
 }
 
 /** Discover only documented flags in the installed executable, without starting a model. */
@@ -21,6 +24,28 @@ export async function detectAgents(cwd = process.cwd()): Promise<AgentCapability
     const missing = required.filter(flag => !help.stdout.includes(flag));
     return { name, installed: true, supported: help.exitCode === 0 && missing.length === 0, version: version.stdout.trim().split('\n')[0] ?? '', reason: missing.length ? `Installed CLI lacks required capabilities: ${missing.join(', ')}` : 'Required CLI capabilities found; authentication is checked when the agent runs.' };
   }));
+}
+
+/** Only visible assistant messages count; echoed input, tools and reasoning events do not. */
+export function acknowledgedCheckpoint(name: 'codex' | 'claude', stdout: string, sourceHash: string, contractHash: string | null): boolean {
+  const expected = `SENTINEL_ACK ${sourceHash} ${contractHash ?? 'none'}`;
+  const texts: string[] = [];
+  for (const line of stdout.split('\n')) {
+    let event: unknown;
+    try { event = JSON.parse(line); } catch { continue; }
+    if (!event || typeof event !== 'object') continue;
+    const value = event as Record<string, unknown>;
+    if (name === 'codex' && value.type === 'item.completed' && value.item && typeof value.item === 'object') {
+      const item = value.item as Record<string, unknown>;
+      if (item.type === 'agent_message' && typeof item.text === 'string') texts.push(item.text);
+    }
+    if (name === 'claude' && value.type === 'assistant' && value.message && typeof value.message === 'object') {
+      const content = (value.message as Record<string, unknown>).content;
+      if (Array.isArray(content)) for (const block of content) if (block && typeof block === 'object' && block.type === 'text' && typeof block.text === 'string') texts.push(block.text);
+    }
+    if (name === 'claude' && value.type === 'result' && value.is_error !== true && typeof value.result === 'string') texts.push(value.result);
+  }
+  return texts.some(text => text.split('\n').some(line => line.trim() === expected));
 }
 
 const faulty = 'export function isAdult(age: unknown): boolean { return (age as number) >= 18; }\nexport function greeting(name: string): string { return `Hello, ${name}!`; }\n';
@@ -53,7 +78,7 @@ export async function runAgent(name: AgentName, options: AgentOptions): Promise<
   let record;
   try {
     record = await runCommand(command, options.workspace, {
-      timeoutMs: options.timeoutMs ?? 600000, input: options.prompt, signal: options.signal,
+      timeoutMs: options.timeoutMs ?? 600000, input: options.prompt, signal: options.signal, onSpawn: options.onSpawn,
       onOutput: chunk => {
         pendingLine = (pendingLine + chunk).slice(-64000);
         const lines = pendingLine.split('\n');
@@ -65,5 +90,5 @@ export async function runAgent(name: AgentName, options: AgentOptions): Promise<
 
   const outcome = record.timedOut || options.signal?.aborted || record.signal ? 'interrupted' : record.exitCode === 0 ? 'completed' : 'failed';
   // Only the visible CLI transcript is recorded. Never imply access to private model reasoning.
-  return { agent: name, startedAt, completedAt: new Date().toISOString(), outcome, command: record, statement: `UNVERIFIED ${name} CLI output:\n${record.stdout.slice(-12000)}${record.stderr ? `\nCLI diagnostics:\n${record.stderr.slice(-2000)}` : ''}` };
+  return { agent: name, startedAt, completedAt: new Date().toISOString(), outcome, command: record, ...(options.acknowledgement ? { handoff: { contextHash: digest(options.prompt), acknowledged: acknowledgedCheckpoint(name as 'codex' | 'claude', record.stdout, options.acknowledgement.sourceHash, options.acknowledgement.contractHash), sourceHash: options.acknowledgement.sourceHash, contractHash: options.acknowledgement.contractHash } } : {}), statement: `UNVERIFIED ${name} CLI output:\n${record.stdout.slice(-12000)}${record.stderr ? `\nCLI diagnostics:\n${record.stderr.slice(-2000)}` : ''}` };
 }

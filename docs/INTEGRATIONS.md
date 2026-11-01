@@ -10,7 +10,7 @@ The installed interface inspected during development was `codex-cli 0.163.0`. SE
 codex exec --sandbox workspace-write --cd WORKSPACE --json -
 ```
 
-The context is sent on standard input. Codex authentication and model configuration remain the user's. The adapter never requests `--dangerously-bypass-approvals-and-sandbox`. The Codex sandbox is distinct from SENTINEL's independent verification runner: this release's verifier is local advisory execution, not an isolation boundary.
+The context is sent on standard input. Codex authentication and model configuration remain the user's. The adapter never requests `--dangerously-bypass-approvals-and-sandbox`. The Codex sandbox is distinct from SENTINEL's independent verification runner: the default verifier is local advisory execution; an optional configured Docker runner isolates verification separately.
 
 Reference: [Codex non-interactive mode](https://developers.openai.com/codex/noninteractive). Installed help is the adapter's compatibility check; provider releases may change their interfaces.
 
@@ -30,10 +30,10 @@ The context is sent on standard input with the managed workspace as the current 
 
 ## Commands
 
-With a reviewed acceptance contract outside the input repository:
+From a supported repository, review the automatically proposed plan and give execution consent:
 
 ```sh
-sentinel run "YOUR EXACT APPROVED OBJECTIVE" --repo /path/to/project --contract /path/to/approved-contract.json --agent codex --allow-local
+sentinel run "Describe the intended fix" --agent codex
 sentinel continue --agent claude
 ```
 
@@ -42,7 +42,7 @@ The first invocation records the explicit local execution consent for the sessio
 ## Durability and integrity
 
 - Checkpoint envelopes in `STORE/sessions/ID/checkpoint.json` contain the complete machine-readable checkpoint and the hash of its historical content object. A single rename publishes a checkpoint atomically.
-- `STORE/latest.json` selects the default session. Pass the session ID to select a different one.
+- `STORE/repositories/HASH/latest.json` selects the current repository’s session for `continue`; malformed pointers fail closed. Use `--session ID` for imports or an explicit different session. Read-only global inspection can still use `STORE/latest.json`.
 - Contracts, source snapshots and receipts are content-addressed objects. Reading them checks their hashes. A valid local hash does not authenticate who created the content.
 - A session lock prevents two live writers. Locks owned by dead processes can be recovered. Malformed locks require inspection; SENTINEL does not guess their owner.
 - A stopped process's `running` checkpoint allows partial source edits to be captured as unverified. For changes made after an ordinary completed/interrupted checkpoint, `--adopt-changes` explicitly accepts the edits into a new unverified state before continuing.
@@ -61,7 +61,7 @@ A versioned `.sentinel.json` bundle carries the selected checkpoint, its approve
 sentinel export --out task.sentinel.json
 # Copy the bundle to another machine or storage location.
 sentinel import task.sentinel.json --store /path/to/receiving-store
-sentinel continue --agent codex --store /path/to/receiving-store --allow-local
+sentinel continue --session IMPORTED_SESSION_ID --agent codex --store /path/to/receiving-store --allow-local
 ```
 
 Import validates the complete evidence chain before publishing a new session. The new workspace uses a new session ID; the original session remains unchanged. Historical receipts retain their original source and execution identities. They are labelled historical for the relocated workspace until verification runs again. Local execution consent is deliberately reset on import, so importing a file alone never authorises execution of its code.
@@ -71,3 +71,5 @@ Bundles do not include `node_modules`, installed agents, provider authentication
 **Review a bundle before sharing it.** It contains the selected source files, contract, local paths, agent transcripts and command outputs already recorded in the session. These may contain private code or information printed by your tools. Export is a local file operation and never uploads the bundle.
 
 Version 1 uses ordinary JSON with canonical base64 content objects; it does not execute archive extractors or evaluate imported code. Import is bounded to 300 MB of encoded JSON, 50,000 objects, 20,000 files per snapshot, 20 MB per source file, 100 MB per source snapshot, and a 1 MB contract. It rejects unsafe paths, Git metadata, source symlinks and case/Unicode-colliding paths. Git setup disables hooks and external Git configuration. Hashes detect corruption; a hostile party able to replace the whole bundle can produce new hashes, so hashes do not establish authorship or trust.
+
+The v0.2 live public-project experiment, interruption and re-verification are recorded in [v0.2 validation](V0.2-VALIDATION.md). Claude authentication remains an external prerequisite; protocol tests do not establish a live Claude handoff.

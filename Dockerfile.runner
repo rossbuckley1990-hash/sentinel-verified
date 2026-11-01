@@ -1,0 +1,11 @@
+# Build explicitly; project verification never pulls images or installs packages.
+FROM node:24-bookworm-slim@sha256:c86ecead9e55a5210ac1727de38a4ca840bf03dcaf34dc9749addbf383b1920c
+LABEL org.sentinel.runner.protocol="1"
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci --ignore-scripts --no-audit --no-fund
+COPY tsconfig.json ./
+COPY src/ ./src/
+RUN npm run build && npm prune --omit=dev --ignore-scripts --no-audit --no-fund
+USER 1000:1000
+ENTRYPOINT ["/usr/local/bin/node", "/app/dist/container-entry.js"]

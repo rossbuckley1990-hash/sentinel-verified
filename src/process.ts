@@ -1,6 +1,6 @@
 import { spawn } from 'node:child_process';
 import type { CommandRecord } from './types.js';
-export interface RunOptions { timeoutMs?: number; input?: string; onOutput?: (text: string) => void; signal?: AbortSignal; env?: NodeJS.ProcessEnv }
+export interface RunOptions { timeoutMs?: number; input?: string; onOutput?: (text: string) => void; onSpawn?: (pid: number) => void; signal?: AbortSignal; env?: NodeJS.ProcessEnv }
 export async function runCommand(command: string[], cwd: string, options: RunOptions = {}): Promise<CommandRecord> {
   if (!command[0]) throw new Error('Empty command');
   const started = performance.now();
@@ -25,10 +25,13 @@ export async function runCommand(command: string[], cwd: string, options: RunOpt
     };
     child.stdout.on('data', data => append('stdout', data)); child.stderr.on('data', data => append('stderr', data));
     child.stdin.on('error', () => {});
-    child.stdin.end(options.input ?? '');
     const finish = () => { if (ended) return; ended = true; clearTimeout(timer); if(killTimer) clearTimeout(killTimer); options.signal?.removeEventListener('abort', abort); record.durationMs = Math.round(performance.now() - started); resolve(record); };
     child.on('error', error => { record.stderr += error.message; finish(); });
     child.on('close', (code, signal) => { record.exitCode = code; record.signal = record.signal ?? signal; if (record.timedOut || record.truncated || record.signal) kill('SIGKILL'); finish(); });
+    // A session may durably record process ownership before its prompt is sent.
+    // A failed ownership write must not release the prompt to the child.
+    try { if (child.pid) options.onSpawn?.(child.pid); child.stdin.end(options.input ?? ''); }
+    catch (error) { record.stderr += `Process ownership could not be recorded: ${String(error)}`; kill('SIGKILL'); child.stdin.destroy(); }
   });
 }
 export function executionEnvironment(): NodeJS.ProcessEnv {

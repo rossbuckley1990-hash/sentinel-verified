@@ -77,3 +77,13 @@ describe('source and verification evidence boundaries', () => {
     expect(await readFile(join(root, 'reproduced/__proto__'), 'utf8')).toBe(source);
   });
 });
+
+
+it('classifies an unloadable test suite as environment failure, not empty coverage',async()=>{
+ const {repo,store}=await fixture();const baseline=await captureSnapshot(repo,store);
+ await writeFile(join(repo,'src/access.test.js'), "import './missing-dependency.js';\n");
+ const candidate=await captureSnapshot(repo,store);const contractHash=await putObject(store,JSON.stringify(contract));
+ const receipt=await verify({store,baseline,candidate,contract,contractHash,dependencies});
+ expect(receipt.checks.find(c=>c.id==='candidate-tests')?.status).toBe('ENVIRONMENT FAILURE');
+ expect(receipt.status).toBe('ENVIRONMENT FAILURE');
+});

@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "frozenBeforeExecution": true,
+  "projects": [
+    {
+      "id": "is-number",
+      "url": "https://github.com/jonschlinkert/is-number",
+      "baselineCommit": "204c885659b8ee1946534c61db91603b9a16d661",
+      "fixedCommit": "12749e3c411750f754d50f093471234c7ab270b0",
+      "licence": "MIT",
+      "requirementSources": [
+        "https://github.com/jonschlinkert/is-number/issues/3",
+        "https://github.com/jonschlinkert/is-number/commit/12749e3c411750f754d50f093471234c7ab270b0"
+      ],
+      "scope": "Historical whitespace-only string bug; complete upstream implementation and Mocha assertions retained."
+    },
+    {
+      "id": "normalize-path",
+      "url": "https://github.com/jonschlinkert/normalize-path",
+      "baselineCommit": "52c3a95ebebc2d98c1ad7606cbafa7e658656899",
+      "licence": "MIT",
+      "requirementSources": [
+        "https://github.com/jonschlinkert/normalize-path/blob/52c3a95ebebc2d98c1ad7606cbafa7e658656899/README.md",
+        "https://github.com/jonschlinkert/normalize-path/blob/52c3a95ebebc2d98c1ad7606cbafa7e658656899/test.js"
+      ],
+      "scope": "Seeded regressions and a legitimate refactor against upstream documented behavior. Not claimed to be upstream bugs."
+    }
+  ],
+  "files": {
+    "dependencies/minimist/LICENSE": "435a6722c786b0a56fbe7387028f1d9d3f3a2d0fb615bb8fee118727c3f59b7b",
+    "dependencies/minimist/index.js": "9cf5e83d36697a92d8af11e000f513ac30a3464bbb024850f9ffdeb1edf59848",
+    "dependencies/minimist/package.json": "252881f6a068a3e70386706d88a694b5e8e9e053b6d9f309fd9a329e651bbf81",
+    "dependencies/kind-of/LICENSE": "daca23d50b0f54d36d6da1b16c82dfea6461e2ae20de0e869957e44cc6d34781",
+    "dependencies/kind-of/index.js": "d0387c144a14241e091e9e76cb4ea78ed0820835511968e7b273938be17f4d10",
+    "dependencies/kind-of/package.json": "a951f2b5903f57e72cdf2305460a87057431bd03a1bfca81e7f2cf73d7a22e55",
+    "dependencies/is-buffer/LICENSE": "c7cc929b57080f4b9d0c6cf57669f0463fc5b39906344dfc8d3bc43426b30eac",
+    "dependencies/is-buffer/index.js": "1586b3e7b873a07da02630b4d173d131c0798995d85fcc37199507ad3ef4e603",
+    "dependencies/is-buffer/package.json": "c3f4ad9709465baf192e2ee4ae1a113addc1843e044eee520c71eb5fd3c9ec85",
+    "projects/is-number/fixed.js": "76f4e8f626040311330e6ee10f2f428d350217d668082dce81c2ab0e0768212f",
+    "projects/is-number/test.js": "b1a08ce307b99195272278ebc0038c52480c0fa339ae334b8e32727277d6a94c",
+    "projects/is-number/LICENSE": "daca23d50b0f54d36d6da1b16c82dfea6461e2ae20de0e869957e44cc6d34781",
+    "projects/is-number/index.js": "1b572fa10d2a238af614189c499ceff034ab2549f4795cffaa85e5976a3f87a6",
+    "projects/is-number/README.md": "d490f6ac792e0f1e72e0adcf3c4622b97a469cc5c1ce6529cd3e76cad60c8a70",
+    "projects/is-number/package.json": "2c5fd85cc3e880b9aae77b2830de06d4aec22a8c74b2bfa6c7f552be3b2501e6",
+    "projects/normalize-path/test.js": "b60f83e5f9b018217446eaca361e5acde57424e23b85cd2d7eb9d7889c1b0f5a",
+    "projects/normalize-path/LICENSE": "e70ff771504ba41f2be55de812a017ff46433d7a250c862e38fc419159e44500",
+    "projects/normalize-path/index.js": "202cf63677ddcac13e71d66d2e98c8f07aad10789845ade028e5be755b7abf3a",
+    "projects/normalize-path/README.md": "af3e56f394e970e17051724817e0b8b0c6b98f3376681cf48973180074a9e83b",
+    "projects/normalize-path/package.json": "284ea445a01a454ab1235a08101445fe16592303167090815f4a75b54d6fba04"
+  },
+  "casesHash": "0a299e85ce4a51de20f243b9455610b8075c02079d18bca261909f519b7476f8",
+  "definedAt": "2026-11-01"
+}

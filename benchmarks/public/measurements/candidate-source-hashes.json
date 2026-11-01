@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "note": "Hashes of predetermined candidate transformations, recorded for replay; expected labels were frozen separately before execution.",
+  "candidates": {
+    "is-number-historical-nonfix": "d5ba0cd9397c822cb1d98555ddf008be6ce2179a5e56f79a094f74a13c22cb88",
+    "is-number-upstream-fix": "76f4e8f626040311330e6ee10f2f428d350217d668082dce81c2ab0e0768212f",
+    "is-number-incomplete-repair": "59c59d97afc7dd5a8dc78a176f8a83776d943b2f359d67d81ed5f556082f24f3",
+    "is-number-narrow-contract-miss": "d5ba0cd9397c822cb1d98555ddf008be6ce2179a5e56f79a094f74a13c22cb88",
+    "normalize-path-benign-refactor": "119fac64e8a2fa5ee2b71b3d1955b59e1c40bdb7e658b292c01a7408a601b77e",
+    "normalize-path-trailing-regression": "79fdc3a7bf6f14ac1f384806beeffc98fb11eb5515b8868f286ff51fe6e26da4",
+    "normalize-path-weakened-tests": "79fdc3a7bf6f14ac1f384806beeffc98fb11eb5515b8868f286ff51fe6e26da4",
+    "normalize-path-unrelated-drift": "cc71ff3d676dc8ad724f091c04612c858c4dacdfe646e1e4fe7e1faf0c76315c",
+    "normalize-path-insufficient-intent": "8aa02f93af7a22e001b408f34a6d82413bc51a412e099ec3b0c063b07addab29"
+  }
+}
