@@ -5,7 +5,14 @@ export function cleanTerminal(text:string):string{return text.replace(/[\u0000-\
 export function line(text=''){process.stdout.write(cleanTerminal(text)+'\n');}
 export function banner(){process.stdout.write(paint('\n  SENTINEL','1;36')+'  /  verified progress survives\n\n');}
 export function progress(message:string){line(`  · ${message}`);}
-export function displayReceipt(receipt:Receipt){
+export function displayReceipt(receipt:Receipt,checkpoint?:Checkpoint){
+ const incomplete=!!checkpoint&&(checkpoint.state!=='verified'||checkpoint.candidateHash!==receipt.candidateHash);
+ const presentedStatus=incomplete?'UNVERIFIED':receipt.status;
+ const requirements=[...(receipt.contract?.requirements??[]),...(receipt.contract?.scenarios??[])];
+ const verified=(kind:string)=>requirements.filter(r=>r.kind===kind&&receipt.checks.some(c=>c.requirementId===r.id&&c.status==='VERIFIED')).length;
+ line(`  IMPLEMENTATION · ${receipt.changes.length} changed files`);
+ if(requirements.length)line(`  ACCEPTANCE · ${verified('must-change')}/${requirements.filter(r=>r.kind==='must-change').length} changes · ${verified('must-preserve')}/${requirements.filter(r=>r.kind==='must-preserve').length} preserved behaviours verified`);
+ if(receipt.coverage)line(`  COVERAGE · ${receipt.coverage.verifiedAspects}/${receipt.coverage.approvedAspects} explicitly reviewed objective aspects verified`);
  line('  TASK → AGENT → CHANGES → VERIFICATION → EVIDENCE → CONTINUATION');line();
  line(`  ${receipt.objective}`);line();
  for(const c of receipt.checks.filter(c=>!c.id.startsWith('baseline:')&&!c.id.startsWith('probe-baseline:')&&!c.id.startsWith('mutation:'))){
@@ -15,7 +22,8 @@ export function displayReceipt(receipt:Receipt){
   if(c.counterexample)line(`    Reduced   ${JSON.stringify(c.counterexample.original)} → ${JSON.stringify(c.counterexample.minimal)} (${c.counterexample.attempts} attempts)`);
  }
  for(const c of receipt.changes.filter(c=>c.classification!=='VERIFIED'))line(`  ! REVIEW REQUIRED      ${c.path}: ${c.reason}`);
- line();line(`  ${receipt.status} · ${(receipt.durationMs/1000).toFixed(2)}s · ${receipt.runner==='container-isolated'?'container verification':'local advisory verification'}`);
+ line();line(`  ${presentedStatus} · ${(receipt.durationMs/1000).toFixed(2)}s · ${receipt.runner==='container-isolated'?'container verification':'local advisory verification'}`);
+ if(incomplete)line(`  Current session is incomplete. Recorded receipt: ${receipt.status}; it does not establish completion of this stage.`);
  line('  Results cover the executed checks. They do not prove arbitrary correctness.');
 }
 export function displayCheckpoint(cp:Checkpoint){line(`  Session     ${cp.id} · ${cp.state}`);line(`  Workspace   ${cp.workspace}`);line(`  Evidence    ${cp.receipts.at(-1)??'No completed verification yet'}`);if(cp.state!=='verified')for(const next of cp.nextActions.slice(0,4))line(`  Next        ${next}`);}
@@ -29,6 +37,7 @@ export class SessionView {
   const stage=/^(Checking clean|Running candidate|Re-running|Comparing|Challenging|Verification is isolated|Agent finished)/i.test(message)?'VERIFICATION':/agent|editing|working|fixture/i.test(message)?'IMPLEMENTATION':this.stage;
   if(stage!==this.stage){this.clear();this.stage=stage;line(`  ${stage} · Running`);}
   if(this.verbose){this.clear();progress(message);}
+  else if(!process.stdout.isTTY||process.env.NO_COLOR){progress(message);}
   else if(process.stdout.isTTY&&!process.env.NO_COLOR){this.clear();process.stdout.write(`\r  ${this.stage} · ${cleanTerminal(message).slice(0,Math.max(35,(process.stdout.columns??100)-25))}`);this.live=true;}
  };
  check=(check:import('./types.js').Check)=>{

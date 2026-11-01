@@ -1,3 +1,5 @@
+import { browserLaunchOptions } from './application.js';
+import { exportSessionPatch } from './patch.js';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
@@ -9,20 +11,21 @@ import { getObject, atomicJson } from './store.js';
 import { writeReport } from './report.js';
 import { banner, progress, line, displayReceipt, displayCheckpoint } from './terminal.js';
 import type { Receipt, Contract } from './types.js';
-export async function demo(store:string){
+export async function demo(store:string,options:{application?:boolean}={}){
  const started=performance.now();banner();line('  CONTROLLED DEMONSTRATION · bundled code · no model or API key');
  line('  A simulated agent claims success. SENTINEL checks the actual behaviour.');line();
- const fixture=fileURLToPath(new URL('../fixtures/demo/',import.meta.url));
+ if(options.application)await browserLaunchOptions();
+ const fixture=fileURLToPath(new URL(options.application?'../fixtures/checkout/':'../fixtures/demo/',import.meta.url));
  const root=await fs.mkdtemp(path.join(os.tmpdir(),'sentinel-demo-'));const repo=path.join(root,'project');
  await fs.cp(fixture,repo,{recursive:true});
- const contractPath=path.join(root,'approved-contract.json');await fs.rename(path.join(repo,'contract.json'),contractPath);
+ const contractPath=path.join(root,'approved-contract.json');await fs.rename(path.join(repo,options.application?'acceptance.json':'contract.json'),contractPath);
  const contract=JSON.parse(await fs.readFile(contractPath,'utf8')) as Contract;
  await fs.writeFile(path.join(repo,'.gitignore'),'node_modules/\n');
  const require=createRequire(import.meta.url);await fs.symlink(path.resolve(path.dirname(require.resolve('vitest/package.json')),'..'),path.join(repo,'node_modules'),'dir');
  for(const args of [['init','-b','main'],['add','--all'],['-c','user.name=SENTINEL','-c','user.email=sentinel@localhost','-c','commit.gpgsign=false','-c','core.hooksPath=/dev/null','commit','-m','Controlled demonstration baseline']]){
   const cmd=await runCommand(['git',...args],repo);if(cmd.exitCode!==0)throw new Error(cmd.stderr);
  }
- progress('Task: reject malformed ages without breaking valid ages or greetings');
+ progress(options.application?'Task: fix a one-cent checkout error in a real React interface and HTTP API':'Task: reject malformed ages without breaking valid ages or greetings');
  const broken=await startSession({repo,objective:contract.objective,contractPath,agent:'fixture-broken',store,localConsent:true,onProgress:progress});
  const firstHash=broken.receipts.at(-1);if(!firstHash)throw new Error(`Demo verification produced no receipt: ${broken.openQuestions.join('; ')}`);
  const bad=JSON.parse((await getObject(store,firstHash)).toString()) as Receipt;
@@ -38,9 +41,11 @@ export async function demo(store:string){
  const finalHash=fixed.receipts.at(-1)!;const good=JSON.parse((await getObject(store,finalHash)).toString()) as Receipt;
  displayReceipt(good);if(good.status!=='VERIFIED')throw new Error('Corrected demo did not pass the preserved acceptance checks.');
  await writeReport(path.join(reportDir,'report.html'),good,fixed,store);
- const metrics={schemaVersion:1,controlledDemo:true,node:process.version,platform:process.platform,arch:process.arch,firstResultMs,totalMs:Math.round(performance.now()-started),session:fixed.id,initialReceipt:firstHash,finalReceipt:finalHash};
+ const patch=await exportSessionPatch(store,fixed.id,path.join(root,'changes.patch'));
+ const metrics={schemaVersion:1,controlledDemo:true,application:!!options.application,node:process.version,platform:process.platform,arch:process.arch,firstResultMs,totalMs:Math.round(performance.now()-started),session:fixed.id,initialReceipt:firstHash,finalReceipt:finalHash};
  await atomicJson(path.join(reportDir,'demo-metrics.json'),metrics);
  line();displayCheckpoint(fixed);line(`  False success report  ${path.join(reportDir,'false-success.html')}`);line(`  Final report          ${path.join(reportDir,'report.html')}`);line(`  First result          ${(metrics.firstResultMs/1000).toFixed(2)}s from demo start (installation excluded)`);
+ line(`  Reviewable patch      ${patch.path}`);
  line(`  Full demonstration    ${(metrics.totalMs/1000).toFixed(2)}s`);
  line(`  Open report           sentinel report --session ${fixed.id} --store '${store.replaceAll("'","'\"'\"'")}' --open`);
  line(`  Continue this session: sentinel continue --session ${fixed.id} --store '${store.replaceAll("'","'\"'\"'")}' --agent codex`);

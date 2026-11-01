@@ -1,0 +1,639 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-01T19:34:14.282Z",
+  "node": "v26.12.0",
+  "platform": "darwin",
+  "arch": "arm64",
+  "versions": {
+    "trustbut": "0.7.0",
+    "mocha": "12.0.3",
+    "supertest": "7.3.1",
+    "express": "5.3.0"
+  },
+  "config": {
+    "runner": "mocha",
+    "args": [
+      "upstream-mocha.cjs"
+    ],
+    "timeoutSec": 30
+  },
+  "limitations": [
+    "Same original11Mocha assertions, no extra contract supplied totrustbut. Generic dependency/change-not-proven warnings are not counted as concrete defect detection.",
+    "No React/Cypress comparison was executed here."
+  ],
+  "results": [
+    {
+      "id": "express-unchanged-correct",
+      "sourceHash": "c705f0c2f9d07ce0ead7c67cdcf227ad6d65f727a140b5ef355632c3c4db3b89",
+      "ordinary": {
+        "exitCode": 0,
+        "durationMs": 739,
+        "tests": 11,
+        "passed": 11,
+        "failed": 0
+      },
+      "trustbut": {
+        "exitCode": 2,
+        "durationMs": 562,
+        "receipt": null
+      }
+    },
+    {
+      "id": "express-error-message-drift",
+      "sourceHash": "89b638df1bfa2999a61f6d1a224f4726949458352cbee3b2068f0b7b9813665e",
+      "ordinary": {
+        "exitCode": 0,
+        "durationMs": 659,
+        "tests": 11,
+        "passed": 11,
+        "failed": 0
+      },
+      "trustbut": {
+        "exitCode": 0,
+        "durationMs": 1623,
+        "receipt": {
+          "$schema": "https://raw.githubusercontent.com/isAlmogK/trustbut/main/spec/agent-receipt-v1.schema.json",
+          "specVersion": "1.2",
+          "producer": {
+            "name": "trustbut",
+            "version": "0.7.0"
+          },
+          "subject": {
+            "base": "939a0f4a8f024ff82d5caad30fe4c544579ee778",
+            "head": "2284233cd01666ea6f5016bf14fe75e12c62c919"
+          },
+          "verdict": "warn",
+          "tests": {
+            "passed": 11,
+            "failed": 0,
+            "errored": 0,
+            "skipped": 0,
+            "scope": "full"
+          },
+          "proofs": [],
+          "findings": [
+            {
+              "id": "change-not-proven",
+              "severity": "warn",
+              "title": "Nothing proves the change",
+              "detail": "no test added or changed"
+            }
+          ],
+          "risks": [],
+          "x-trustbut": {
+            "runner": "mocha",
+            "languages": [
+              "js"
+            ],
+            "root": ".",
+            "after": {
+              "exitCode": 0,
+              "durationMs": 818,
+              "cases": [
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/users without an api key should respond with 400 bad request",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/users without an api key should respond with 400 bad request",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/users with an invalid api key should respond with 401 unauthorized",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/users with an invalid api key should respond with 401 unauthorized",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/users with a valid api key should respond users json",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/users with a valid api key should respond users json",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/repos without an api key should respond with 400 bad request",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/repos without an api key should respond with 400 bad request",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/repos with an invalid api key should respond with 401 unauthorized",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/repos with an invalid api key should respond with 401 unauthorized",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/repos with a valid api key should respond repos json",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/repos with a valid api key should respond repos json",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/user/:name/repos without an api key should respond with 400 bad request",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/user/:name/repos without an api key should respond with 400 bad request",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/user/:name/repos with an invalid api key should respond with 401 unauthorized",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/user/:name/repos with an invalid api key should respond with 401 unauthorized",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/user/:name/repos with a valid api key should respond user repos json",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/user/:name/repos with a valid api key should respond user repos json",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/user/:name/repos with a valid api key should 404 with unknown user",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/user/:name/repos with a valid api key should 404 with unknown user",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service when requesting an invalid route should respond with 404 json",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service when requesting an invalid route should respond with 404 json",
+                  "outcome": "pass"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "express-key-validation-bypass",
+      "sourceHash": "8a91d22d86af55a8dcd00f83797871ec3025668462bc5f22e38437644d707a52",
+      "ordinary": {
+        "exitCode": 3,
+        "durationMs": 405,
+        "tests": 11,
+        "passed": 8,
+        "failed": 3
+      },
+      "trustbut": {
+        "exitCode": 1,
+        "durationMs": 3081,
+        "receipt": {
+          "$schema": "https://raw.githubusercontent.com/isAlmogK/trustbut/main/spec/agent-receipt-v1.schema.json",
+          "specVersion": "1.2",
+          "producer": {
+            "name": "trustbut",
+            "version": "0.7.0"
+          },
+          "subject": {
+            "base": "dda83c2d491d0723d883e98947291a6c8282ba99",
+            "head": "200645fa54c356f41747c3b099aa33ffcca95186"
+          },
+          "verdict": "fail",
+          "tests": {
+            "passed": 8,
+            "failed": 3,
+            "errored": 0,
+            "skipped": 0,
+            "scope": "full"
+          },
+          "proofs": [],
+          "findings": [
+            {
+              "id": "change-not-proven",
+              "severity": "warn",
+              "title": "Nothing proves the change",
+              "detail": "no test added or changed"
+            },
+            {
+              "id": "suite-failing",
+              "severity": "fail",
+              "title": "Test suite fails at head (clean checkout)",
+              "detail": "exit code 3"
+            },
+            {
+              "id": "test-regressed",
+              "severity": "fail",
+              "title": "Test passes at base and fails at head",
+              "file": "upstream-mocha.cjs",
+              "detail": "web-service GET /api/users with an invalid api key should respond with 401 unauthorized"
+            },
+            {
+              "id": "test-regressed",
+              "severity": "fail",
+              "title": "Test passes at base and fails at head",
+              "file": "upstream-mocha.cjs",
+              "detail": "web-service GET /api/repos with an invalid api key should respond with 401 unauthorized"
+            },
+            {
+              "id": "test-regressed",
+              "severity": "fail",
+              "title": "Test passes at base and fails at head",
+              "file": "upstream-mocha.cjs",
+              "detail": "web-service GET /api/user/:name/repos with an invalid api key should respond with 401 unauthorized"
+            }
+          ],
+          "risks": [],
+          "x-trustbut": {
+            "runner": "mocha",
+            "languages": [
+              "js"
+            ],
+            "root": ".",
+            "after": {
+              "exitCode": 3,
+              "durationMs": 655,
+              "cases": [
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/users without an api key should respond with 400 bad request",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/users without an api key should respond with 400 bad request",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/users with a valid api key should respond users json",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/users with a valid api key should respond users json",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/repos without an api key should respond with 400 bad request",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/repos without an api key should respond with 400 bad request",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/repos with a valid api key should respond repos json",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/repos with a valid api key should respond repos json",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/user/:name/repos without an api key should respond with 400 bad request",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/user/:name/repos without an api key should respond with 400 bad request",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/user/:name/repos with a valid api key should respond user repos json",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/user/:name/repos with a valid api key should respond user repos json",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/user/:name/repos with a valid api key should 404 with unknown user",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/user/:name/repos with a valid api key should 404 with unknown user",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service when requesting an invalid route should respond with 404 json",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service when requesting an invalid route should respond with 404 json",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/users with an invalid api key should respond with 401 unauthorized",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/users with an invalid api key should respond with 401 unauthorized",
+                  "outcome": "fail"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/repos with an invalid api key should respond with 401 unauthorized",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/repos with an invalid api key should respond with 401 unauthorized",
+                  "outcome": "fail"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/user/:name/repos with an invalid api key should respond with 401 unauthorized",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/user/:name/repos with an invalid api key should respond with 401 unauthorized",
+                  "outcome": "fail"
+                }
+              ]
+            },
+            "before": {
+              "exitCode": 0,
+              "durationMs": 516,
+              "cases": [
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/users without an api key should respond with 400 bad request",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/users without an api key should respond with 400 bad request",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/users with an invalid api key should respond with 401 unauthorized",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/users with an invalid api key should respond with 401 unauthorized",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/users with a valid api key should respond users json",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/users with a valid api key should respond users json",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/repos without an api key should respond with 400 bad request",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/repos without an api key should respond with 400 bad request",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/repos with an invalid api key should respond with 401 unauthorized",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/repos with an invalid api key should respond with 401 unauthorized",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/repos with a valid api key should respond repos json",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/repos with a valid api key should respond repos json",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/user/:name/repos without an api key should respond with 400 bad request",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/user/:name/repos without an api key should respond with 400 bad request",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/user/:name/repos with an invalid api key should respond with 401 unauthorized",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/user/:name/repos with an invalid api key should respond with 401 unauthorized",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/user/:name/repos with a valid api key should respond user repos json",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/user/:name/repos with a valid api key should respond user repos json",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/user/:name/repos with a valid api key should 404 with unknown user",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/user/:name/repos with a valid api key should 404 with unknown user",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service when requesting an invalid route should respond with 404 json",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service when requesting an invalid route should respond with 404 json",
+                  "outcome": "pass"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "express-correct-repair",
+      "sourceHash": "c705f0c2f9d07ce0ead7c67cdcf227ad6d65f727a140b5ef355632c3c4db3b89",
+      "ordinary": {
+        "exitCode": 0,
+        "durationMs": 441,
+        "tests": 11,
+        "passed": 11,
+        "failed": 0
+      },
+      "trustbut": {
+        "exitCode": 0,
+        "durationMs": 806,
+        "receipt": {
+          "$schema": "https://raw.githubusercontent.com/isAlmogK/trustbut/main/spec/agent-receipt-v1.schema.json",
+          "specVersion": "1.2",
+          "producer": {
+            "name": "trustbut",
+            "version": "0.7.0"
+          },
+          "subject": {
+            "base": "194791bc5a76d8da5ff40722a889bc6d14d94de7",
+            "head": "903700f8f72e09ea886e7f5537c5e42415b8d673"
+          },
+          "verdict": "warn",
+          "tests": {
+            "passed": 11,
+            "failed": 0,
+            "errored": 0,
+            "skipped": 0,
+            "scope": "full"
+          },
+          "proofs": [],
+          "findings": [
+            {
+              "id": "change-not-proven",
+              "severity": "warn",
+              "title": "Nothing proves the change",
+              "detail": "no test added or changed"
+            }
+          ],
+          "risks": [],
+          "x-trustbut": {
+            "runner": "mocha",
+            "languages": [
+              "js"
+            ],
+            "root": ".",
+            "after": {
+              "exitCode": 0,
+              "durationMs": 269,
+              "cases": [
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/users without an api key should respond with 400 bad request",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/users without an api key should respond with 400 bad request",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/users with an invalid api key should respond with 401 unauthorized",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/users with an invalid api key should respond with 401 unauthorized",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/users with a valid api key should respond users json",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/users with a valid api key should respond users json",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/repos without an api key should respond with 400 bad request",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/repos without an api key should respond with 400 bad request",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/repos with an invalid api key should respond with 401 unauthorized",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/repos with an invalid api key should respond with 401 unauthorized",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/repos with a valid api key should respond repos json",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/repos with a valid api key should respond repos json",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/user/:name/repos without an api key should respond with 400 bad request",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/user/:name/repos without an api key should respond with 400 bad request",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/user/:name/repos with an invalid api key should respond with 401 unauthorized",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/user/:name/repos with an invalid api key should respond with 401 unauthorized",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/user/:name/repos with a valid api key should respond user repos json",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/user/:name/repos with a valid api key should respond user repos json",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/user/:name/repos with a valid api key should 404 with unknown user",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/user/:name/repos with a valid api key should 404 with unknown user",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service when requesting an invalid route should respond with 404 json",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service when requesting an invalid route should respond with 404 json",
+                  "outcome": "pass"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "express-benign-refactor",
+      "sourceHash": "1e4ccb6fe18572928c734ee9e93b538e5ed7044c55c0d1c8bff709c60ab08059",
+      "ordinary": {
+        "exitCode": 0,
+        "durationMs": 274,
+        "tests": 11,
+        "passed": 11,
+        "failed": 0
+      },
+      "trustbut": {
+        "exitCode": 0,
+        "durationMs": 791,
+        "receipt": {
+          "$schema": "https://raw.githubusercontent.com/isAlmogK/trustbut/main/spec/agent-receipt-v1.schema.json",
+          "specVersion": "1.2",
+          "producer": {
+            "name": "trustbut",
+            "version": "0.7.0"
+          },
+          "subject": {
+            "base": "b7fa51024bc87b563c2a4a3fbcac289d60da5a10",
+            "head": "e04d7bac66a466450fa3f125b12c63f74737ac78"
+          },
+          "verdict": "warn",
+          "tests": {
+            "passed": 11,
+            "failed": 0,
+            "errored": 0,
+            "skipped": 0,
+            "scope": "full"
+          },
+          "proofs": [],
+          "findings": [
+            {
+              "id": "change-not-proven",
+              "severity": "warn",
+              "title": "Nothing proves the change",
+              "detail": "no test added or changed"
+            }
+          ],
+          "risks": [],
+          "x-trustbut": {
+            "runner": "mocha",
+            "languages": [
+              "js"
+            ],
+            "root": ".",
+            "after": {
+              "exitCode": 0,
+              "durationMs": 332,
+              "cases": [
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/users without an api key should respond with 400 bad request",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/users without an api key should respond with 400 bad request",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/users with an invalid api key should respond with 401 unauthorized",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/users with an invalid api key should respond with 401 unauthorized",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/users with a valid api key should respond users json",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/users with a valid api key should respond users json",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/repos without an api key should respond with 400 bad request",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/repos without an api key should respond with 400 bad request",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/repos with an invalid api key should respond with 401 unauthorized",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/repos with an invalid api key should respond with 401 unauthorized",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/repos with a valid api key should respond repos json",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/repos with a valid api key should respond repos json",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/user/:name/repos without an api key should respond with 400 bad request",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/user/:name/repos without an api key should respond with 400 bad request",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/user/:name/repos with an invalid api key should respond with 401 unauthorized",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/user/:name/repos with an invalid api key should respond with 401 unauthorized",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/user/:name/repos with a valid api key should respond user repos json",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/user/:name/repos with a valid api key should respond user repos json",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service GET /api/user/:name/repos with a valid api key should 404 with unknown user",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service GET /api/user/:name/repos with a valid api key should 404 with unknown user",
+                  "outcome": "pass"
+                },
+                {
+                  "id": "upstream-mocha.cjs::web-service when requesting an invalid route should respond with 404 json",
+                  "file": "upstream-mocha.cjs",
+                  "name": "web-service when requesting an invalid route should respond with 404 json",
+                  "outcome": "pass"
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "rawMeasurementSha256": "b0bed9de783580badaa8cdf64ffb6eccd09b2cd2ed2c8d82387a8c199dfd96b5",
+  "redactions": "Absolute execution paths replaced with placeholders; source hashes, commands and semantic observations retained."
+}

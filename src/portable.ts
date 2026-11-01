@@ -27,9 +27,10 @@ const check = z.object({
   counterexample: z.object({ original: z.array(z.unknown()).max(20), minimal: z.array(z.unknown()).max(20), attempts: z.number().int().nonnegative(), guarantee: short }).strict().optional(),
 }).strict();
 const receiptSchema = z.object({
-  schemaVersion: z.literal(1), id: short, createdAt: z.string().max(100), objective: short,
+  schemaVersion: z.union([z.literal(1),z.literal(2)]), id: short, createdAt: z.string().max(100), objective: short,
   baselineHash: hash, candidateHash: hash, contractHash: hash.nullable(), git: gitIdentity, runner: z.enum(['local-advisory','container-isolated']), contract:z.unknown().optional(),
   checks: z.array(check).max(10000), changes: z.array(z.object({ path: z.string().max(8192), kind: z.enum(['added', 'modified', 'deleted']), classification: status, reason: short }).strict()).max(20000),
+  artifacts:z.array(z.object({hash,mediaType:z.enum(['image/png','application/json']),label:short,phase:z.enum(['baseline','candidate']),scenarioId:short,bytes:z.number().int().nonnegative().max(4000000)}).strict()).max(100).optional(),coverage:z.object({approvedAspects:z.number().int().nonnegative().max(30),specifiedAspects:z.number().int().nonnegative().max(30),verifiedAspects:z.number().int().nonnegative().max(30),meaning:short}).strict().optional(),
   status, durationMs: z.number().finite().nonnegative(), runtime: z.record(z.string().max(200), z.string().max(10000)).optional(), limitations: z.array(short).max(1000), nextActions: z.array(short).max(10000),
 }).strict();
 const snapshotSchema = z.object({
@@ -145,6 +146,8 @@ function validateBundle(value: unknown): { bundle: Bundle; checkpoint: Checkpoin
     const receipt = receiptSchema.parse(parseJson(get(receiptHash)));
     if (receipt.baselineHash !== checkpoint.baselineHash || receipt.contractHash !== checkpoint.contractHash) throw new Error('Receipt does not belong to the checkpoint baseline and contract.');
     if(receipt.contract){const embedded=parseContract(receipt.contract);if(!receipt.contractHash||JSON.stringify(embedded)!==JSON.stringify(parseContract(parseJson(get(receipt.contractHash)))))throw new Error('Receipt approved contract differs from its content identity.');}
+    if(receipt.schemaVersion===1&&(receipt.artifacts||receipt.coverage))throw new Error('Application evidence requires receipt schema 2');
+    let artifactBytes=0;for(const artifact of receipt.artifacts??[]){const bytes=get(artifact.hash);if(bytes.length!==artifact.bytes)throw new Error('Artifact byte count differs from evidence');if(artifact.mediaType==='image/png'&&!bytes.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10])))throw new Error('Invalid screenshot PNG evidence');artifactBytes+=bytes.length;}if(artifactBytes>40000000)throw new Error('Receipt artifacts exceed 40 MB');
     visitSnapshot(receipt.baselineHash);
     const candidate = visitSnapshot(receipt.candidateHash);
     if (JSON.stringify(candidate.git) !== JSON.stringify(receipt.git)) throw new Error('Receipt source identity differs from its candidate snapshot.');
@@ -187,6 +190,7 @@ export async function exportSession(store: string, id: string | undefined, outFi
     if (checkpoint.contractHash) {const contract=parseContract(JSON.parse((await add(checkpoint.contractHash)).toString()));if(contract.approval){await add(contract.approval.proposalHash);await addSnapshot(contract.approval.baselineHash);}}
     for (const key of checkpoint.receipts) {
       const receipt = JSON.parse((await add(key)).toString()) as Receipt;
+      for(const artifact of receipt.artifacts??[])await add(artifact.hash);
       await addSnapshot(receipt.baselineHash);
       await addSnapshot(receipt.candidateHash);
     }

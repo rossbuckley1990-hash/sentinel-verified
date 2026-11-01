@@ -1,0 +1,15 @@
+# v1 application evaluation
+
+The reproducible application corpus is documented in [the web benchmark](../benchmarks/web/README.md). It supplements, rather than replaces, the existing historical function corpus and adversarial checkpoint tests.
+
+The initial label manifest is frozen at SHA-256 `7c8e83838840c89fa3f5d515a2400e043a38318e9e1cee39654001c7d3fbfc01`: three development cases and nine internally held-out cases across the Express web-service example and React TodoMVC. Source commits, licenses, dependency locks, adapter recipes and literal expected outcomes are included. All new web defects are seeded and labelled; historical upstream defects remain in the function corpus.
+
+The controlled Orbit checkout is a separate product demonstration. Its integer-cent expectation is calculated before execution, then checked through both actual HTTP and a rendered React interface. The faulty and corrected adapter implementations are deterministic fixtures, not commercial-agent outputs.
+
+The first v1.0.0-rc.1 run matched all 12 predeclared outcomes with stable kernel fingerprints: five correct candidates accepted, four of five defective candidate/contract combinations signalled, one explicit specification miss, unconfirmed intent reported UNVERIFIED and application startup failure reported ENVIRONMENT FAILURE. [Measured results](../benchmarks/web/measurements/RESULTS.md) include exact versions, source hashes and actual timings. Two source-backed CLI replays reproduced the API and browser outcomes after removal of their original disposable checkouts. The benchmark intentionally includes an inadequately approved heading-only contract that misses a trimming defect. A green scoped result cannot detect the approving person's incorrect claim that a heading establishes trimming. Coverage confirmation is an auditable declaration, not proof that natural language has been fully understood.
+
+This evaluation does not establish a general agent-productivity advantage. A well-written ordinary handoff that retains the same exact inputs and expectations is a meaningful control. Earlier missing-information comparisons remain documented with their successful informative-summary controls and must not be repackaged as a v1 model-speed claim.
+
+Verified Task Completion Rate must use attempted real development tasks as its denominator. The scripted candidate corpus does not contain independently sampled agent attempts, so its detection/acceptance counts are not a task-completion estimate. Live task observations should be reported separately with their human interventions, approved outcomes, interruptions and actual agent authentication state.
+
+The [executed direct-agent and ordinary-summary comparison](V1-AGENT-COMPARISON.md) records one real approved Express task. Both direct Codex and SENTINEL completed it; the complete ordinary summary also succeeded. The initial summary protocol and its explicit environment-limit refinement are both retained. No productivity advantage is inferred.

@@ -7,10 +7,10 @@ const child=spawn(process.execPath,['dist/cli.js','demo','--store',store],{env:{
 let stdout='',stderr='';child.stdout.on('data',b=>stdout+=b);child.stderr.on('data',b=>stderr+=b);
 const code=await new Promise(resolve=>child.on('close',resolve));
 if(code!==0)throw new Error(stderr+'\n'+stdout);
-const redacted=stdout.replaceAll(await fs.realpath(store),'<store>').replaceAll(store,'<store>');
+const redacted=stdout.replaceAll(await fs.realpath(store),'<store>').replaceAll(store,'<store>').replace(/\/(?:private\/)?var\/folders\/[^\s']+/g,'<temporary-demo-path>');
 await fs.mkdir('docs',{recursive:true});await fs.writeFile('docs/demo.txt',redacted);
 const lines=redacted.split('\n');
-const selected=lines.filter(s=>/SENTINEL  \/|CONTROLLED DEMONSTRATION|Candidate ordinary tests|3\/3 ordinary tests|CONTRADICTED +String|Input +\["00018"\]|Expected +false|Observed +true|Reduced |Simulating an interrupted|second deterministic|VERIFIED +String|VERIFIED ·|First result |Full demonstration/.test(s));
+const selected=lines.filter(s=>/SENTINEL  \/|CONTROLLED DEMONSTRATION|Candidate ordinary tests|3\/3 ordinary tests|CONTRADICTED +Round|CONTRADICTED +Show|Expected |Observed |Reduced |Simulating an interrupted|second deterministic|VERIFIED +Round|VERIFIED +Show|VERIFIED ·|First result |Full demonstration/.test(s));
 const escape=s=>s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
 const width=1020,height=selected.length*27+130;
 const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><rect width="100%" height="100%" rx="16" fill="#0c1319"/><text x="32" y="34" fill="#7e929e" font-family="monospace" font-size="12">SENTINEL · actual terminal output · controlled deterministic fixture</text>${selected.map((l,i)=>`<text x="20" y="${78+i*27}" fill="${l.includes('CONTRADICTED')||l.includes('Observed')?'#ffb3a7':l.includes('VERIFIED')?'#8de3be':'#dfebf2'}" font-family="ui-monospace,monospace" font-size="15">${escape(l)}</text>`).join('')}<text x="32" y="${height-22}" fill="#7e929e" font-family="monospace" font-size="12">Reproduce: npm run build &amp;&amp; npm run demo · Full transcript: docs/demo.txt</text></svg>`;

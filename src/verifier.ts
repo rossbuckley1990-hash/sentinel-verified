@@ -1,3 +1,6 @@
+import { VERSION } from './version.js';
+import { verifyApplication } from './application.js';
+import type { EvidenceArtifact } from './application-schema.js';
 import { promises as fs, existsSync } from 'node:fs';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
@@ -104,6 +107,7 @@ export async function verify(options:VerificationOptions):Promise<Receipt>{
  if(contract?.approval){if(contract.approval.baselineHash!==baseline.hash)throw new Error('Approved baseline differs from verification baseline. Review a fresh plan.');validateApprovalProposal(contract,JSON.parse((await getObject(store,contract.approval.proposalHash)).toString()));}
  const scratch=await fs.mkdtemp(path.join(await fs.realpath(store),'execution-'));
  let baseDir=path.join(scratch,'baseline'),candidateDir=path.join(scratch,'candidate');const preservedDir=path.join(scratch,'preserved');
+ const artifacts:EvidenceArtifact[]=[];let applicationRuntime:Record<string,string>={};
  const checks:Check[]=[];const record=(check:Check)=>{checks.push(check);options.onCheck?.(check);};const timeout=options.timeoutMs??15000;
  const changes=await inspectChanges({...options,contract});
  const progress=options.onProgress??(()=>{});
@@ -121,8 +125,8 @@ export async function verify(options:VerificationOptions):Promise<Receipt>{
   baseDir=path.join(scratch,'behaviour-baseline');candidateDir=path.join(scratch,'behaviour-candidate');
   for(const [snapshot,dir] of [[baseline,baseDir],[candidate,candidateDir]] as const){await materializeSnapshot(store,snapshot,dir);await attachDependencies(dir,options.dependencies);}
   for(const [i,question] of (contract?.unresolved??[]).entries())record({id:`unresolved:${i}`,label:'Unresolved acceptance question',status:'UNVERIFIED',detail:question});
-  if(contract?.schemaVersion===2&&!contract.requirements.some(r=>r.kind==='must-change'))record({id:'objective-coverage',label:'Task change coverage',status:'UNVERIFIED',detail:'The approved plan has no must-change check. Preserved behaviour alone cannot establish this objective.'});
-  if(!contract||contract.requirements.length===0)record({id:'intent',label:'Approved intent',status:'UNVERIFIED',detail:'No approved requirements. Passing available tests cannot establish the task objective.'});
+  if(contract&&((contract.schemaVersion===2)||(contract.schemaVersion===3&&contract.coverage?.intent!=='preserve'))&&![...contract.requirements,...(contract.scenarios??[])].some(r=>r.kind==='must-change'))record({id:'objective-coverage',label:'Task change coverage',status:'UNVERIFIED',detail:'The approved plan has no must-change check. Preserved behaviour alone cannot establish this objective.'});
+  if(!contract||contract.requirements.length+(contract.scenarios?.length??0)===0)record({id:'intent',label:'Approved intent',status:'UNVERIFIED',detail:'No approved requirements. Passing available tests cannot establish the task objective.'});
   for(const req of contract?.requirements??[]){
    progress(`Checking ${req.kind}: ${req.description}`);const cases=examples(req);const calls=cases.map(c=>({module:req.module,export:req.export,args:c.args}));
    const base=await probe(baseDir,calls,timeout),after=await probe(candidateDir,[...calls,...calls],timeout);
@@ -157,12 +161,21 @@ export async function verify(options:VerificationOptions):Promise<Receipt>{
     record({id:`mutation:${req.id}`,label:`Negative control: ${req.id}`,status:result.error||!result.values[0]?.ok?'ENVIRONMENT FAILURE':matches(result.values[0],first.expected)?'UNVERIFIED':'VERIFIED',detail:'Deliberately wrong constant export '+(result.error?'could not execute':'was checked against the approved example')+(result.error?`: ${result.error}`:''),command:result.command});
    }finally{await fs.writeFile(file,original);}
   }
+  if(contract?.application&&contract.scenarios?.length){
+   const result=await verifyApplication({store,baselineRoot:baseDir,candidateRoot:candidateDir,application:contract.application,scenarios:contract.scenarios,timeoutMs:timeout,onProgress:progress});
+   result.checks.forEach(record);artifacts.push(...result.artifacts);applicationRuntime=result.runtime;
+  }
+  if(contract?.schemaVersion===3){
+   if(!contract.coverage?.confirmed||!contract.coverage.aspects.length)record({id:'objective-coverage',label:'Reviewed objective coverage',status:'UNVERIFIED',detail:'The approved plan does not establish coverage of every explicitly intended outcome.'});
+   for(const aspect of contract.coverage?.aspects??[])if(!aspect.requirementIds.length)record({id:`coverage:${aspect.id}`,label:aspect.description,status:'UNVERIFIED',detail:'This approved objective aspect has no independent acceptance example.'});
+  }
   await checkExecutionCopy(baseDir,baseline,checks,'baseline-behaviour');await checkExecutionCopy(candidateDir,candidate,checks,'candidate-behaviour');
  }catch(error){record({id:'execution',label:'Verification infrastructure',status:'ENVIRONMENT FAILURE',detail:String(error)});}
  finally{await fs.rm(scratch,{recursive:true,force:true});}
  // Re-read content-addressed inputs after executing advisory code to detect ordinary tampering.
  try{await readSnapshot(store,baseline.hash);await readSnapshot(store,candidate.hash);if(contractHash)await getObject(store,contractHash);}catch(error){record({id:'integrity',label:'Protected evidence integrity',status:'ENVIRONMENT FAILURE',detail:String(error)});}
+ const aspects=contract?.coverage?.aspects??[];const coverage=contract?.schemaVersion===3?{approvedAspects:aspects.length,specifiedAspects:aspects.filter(a=>a.requirementIds.length>0).length,verifiedAspects:aspects.filter(a=>a.requirementIds.length>0&&a.requirementIds.every(id=>checks.some(c=>c.requirementId===id&&c.status==='VERIFIED'))).length,meaning:'Counts only explicitly reviewed objective aspects and their finite examples; not semantic completeness.'}:undefined;
  const status=overallStatus(checks,changes);const nextActions=checks.filter(c=>c.id!=='baseline-tests'&&c.status!=='VERIFIED').map(c=>`${c.status}: ${c.label} — ${c.detail}`);
  nextActions.push(...changes.filter(c=>c.classification!=='VERIFIED').map(c=>`Review ${c.path}: ${c.reason}`));
- return {schemaVersion:1,id:randomUUID(),createdAt:new Date().toISOString(),objective:contract?.objective??'Inspect candidate changes without approved intent',baselineHash:baseline.hash,candidateHash:candidate.hash,contractHash,git:candidate.git,runner:'local-advisory',...(contract?{contract}:{}),checks,changes,status,durationMs:Math.round(performance.now()-start),runtime:{node:process.version,platform:process.platform,arch:process.arch,verifierVersion:'0.2.0',vitest:require('vitest/package.json').version,workerSha256:digest(await fs.readFile(worker))},limitations:['Local advisory execution under the same OS account is not a security boundary.','Only the supplied examples, invariant seeds, and differential probes were observed; passing them is not a proof of arbitrary correctness.','Vitest uses SENTINEL’s explicit Node configuration; custom project config/plugins/setup files are not loaded.','Dependencies are reused from the supplied node_modules directory and are not hermetically captured.','Negative controls replace selected exports with wrong constants; this is not a general mutation score.','Hashes detect corruption, not malicious rewriting of the entire evidence chain.'],nextActions:nextActions.length?nextActions:['All scoped checks passed. Review the diff and the stated coverage limits before merging.']};
+ return {schemaVersion:contract?.schemaVersion===3?2:1,...(artifacts.length?{artifacts}:{}),...(coverage?{coverage}:{}),id:randomUUID(),createdAt:new Date().toISOString(),objective:contract?.objective??'Inspect candidate changes without approved intent',baselineHash:baseline.hash,candidateHash:candidate.hash,contractHash,git:candidate.git,runner:'local-advisory',...(contract?{contract}:{}),checks,changes,status,durationMs:Math.round(performance.now()-start),runtime:{node:process.version,platform:process.platform,arch:process.arch,verifierVersion:VERSION,...applicationRuntime,vitest:require('vitest/package.json').version,workerSha256:digest(await fs.readFile(worker))},limitations:['Local advisory execution under the same OS account is not a security boundary.','Only the supplied examples, invariant seeds, and differential probes were observed; passing them is not a proof of arbitrary correctness.','Vitest uses SENTINEL’s explicit Node configuration; custom project config/plugins/setup files are not loaded.','Dependencies are reused from the supplied node_modules directory and are not hermetically captured.','Negative controls replace selected exports with wrong constants; this is not a general mutation score.','Hashes detect corruption, not malicious rewriting of the entire evidence chain.'],nextActions:nextActions.length?nextActions:['All scoped checks passed. Review the diff and the stated coverage limits before merging.']};
 }

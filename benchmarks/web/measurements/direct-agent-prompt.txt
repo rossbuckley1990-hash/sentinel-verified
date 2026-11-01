@@ -1,0 +1,79 @@
+You are implementing a developer-approved change in a pinned public Express example.
+Task: Add the stable error code INVALID_API_KEY to invalid API-key responses while preserving missing-key errors and valid user responses.
+
+Approved acceptance criteria (expected behavior is authoritative; implementation is not an oracle):
+[
+  {
+    "id": "application-f69df4f7",
+    "kind": "must-change",
+    "description": "Return a stable error code for invalid API keys on users",
+    "type": "http",
+    "method": "GET",
+    "path": "/api/users?api-key=wrong",
+    "expected": {
+      "status": 401,
+      "bodyType": "json",
+      "body": {
+        "error": "invalid api key",
+        "code": "INVALID_API_KEY"
+      }
+    }
+  },
+  {
+    "id": "application-7c07e3f2",
+    "kind": "must-change",
+    "description": "Return the same stable invalid-key code for repositories",
+    "type": "http",
+    "method": "GET",
+    "path": "/api/repos?api-key=wrong",
+    "expected": {
+      "status": 401,
+      "bodyType": "json",
+      "body": {
+        "error": "invalid api key",
+        "code": "INVALID_API_KEY"
+      }
+    }
+  },
+  {
+    "id": "application-b0e782f7",
+    "kind": "must-preserve",
+    "description": "Preserve the missing-key validation response",
+    "type": "http",
+    "method": "GET",
+    "path": "/api/users",
+    "expected": {
+      "status": 400,
+      "bodyType": "json",
+      "body": {
+        "error": "api key required"
+      }
+    }
+  },
+  {
+    "id": "application-751d920d",
+    "kind": "must-preserve",
+    "description": "Preserve the existing valid user list",
+    "type": "http",
+    "method": "GET",
+    "path": "/api/users?api-key=foo",
+    "expected": {
+      "status": 200,
+      "bodyType": "json",
+      "body": [
+        {
+          "name": "tobi"
+        },
+        {
+          "name": "loki"
+        },
+        {
+          "name": "jane"
+        }
+      ]
+    }
+  }
+]
+
+Only change app.cjs. Preserve the existing tests, server, dependency definitions and other files. The public example's original eleven Mocha/Supertest tests are in upstream-mocha.cjs; api.test.js registers those assertions for Vitest. Dependencies are already installed. Do not install dependencies or contact external services. Implement the requested feature, inspect the diff and run appropriate existing checks. Do not commit. Give a concise description of changes and checks. This direct-workflow control has no SENTINEL orchestration or automatic repair; an external evaluator will independently check the four criteria after you finish.
+

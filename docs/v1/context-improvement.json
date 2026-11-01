@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "session": "s-mvy8hr75-8cf42673",
+  "contextCharacters": 13342,
+  "within16000": true,
+  "approvedCriteria": 4,
+  "inlineCriteria": 4,
+  "approvedSectionComplete": true,
+  "preservedEnvironmentFailures": 3,
+  "inlineEPERM": true,
+  "failureExitCodes": [
+    1,
+    1,
+    1
+  ],
+  "failureCommandsBounded": true,
+  "failureDiagnosticsBounded": true,
+  "unverifiedLabel": true,
+  "environmentReassessmentWarning": true,
+  "newModelExecution": false
+}

@@ -1,3 +1,4 @@
+import type { ApplicationConfig, ApplicationScenario, EvidenceArtifact } from './application-schema.js';
 export type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
 export type Status = 'VERIFIED' | 'CONTRADICTED' | 'UNVERIFIED' | 'REVIEW REQUIRED' | 'ENVIRONMENT FAILURE';
 export interface Example { args: Json[]; expected: Json }
@@ -12,7 +13,8 @@ export interface ContractApproval {
   requirementIds: string[]; resolvedQuestions: {question:string;reason:string}[];
 }
 export interface Contract {
-  schemaVersion: 1 | 2; objective: string; approvedBy: string; requirements: Requirement[];
+  schemaVersion: 1 | 2 | 3; objective: string; approvedBy: string; requirements: Requirement[];
+  application?: ApplicationConfig; scenarios?: ApplicationScenario[]; coverage?: {intent?:'change'|'preserve';confirmed:boolean;aspects:{id:string;description:string;requirementIds:string[]}[]};
   probes?: Probe[]; allowedPaths?: string[]; approval?: ContractApproval; unresolved?: string[]; discoveryLimits?: string[];
 }
 export interface GitIdentity { root: string; head: string; branch: string; dirty: boolean }
@@ -26,9 +28,10 @@ export interface Check {
 }
 export interface Change { path: string; kind: 'added' | 'modified' | 'deleted'; classification: Status; reason: string }
 export interface Receipt {
-  schemaVersion: 1; id: string; createdAt: string; objective: string;
+  schemaVersion: 1 | 2; id: string; createdAt: string; objective: string;
   baselineHash: string; candidateHash: string; contractHash: string | null;
   git: GitIdentity; runner: 'local-advisory' | 'container-isolated'; contract?: Contract; checks: Check[]; changes: Change[];
+  artifacts?: EvidenceArtifact[]; coverage?: {approvedAspects:number;specifiedAspects:number;verifiedAspects:number;meaning:string};
   status: Status; durationMs: number; runtime?: Record<string, string>; limitations: string[]; nextActions: string[];
 }
 export type AgentName = 'codex' | 'claude' | 'fixture-broken' | 'fixture-fix' | 'fixture-interrupt';

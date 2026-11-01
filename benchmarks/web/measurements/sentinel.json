@@ -1,0 +1,970 @@
+{
+  "schemaVersion": 1,
+  "scope": "Pinned public app examples; seeded changes and finite independently specified contracts; not a blind field evaluation",
+  "createdAt": "2026-11-01T19:40:00.668Z",
+  "casesHash": "7c8e83838840c89fa3f5d515a2400e043a38318e9e1cee39654001c7d3fbfc01",
+  "platform": "darwin",
+  "arch": "arm64",
+  "node": "v26.12.0",
+  "versions": {
+    "express": "5.3.0",
+    "mocha": "12.0.3",
+    "supertest": "7.3.1",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "react-router-dom": "7.18.5",
+    "esbuild": "0.28.2",
+    "vitest": "5.0.5"
+  },
+  "runtimeBefore": {
+    "../../dist/verifier.js": "9b0345e482da91d313dc30bdeb5c47a2587136fdf7cecc54ccbf91675cf64fbf",
+    "../../dist/application.js": "bce54a9e0b6028d9e0d0f411ad582a4cb2ed832d2298a98eeca951dedd3fc54c",
+    "../../dist/application-schema.js": "e4f2aac85e886cf3ea87a939d78f85bef83de585bd73008a574d5e6fde8a1c23",
+    "../../dist/schema.js": "27a1070ddc7609f5cafd0e38eb173031e4d3f51cdee1e74147b080c46cb89ff3",
+    "../../dist/store.js": "5659fe84e413cd2f3b69a774b44a12bfd4c8b36cc4c58f0877f5f1f6992c227c",
+    "../../dist/process.js": "83ee2febfee392b1174c46dd2b69083c6475f3dcb09cd7bb08accba1a8cdb3d3",
+    "prepare.mjs": "d9fe2be0aa9e382be06ac68aaf338b84721b0a32c617dc75ea57dc84d29629ab",
+    "run.mjs": "6eab70266ac5f776f256a54c9eb959d996f7e2c841769c62b1e4f97a5ee98457",
+    "runtime/package-lock.json": "bf08b01c9b7e09bd40a4343e579b180cabfb9aaad1045dbea0be9aa130f90a50"
+  },
+  "runtimeAfter": {
+    "../../dist/verifier.js": "9b0345e482da91d313dc30bdeb5c47a2587136fdf7cecc54ccbf91675cf64fbf",
+    "../../dist/application.js": "bce54a9e0b6028d9e0d0f411ad582a4cb2ed832d2298a98eeca951dedd3fc54c",
+    "../../dist/application-schema.js": "e4f2aac85e886cf3ea87a939d78f85bef83de585bd73008a574d5e6fde8a1c23",
+    "../../dist/schema.js": "27a1070ddc7609f5cafd0e38eb173031e4d3f51cdee1e74147b080c46cb89ff3",
+    "../../dist/store.js": "5659fe84e413cd2f3b69a774b44a12bfd4c8b36cc4c58f0877f5f1f6992c227c",
+    "../../dist/process.js": "83ee2febfee392b1174c46dd2b69083c6475f3dcb09cd7bb08accba1a8cdb3d3",
+    "prepare.mjs": "d9fe2be0aa9e382be06ac68aaf338b84721b0a32c617dc75ea57dc84d29629ab",
+    "run.mjs": "6eab70266ac5f776f256a54c9eb959d996f7e2c841769c62b1e4f97a5ee98457",
+    "runtime/package-lock.json": "bf08b01c9b7e09bd40a4343e579b180cabfb9aaad1045dbea0be9aa130f90a50"
+  },
+  "split": "all",
+  "totalMs": 154075,
+  "results": [
+    {
+      "id": "express-unchanged-correct",
+      "project": "express",
+      "split": "development",
+      "classification": "correct",
+      "origin": "upstream-example",
+      "expected": "VERIFIED",
+      "observed": "VERIFIED",
+      "matched": true,
+      "source": {
+        "baseline": "9674e3496bfb38b4e73b90f9cad81a34fa1ea316af52d073732f495b2e600a56",
+        "candidate": "9674e3496bfb38b4e73b90f9cad81a34fa1ea316af52d073732f495b2e600a56",
+        "contract": "4d378a19401cceed12ced766c8e9a7d7051df5328df47136974f7f1cde541106"
+      },
+      "receipt": "87eade1204c2cbc23c0d34f640a838a214f378fde550534b99e205d7b2eafc0e",
+      "durationMs": 6977,
+      "checks": [
+        {
+          "id": "baseline-tests",
+          "status": "VERIFIED",
+          "detail": "11/11 ordinary tests passed; these do not establish the approved intent"
+        },
+        {
+          "id": "candidate-tests",
+          "status": "VERIFIED",
+          "detail": "11/11 ordinary tests passed; these do not establish the approved intent"
+        },
+        {
+          "id": "preserved-tests",
+          "status": "VERIFIED",
+          "detail": "11/11 ordinary tests passed; these do not establish the approved intent"
+        },
+        {
+          "id": "application-server:baseline",
+          "status": "VERIFIED",
+          "detail": "Approved server command started on a fresh loopback port and was stopped after observation. This is execution evidence, not an acceptance result."
+        },
+        {
+          "id": "application-server:candidate",
+          "status": "VERIFIED",
+          "detail": "Approved server command started on a fresh loopback port and was stopped after observation. This is execution evidence, not an acceptance result."
+        },
+        {
+          "id": "req:invalid-key",
+          "status": "VERIFIED",
+          "detail": "The approved application scenario passed twice. This establishes only the specified observations."
+        },
+        {
+          "id": "req:missing-key",
+          "status": "VERIFIED",
+          "detail": "The approved application scenario passed twice. This establishes only the specified observations."
+        },
+        {
+          "id": "req:valid-users",
+          "status": "VERIFIED",
+          "detail": "The approved application scenario passed twice. This establishes only the specified observations."
+        }
+      ],
+      "ordinary": {
+        "label": "Original upstream Mocha/Supertest suite; only require path adapted",
+        "exitCode": 0,
+        "durationMs": 799,
+        "tests": 11,
+        "passed": 11,
+        "failed": 0
+      },
+      "executionRuntime": {
+        "node": "v26.12.0",
+        "platform": "darwin",
+        "arch": "arm64",
+        "verifierVersion": "1.0.0-rc.1",
+        "applicationProtocol": "1",
+        "applicationCommand": "Exact executed argv is recorded in the baseline and candidate server lifecycle command records.",
+        "applicationEnvironment": "PORT=fresh loopback port; HOST=127.0.0.1; HOME=temporary empty directory; inherited secret variables removed",
+        "browserNetworkPolicy": "same-origin HTTP; WebSockets and service workers blocked; server is not network-isolated",
+        "baselineApplicationOrigin": "http://127.0.0.1:53037",
+        "candidateApplicationOrigin": "http://127.0.0.1:53050",
+        "vitest": "5.0.5",
+        "workerSha256": "c16009148648f57d65398d7741a6d805170a278ea3329f781dc4d005bb2c85ad"
+      }
+    },
+    {
+      "id": "express-error-message-drift",
+      "project": "express",
+      "split": "development",
+      "classification": "defect",
+      "origin": "seeded-regression",
+      "expected": "CONTRADICTED",
+      "observed": "CONTRADICTED",
+      "matched": true,
+      "source": {
+        "baseline": "2fc8802196e61f7d04e03e24eb9a4473832f4da1ee83353e96804ce740ee6aa0",
+        "candidate": "e26736a2ce44aefa09f64cde828b35d4f44cb1b746a2f9417a04d5b6727a94bc",
+        "contract": "4d378a19401cceed12ced766c8e9a7d7051df5328df47136974f7f1cde541106"
+      },
+      "receipt": "d4fe296a966c9ce21f0f2a9ae3552b17f8558fbd80f02d5315993956b8a6b46d",
+      "durationMs": 6218,
+      "checks": [
+        {
+          "id": "baseline-tests",
+          "status": "VERIFIED",
+          "detail": "11/11 ordinary tests passed; these do not establish the approved intent"
+        },
+        {
+          "id": "candidate-tests",
+          "status": "VERIFIED",
+          "detail": "11/11 ordinary tests passed; these do not establish the approved intent"
+        },
+        {
+          "id": "preserved-tests",
+          "status": "VERIFIED",
+          "detail": "11/11 ordinary tests passed; these do not establish the approved intent"
+        },
+        {
+          "id": "application-server:baseline",
+          "status": "VERIFIED",
+          "detail": "Approved server command started on a fresh loopback port and was stopped after observation. This is execution evidence, not an acceptance result."
+        },
+        {
+          "id": "application-server:candidate",
+          "status": "VERIFIED",
+          "detail": "Approved server command started on a fresh loopback port and was stopped after observation. This is execution evidence, not an acceptance result."
+        },
+        {
+          "id": "req:invalid-key",
+          "status": "CONTRADICTED",
+          "detail": "The observed application response contradicts the approved acceptance scenario"
+        },
+        {
+          "id": "req:missing-key",
+          "status": "VERIFIED",
+          "detail": "The approved application scenario passed twice. This establishes only the specified observations."
+        },
+        {
+          "id": "req:valid-users",
+          "status": "VERIFIED",
+          "detail": "The approved application scenario passed twice. This establishes only the specified observations."
+        }
+      ],
+      "ordinary": {
+        "label": "Original upstream Mocha/Supertest suite; only require path adapted",
+        "exitCode": 0,
+        "durationMs": 507,
+        "tests": 11,
+        "passed": 11,
+        "failed": 0
+      },
+      "executionRuntime": {
+        "node": "v26.12.0",
+        "platform": "darwin",
+        "arch": "arm64",
+        "verifierVersion": "1.0.0-rc.1",
+        "applicationProtocol": "1",
+        "applicationCommand": "Exact executed argv is recorded in the baseline and candidate server lifecycle command records.",
+        "applicationEnvironment": "PORT=fresh loopback port; HOST=127.0.0.1; HOME=temporary empty directory; inherited secret variables removed",
+        "browserNetworkPolicy": "same-origin HTTP; WebSockets and service workers blocked; server is not network-isolated",
+        "baselineApplicationOrigin": "http://127.0.0.1:53155",
+        "candidateApplicationOrigin": "http://127.0.0.1:53171",
+        "vitest": "5.0.5",
+        "workerSha256": "c16009148648f57d65398d7741a6d805170a278ea3329f781dc4d005bb2c85ad"
+      }
+    },
+    {
+      "id": "express-key-validation-bypass",
+      "project": "express",
+      "split": "held-out",
+      "classification": "defect",
+      "origin": "seeded-regression",
+      "expected": "CONTRADICTED",
+      "observed": "CONTRADICTED",
+      "matched": true,
+      "source": {
+        "baseline": "9f8bc9810d84c5af95f475389171560eb31f907314d096f1c8998a8eaf9387a0",
+        "candidate": "96ac6820c003e307a543a22c84a44299584b9ef484887daed29cebdb6d749e63",
+        "contract": "4d378a19401cceed12ced766c8e9a7d7051df5328df47136974f7f1cde541106"
+      },
+      "receipt": "017e7b2856c907916d7014d58a7d6727ecc04b20324a7efd1bd3aad8e1880d99",
+      "durationMs": 6162,
+      "checks": [
+        {
+          "id": "baseline-tests",
+          "status": "VERIFIED",
+          "detail": "11/11 ordinary tests passed; these do not establish the approved intent"
+        },
+        {
+          "id": "candidate-tests",
+          "status": "CONTRADICTED",
+          "detail": "8/11 tests passed"
+        },
+        {
+          "id": "preserved-tests",
+          "status": "CONTRADICTED",
+          "detail": "8/11 tests passed"
+        },
+        {
+          "id": "application-server:baseline",
+          "status": "VERIFIED",
+          "detail": "Approved server command started on a fresh loopback port and was stopped after observation. This is execution evidence, not an acceptance result."
+        },
+        {
+          "id": "application-server:candidate",
+          "status": "VERIFIED",
+          "detail": "Approved server command started on a fresh loopback port and was stopped after observation. This is execution evidence, not an acceptance result."
+        },
+        {
+          "id": "req:invalid-key",
+          "status": "CONTRADICTED",
+          "detail": "The observed application response contradicts the approved acceptance scenario"
+        },
+        {
+          "id": "req:missing-key",
+          "status": "VERIFIED",
+          "detail": "The approved application scenario passed twice. This establishes only the specified observations."
+        },
+        {
+          "id": "req:valid-users",
+          "status": "VERIFIED",
+          "detail": "The approved application scenario passed twice. This establishes only the specified observations."
+        }
+      ],
+      "ordinary": {
+        "label": "Original upstream Mocha/Supertest suite; only require path adapted",
+        "exitCode": 3,
+        "durationMs": 704,
+        "tests": 11,
+        "passed": 8,
+        "failed": 3
+      },
+      "executionRuntime": {
+        "node": "v26.12.0",
+        "platform": "darwin",
+        "arch": "arm64",
+        "verifierVersion": "1.0.0-rc.1",
+        "applicationProtocol": "1",
+        "applicationCommand": "Exact executed argv is recorded in the baseline and candidate server lifecycle command records.",
+        "applicationEnvironment": "PORT=fresh loopback port; HOST=127.0.0.1; HOME=temporary empty directory; inherited secret variables removed",
+        "browserNetworkPolicy": "same-origin HTTP; WebSockets and service workers blocked; server is not network-isolated",
+        "baselineApplicationOrigin": "http://127.0.0.1:53280",
+        "candidateApplicationOrigin": "http://127.0.0.1:53292",
+        "vitest": "5.0.5",
+        "workerSha256": "c16009148648f57d65398d7741a6d805170a278ea3329f781dc4d005bb2c85ad"
+      }
+    },
+    {
+      "id": "express-correct-repair",
+      "project": "express",
+      "split": "held-out",
+      "classification": "correct",
+      "origin": "seeded-repair",
+      "expected": "VERIFIED",
+      "observed": "VERIFIED",
+      "matched": true,
+      "source": {
+        "baseline": "26a6a703e271b0814a5829af13a15b3722803ab14baed4ae889889dbfbf98a7c",
+        "candidate": "21c4f676d6812b447f5407b66da47d659cb3fb5e3957adab677a4e47d2286ba0",
+        "contract": "4d378a19401cceed12ced766c8e9a7d7051df5328df47136974f7f1cde541106"
+      },
+      "receipt": "4d018859ab754c323e0aa36e8adfd56e11713e129ab36f9f8d152805a8fd97bd",
+      "durationMs": 6757,
+      "checks": [
+        {
+          "id": "baseline-tests",
+          "status": "VERIFIED",
+          "detail": "11/11 ordinary tests passed; these do not establish the approved intent"
+        },
+        {
+          "id": "candidate-tests",
+          "status": "VERIFIED",
+          "detail": "11/11 ordinary tests passed; these do not establish the approved intent"
+        },
+        {
+          "id": "preserved-tests",
+          "status": "VERIFIED",
+          "detail": "11/11 ordinary tests passed; these do not establish the approved intent"
+        },
+        {
+          "id": "application-server:baseline",
+          "status": "VERIFIED",
+          "detail": "Approved server command started on a fresh loopback port and was stopped after observation. This is execution evidence, not an acceptance result."
+        },
+        {
+          "id": "application-server:candidate",
+          "status": "VERIFIED",
+          "detail": "Approved server command started on a fresh loopback port and was stopped after observation. This is execution evidence, not an acceptance result."
+        },
+        {
+          "id": "req:invalid-key",
+          "status": "VERIFIED",
+          "detail": "The approved application scenario passed twice. This establishes only the specified observations."
+        },
+        {
+          "id": "req:missing-key",
+          "status": "VERIFIED",
+          "detail": "The approved application scenario passed twice. This establishes only the specified observations."
+        },
+        {
+          "id": "req:valid-users",
+          "status": "VERIFIED",
+          "detail": "The approved application scenario passed twice. This establishes only the specified observations."
+        }
+      ],
+      "ordinary": {
+        "label": "Original upstream Mocha/Supertest suite; only require path adapted",
+        "exitCode": 0,
+        "durationMs": 603,
+        "tests": 11,
+        "passed": 11,
+        "failed": 0
+      },
+      "executionRuntime": {
+        "node": "v26.12.0",
+        "platform": "darwin",
+        "arch": "arm64",
+        "verifierVersion": "1.0.0-rc.1",
+        "applicationProtocol": "1",
+        "applicationCommand": "Exact executed argv is recorded in the baseline and candidate server lifecycle command records.",
+        "applicationEnvironment": "PORT=fresh loopback port; HOST=127.0.0.1; HOME=temporary empty directory; inherited secret variables removed",
+        "browserNetworkPolicy": "same-origin HTTP; WebSockets and service workers blocked; server is not network-isolated",
+        "baselineApplicationOrigin": "http://127.0.0.1:53397",
+        "candidateApplicationOrigin": "http://127.0.0.1:53410",
+        "vitest": "5.0.5",
+        "workerSha256": "c16009148648f57d65398d7741a6d805170a278ea3329f781dc4d005bb2c85ad"
+      }
+    },
+    {
+      "id": "express-benign-refactor",
+      "project": "express",
+      "split": "held-out",
+      "classification": "correct",
+      "origin": "seeded-refactor",
+      "expected": "VERIFIED",
+      "observed": "VERIFIED",
+      "matched": true,
+      "source": {
+        "baseline": "1711019e061126947760fff40149213019f1197e0c6cbf5180a731c219d63a72",
+        "candidate": "34b324df25e98ae9e04d0fd6aad580205109ed73ff04fd462b04a3d54dfc1c4e",
+        "contract": "75816f308841427c62bb8a9dc594fdeaa8ad1148d037c07d9e06dc5a2bbc4799"
+      },
+      "receipt": "67a5980a156fdfe0518d57de81a292abdf5a07dffad83a828fa82f286feba470",
+      "durationMs": 8661,
+      "checks": [
+        {
+          "id": "baseline-tests",
+          "status": "VERIFIED",
+          "detail": "11/11 ordinary tests passed; these do not establish the approved intent"
+        },
+        {
+          "id": "candidate-tests",
+          "status": "VERIFIED",
+          "detail": "11/11 ordinary tests passed; these do not establish the approved intent"
+        },
+        {
+          "id": "preserved-tests",
+          "status": "VERIFIED",
+          "detail": "11/11 ordinary tests passed; these do not establish the approved intent"
+        },
+        {
+          "id": "application-server:baseline",
+          "status": "VERIFIED",
+          "detail": "Approved server command started on a fresh loopback port and was stopped after observation. This is execution evidence, not an acceptance result."
+        },
+        {
+          "id": "application-server:candidate",
+          "status": "VERIFIED",
+          "detail": "Approved server command started on a fresh loopback port and was stopped after observation. This is execution evidence, not an acceptance result."
+        },
+        {
+          "id": "req:invalid-key",
+          "status": "VERIFIED",
+          "detail": "The approved application scenario passed twice. This establishes only the specified observations."
+        },
+        {
+          "id": "req:missing-key",
+          "status": "VERIFIED",
+          "detail": "The approved application scenario passed twice. This establishes only the specified observations."
+        },
+        {
+          "id": "req:valid-users",
+          "status": "VERIFIED",
+          "detail": "The approved application scenario passed twice. This establishes only the specified observations."
+        }
+      ],
+      "ordinary": {
+        "label": "Original upstream Mocha/Supertest suite; only require path adapted",
+        "exitCode": 0,
+        "durationMs": 641,
+        "tests": 11,
+        "passed": 11,
+        "failed": 0
+      },
+      "executionRuntime": {
+        "node": "v26.12.0",
+        "platform": "darwin",
+        "arch": "arm64",
+        "verifierVersion": "1.0.0-rc.1",
+        "applicationProtocol": "1",
+        "applicationCommand": "Exact executed argv is recorded in the baseline and candidate server lifecycle command records.",
+        "applicationEnvironment": "PORT=fresh loopback port; HOST=127.0.0.1; HOME=temporary empty directory; inherited secret variables removed",
+        "browserNetworkPolicy": "same-origin HTTP; WebSockets and service workers blocked; server is not network-isolated",
+        "baselineApplicationOrigin": "http://127.0.0.1:53525",
+        "candidateApplicationOrigin": "http://127.0.0.1:53540",
+        "vitest": "5.0.5",
+        "workerSha256": "c16009148648f57d65398d7741a6d805170a278ea3329f781dc4d005bb2c85ad"
+      }
+    },
+    {
+      "id": "react-trim-regression",
+      "project": "todomvc",
+      "split": "development",
+      "classification": "defect",
+      "origin": "seeded-regression",
+      "expected": "CONTRADICTED",
+      "observed": "CONTRADICTED",
+      "matched": true,
+      "source": {
+        "baseline": "c008ecdf2e9f003bd4b9b056cf4e820cacaaaeb3c146a08ef3409b1e0d3f7399",
+        "candidate": "059e3e2d09382d883c9b307b0d13367d5776d1ab9b1ce8051ee6e152cdfb67aa",
+        "contract": "d116585566211cd630c5f12d71f9b601f00fd7d644bff1c7f0db6e21453c75ac"
+      },
+      "receipt": "45d373c204f13d5dcb4873efbeb86026d528a78eb7695e952ff6c02876861e93",
+      "durationMs": 27178,
+      "checks": [
+        {
+          "id": "baseline-tests",
+          "status": "VERIFIED",
+          "detail": "2/2 ordinary tests passed; these do not establish the approved intent"
+        },
+        {
+          "id": "candidate-tests",
+          "status": "VERIFIED",
+          "detail": "2/2 ordinary tests passed; these do not establish the approved intent"
+        },
+        {
+          "id": "preserved-tests",
+          "status": "VERIFIED",
+          "detail": "2/2 ordinary tests passed; these do not establish the approved intent"
+        },
+        {
+          "id": "application-server:baseline",
+          "status": "VERIFIED",
+          "detail": "Approved server command started on a fresh loopback port and was stopped after observation. This is execution evidence, not an acceptance result."
+        },
+        {
+          "id": "application-server:candidate",
+          "status": "VERIFIED",
+          "detail": "Approved server command started on a fresh loopback port and was stopped after observation. This is execution evidence, not an acceptance result."
+        },
+        {
+          "id": "req:trim-input",
+          "status": "CONTRADICTED",
+          "detail": "The observed application response contradicts the approved acceptance scenario"
+        },
+        {
+          "id": "req:plain-input",
+          "status": "VERIFIED",
+          "detail": "The approved application scenario passed twice. This establishes only the specified observations."
+        }
+      ],
+      "ordinary": {
+        "label": "SENTINEL-authored Vitest reducer smoke tests, not the upstream Cypress suite",
+        "status": "VERIFIED"
+      },
+      "executionRuntime": {
+        "node": "v26.12.0",
+        "platform": "darwin",
+        "arch": "arm64",
+        "verifierVersion": "1.0.0-rc.1",
+        "applicationProtocol": "1",
+        "applicationCommand": "Exact executed argv is recorded in the baseline and candidate server lifecycle command records.",
+        "applicationEnvironment": "PORT=fresh loopback port; HOST=127.0.0.1; HOME=temporary empty directory; inherited secret variables removed",
+        "browserNetworkPolicy": "same-origin HTTP; WebSockets and service workers blocked; server is not network-isolated",
+        "browserVersion": "156.0.8078.76",
+        "browserExecutable": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        "baselineApplicationOrigin": "http://127.0.0.1:53630",
+        "candidateApplicationOrigin": "http://127.0.0.1:53693",
+        "vitest": "5.0.5",
+        "workerSha256": "c16009148648f57d65398d7741a6d805170a278ea3329f781dc4d005bb2c85ad"
+      }
+    },
+    {
+      "id": "react-incomplete-trim-repair",
+      "project": "todomvc",
+      "split": "held-out",
+      "classification": "defect",
+      "origin": "seeded-repair",
+      "expected": "CONTRADICTED",
+      "observed": "CONTRADICTED",
+      "matched": true,
+      "source": {
+        "baseline": "320e347cae587125c837468d38b349abfb48f45b11c6e3cf79902bab4a30513d",
+        "candidate": "e8de98ec58143c66b18d6cf83f765a2cf55bf09c37c4602e84b1ec10b06505c6",
+        "contract": "d116585566211cd630c5f12d71f9b601f00fd7d644bff1c7f0db6e21453c75ac"
+      },
+      "receipt": "4017b3e0af10895f2206d4c927cbfd040aa159b375f7dd681baae025c6160bc2",
+      "durationMs": 29334,
+      "checks": [
+        {
+          "id": "baseline-tests",
+          "status": "VERIFIED",
+          "detail": "2/2 ordinary tests passed; these do not establish the approved intent"
+        },
+        {
+          "id": "candidate-tests",
+          "status": "VERIFIED",
+          "detail": "2/2 ordinary tests passed; these do not establish the approved intent"
+        },
+        {
+          "id": "preserved-tests",
+          "status": "VERIFIED",
+          "detail": "2/2 ordinary tests passed; these do not establish the approved intent"
+        },
+        {
+          "id": "application-server:baseline",
+          "status": "VERIFIED",
+          "detail": "Approved server command started on a fresh loopback port and was stopped after observation. This is execution evidence, not an acceptance result."
+        },
+        {
+          "id": "application-server:candidate",
+          "status": "VERIFIED",
+          "detail": "Approved server command started on a fresh loopback port and was stopped after observation. This is execution evidence, not an acceptance result."
+        },
+        {
+          "id": "req:trim-input",
+          "status": "CONTRADICTED",
+          "detail": "The observed application response contradicts the approved acceptance scenario"
+        },
+        {
+          "id": "req:plain-input",
+          "status": "VERIFIED",
+          "detail": "The approved application scenario passed twice. This establishes only the specified observations."
+        }
+      ],
+      "ordinary": {
+        "label": "SENTINEL-authored Vitest reducer smoke tests, not the upstream Cypress suite",
+        "status": "VERIFIED"
+      },
+      "executionRuntime": {
+        "node": "v26.12.0",
+        "platform": "darwin",
+        "arch": "arm64",
+        "verifierVersion": "1.0.0-rc.1",
+        "applicationProtocol": "1",
+        "applicationCommand": "Exact executed argv is recorded in the baseline and candidate server lifecycle command records.",
+        "applicationEnvironment": "PORT=fresh loopback port; HOST=127.0.0.1; HOME=temporary empty directory; inherited secret variables removed",
+        "browserNetworkPolicy": "same-origin HTTP; WebSockets and service workers blocked; server is not network-isolated",
+        "browserVersion": "156.0.8078.76",
+        "browserExecutable": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        "baselineApplicationOrigin": "http://127.0.0.1:53805",
+        "candidateApplicationOrigin": "http://127.0.0.1:53844",
+        "vitest": "5.0.5",
+        "workerSha256": "c16009148648f57d65398d7741a6d805170a278ea3329f781dc4d005bb2c85ad"
+      }
+    },
+    {
+      "id": "react-correct-repair",
+      "project": "todomvc",
+      "split": "held-out",
+      "classification": "correct",
+      "origin": "seeded-repair",
+      "expected": "VERIFIED",
+      "observed": "VERIFIED",
+      "matched": true,
+      "source": {
+        "baseline": "bb4f780ddcef22445d8a91fb22b2199bdd2666babd1e5480340f068ff2783fb2",
+        "candidate": "3afb076203e3fbc43039a3bf73d571a1a630817ca59025f2d3927767ca1d9fb2",
+        "contract": "d116585566211cd630c5f12d71f9b601f00fd7d644bff1c7f0db6e21453c75ac"
+      },
+      "receipt": "61c776055d717ab2fe0cf0e6b958ea8577d61ba3cc5481cffd1a688ad5e4e7df",
+      "durationMs": 29856,
+      "checks": [
+        {
+          "id": "baseline-tests",
+          "status": "VERIFIED",
+          "detail": "2/2 ordinary tests passed; these do not establish the approved intent"
+        },
+        {
+          "id": "candidate-tests",
+          "status": "VERIFIED",
+          "detail": "2/2 ordinary tests passed; these do not establish the approved intent"
+        },
+        {
+          "id": "preserved-tests",
+          "status": "VERIFIED",
+          "detail": "2/2 ordinary tests passed; these do not establish the approved intent"
+        },
+        {
+          "id": "application-server:baseline",
+          "status": "VERIFIED",
+          "detail": "Approved server command started on a fresh loopback port and was stopped after observation. This is execution evidence, not an acceptance result."
+        },
+        {
+          "id": "application-server:candidate",
+          "status": "VERIFIED",
+          "detail": "Approved server command started on a fresh loopback port and was stopped after observation. This is execution evidence, not an acceptance result."
+        },
+        {
+          "id": "req:trim-input",
+          "status": "VERIFIED",
+          "detail": "The approved application scenario passed twice. This establishes only the specified observations."
+        },
+        {
+          "id": "req:plain-input",
+          "status": "VERIFIED",
+          "detail": "The approved application scenario passed twice. This establishes only the specified observations."
+        }
+      ],
+      "ordinary": {
+        "label": "SENTINEL-authored Vitest reducer smoke tests, not the upstream Cypress suite",
+        "status": "VERIFIED"
+      },
+      "executionRuntime": {
+        "node": "v26.12.0",
+        "platform": "darwin",
+        "arch": "arm64",
+        "verifierVersion": "1.0.0-rc.1",
+        "applicationProtocol": "1",
+        "applicationCommand": "Exact executed argv is recorded in the baseline and candidate server lifecycle command records.",
+        "applicationEnvironment": "PORT=fresh loopback port; HOST=127.0.0.1; HOME=temporary empty directory; inherited secret variables removed",
+        "browserNetworkPolicy": "same-origin HTTP; WebSockets and service workers blocked; server is not network-isolated",
+        "browserVersion": "156.0.8078.76",
+        "browserExecutable": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        "baselineApplicationOrigin": "http://127.0.0.1:53939",
+        "candidateApplicationOrigin": "http://127.0.0.1:54197",
+        "vitest": "5.0.5",
+        "workerSha256": "c16009148648f57d65398d7741a6d805170a278ea3329f781dc4d005bb2c85ad"
+      }
+    },
+    {
+      "id": "react-benign-refactor",
+      "project": "todomvc",
+      "split": "held-out",
+      "classification": "correct",
+      "origin": "seeded-refactor",
+      "expected": "VERIFIED",
+      "observed": "VERIFIED",
+      "matched": true,
+      "source": {
+        "baseline": "c1ee89a3dac18a7ad7cdebb3df672d28b787dee3d9a292957d8b54d1f0232459",
+        "candidate": "73316d0519338f6cf6d9932d673a5b5195cd24442108218ed540aca74967fb91",
+        "contract": "f2ddf9309ef19e3da4ae820abe136f6a71a6a9f0bad92882a8242ef5e06b0b06"
+      },
+      "receipt": "8e988a534606f8514a76ac61271ec308afbc9325d928ea72edbdd3f8fa79aa30",
+      "durationMs": 15677,
+      "checks": [
+        {
+          "id": "baseline-tests",
+          "status": "VERIFIED",
+          "detail": "2/2 ordinary tests passed; these do not establish the approved intent"
+        },
+        {
+          "id": "candidate-tests",
+          "status": "VERIFIED",
+          "detail": "2/2 ordinary tests passed; these do not establish the approved intent"
+        },
+        {
+          "id": "preserved-tests",
+          "status": "VERIFIED",
+          "detail": "2/2 ordinary tests passed; these do not establish the approved intent"
+        },
+        {
+          "id": "application-server:baseline",
+          "status": "VERIFIED",
+          "detail": "Approved server command started on a fresh loopback port and was stopped after observation. This is execution evidence, not an acceptance result."
+        },
+        {
+          "id": "application-server:candidate",
+          "status": "VERIFIED",
+          "detail": "Approved server command started on a fresh loopback port and was stopped after observation. This is execution evidence, not an acceptance result."
+        },
+        {
+          "id": "req:trim-input",
+          "status": "VERIFIED",
+          "detail": "The approved application scenario passed twice. This establishes only the specified observations."
+        },
+        {
+          "id": "req:plain-input",
+          "status": "VERIFIED",
+          "detail": "The approved application scenario passed twice. This establishes only the specified observations."
+        }
+      ],
+      "ordinary": {
+        "label": "SENTINEL-authored Vitest reducer smoke tests, not the upstream Cypress suite",
+        "status": "VERIFIED"
+      },
+      "executionRuntime": {
+        "node": "v26.12.0",
+        "platform": "darwin",
+        "arch": "arm64",
+        "verifierVersion": "1.0.0-rc.1",
+        "applicationProtocol": "1",
+        "applicationCommand": "Exact executed argv is recorded in the baseline and candidate server lifecycle command records.",
+        "applicationEnvironment": "PORT=fresh loopback port; HOST=127.0.0.1; HOME=temporary empty directory; inherited secret variables removed",
+        "browserNetworkPolicy": "same-origin HTTP; WebSockets and service workers blocked; server is not network-isolated",
+        "browserVersion": "156.0.8078.76",
+        "browserExecutable": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        "baselineApplicationOrigin": "http://127.0.0.1:54259",
+        "candidateApplicationOrigin": "http://127.0.0.1:54301",
+        "vitest": "5.0.5",
+        "workerSha256": "c16009148648f57d65398d7741a6d805170a278ea3329f781dc4d005bb2c85ad"
+      }
+    },
+    {
+      "id": "react-inadequate-approved-contract",
+      "project": "todomvc",
+      "split": "held-out",
+      "classification": "known-miss",
+      "origin": "specification-gap",
+      "expected": "VERIFIED",
+      "observed": "VERIFIED",
+      "matched": true,
+      "source": {
+        "baseline": "82fd98dda4a6a5e64d6cc3aa325111aeb3b7c6817a0ed45c3acf6802fbf5a43f",
+        "candidate": "8a354fc94c5a9a10147a2ceecf914d02b10824fddff3e9b5d150b20854c57531",
+        "contract": "ea29f64e50053f88ddde3d357f97902d073164a2f2d480612aabfc6ccca2aaa7"
+      },
+      "receipt": "be316d0b7a06d3dc8ad57833985bcfc462898a71e9bd030dd44d577ced79f94f",
+      "durationMs": 9075,
+      "checks": [
+        {
+          "id": "baseline-tests",
+          "status": "VERIFIED",
+          "detail": "2/2 ordinary tests passed; these do not establish the approved intent"
+        },
+        {
+          "id": "candidate-tests",
+          "status": "VERIFIED",
+          "detail": "2/2 ordinary tests passed; these do not establish the approved intent"
+        },
+        {
+          "id": "preserved-tests",
+          "status": "VERIFIED",
+          "detail": "2/2 ordinary tests passed; these do not establish the approved intent"
+        },
+        {
+          "id": "application-server:baseline",
+          "status": "VERIFIED",
+          "detail": "Approved server command started on a fresh loopback port and was stopped after observation. This is execution evidence, not an acceptance result."
+        },
+        {
+          "id": "application-server:candidate",
+          "status": "VERIFIED",
+          "detail": "Approved server command started on a fresh loopback port and was stopped after observation. This is execution evidence, not an acceptance result."
+        },
+        {
+          "id": "req:heading-only",
+          "status": "VERIFIED",
+          "detail": "The approved application scenario passed twice. This establishes only the specified observations."
+        }
+      ],
+      "ordinary": {
+        "label": "SENTINEL-authored Vitest reducer smoke tests, not the upstream Cypress suite",
+        "status": "VERIFIED"
+      },
+      "executionRuntime": {
+        "node": "v26.12.0",
+        "platform": "darwin",
+        "arch": "arm64",
+        "verifierVersion": "1.0.0-rc.1",
+        "applicationProtocol": "1",
+        "applicationCommand": "Exact executed argv is recorded in the baseline and candidate server lifecycle command records.",
+        "applicationEnvironment": "PORT=fresh loopback port; HOST=127.0.0.1; HOME=temporary empty directory; inherited secret variables removed",
+        "browserNetworkPolicy": "same-origin HTTP; WebSockets and service workers blocked; server is not network-isolated",
+        "browserVersion": "156.0.8078.76",
+        "browserExecutable": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        "baselineApplicationOrigin": "http://127.0.0.1:54365",
+        "candidateApplicationOrigin": "http://127.0.0.1:54388",
+        "vitest": "5.0.5",
+        "workerSha256": "c16009148648f57d65398d7741a6d805170a278ea3329f781dc4d005bb2c85ad"
+      }
+    },
+    {
+      "id": "react-unconfirmed-coverage",
+      "project": "todomvc",
+      "split": "held-out",
+      "classification": "unknown",
+      "origin": "incomplete-approval",
+      "expected": "UNVERIFIED",
+      "observed": "UNVERIFIED",
+      "matched": true,
+      "source": {
+        "baseline": "b6557f5026971d84b937bed97804de851ad7edde1c78211790981b8a42b23314",
+        "candidate": "b6557f5026971d84b937bed97804de851ad7edde1c78211790981b8a42b23314",
+        "contract": "e56d1222d99eb1c032efba59f64053a3fbdb707518a7e21ef75059aea32cd863"
+      },
+      "receipt": "a744f22e01c41228e768fea2aacc1ee77f8cb6e3bebb293e825e4fcda44aa108",
+      "durationMs": 5340,
+      "checks": [
+        {
+          "id": "baseline-tests",
+          "status": "VERIFIED",
+          "detail": "2/2 ordinary tests passed; these do not establish the approved intent"
+        },
+        {
+          "id": "candidate-tests",
+          "status": "VERIFIED",
+          "detail": "2/2 ordinary tests passed; these do not establish the approved intent"
+        },
+        {
+          "id": "preserved-tests",
+          "status": "VERIFIED",
+          "detail": "2/2 ordinary tests passed; these do not establish the approved intent"
+        },
+        {
+          "id": "application-server:baseline",
+          "status": "VERIFIED",
+          "detail": "Approved server command started on a fresh loopback port and was stopped after observation. This is execution evidence, not an acceptance result."
+        },
+        {
+          "id": "application-server:candidate",
+          "status": "VERIFIED",
+          "detail": "Approved server command started on a fresh loopback port and was stopped after observation. This is execution evidence, not an acceptance result."
+        },
+        {
+          "id": "req:heading-only",
+          "status": "VERIFIED",
+          "detail": "The approved application scenario passed twice. This establishes only the specified observations."
+        },
+        {
+          "id": "objective-coverage",
+          "status": "UNVERIFIED",
+          "detail": "The approved plan does not establish coverage of every explicitly intended outcome."
+        }
+      ],
+      "ordinary": {
+        "label": "SENTINEL-authored Vitest reducer smoke tests, not the upstream Cypress suite",
+        "status": "VERIFIED"
+      },
+      "executionRuntime": {
+        "node": "v26.12.0",
+        "platform": "darwin",
+        "arch": "arm64",
+        "verifierVersion": "1.0.0-rc.1",
+        "applicationProtocol": "1",
+        "applicationCommand": "Exact executed argv is recorded in the baseline and candidate server lifecycle command records.",
+        "applicationEnvironment": "PORT=fresh loopback port; HOST=127.0.0.1; HOME=temporary empty directory; inherited secret variables removed",
+        "browserNetworkPolicy": "same-origin HTTP; WebSockets and service workers blocked; server is not network-isolated",
+        "browserVersion": "156.0.8078.76",
+        "browserExecutable": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        "baselineApplicationOrigin": "http://127.0.0.1:54413",
+        "candidateApplicationOrigin": "http://127.0.0.1:54435",
+        "vitest": "5.0.5",
+        "workerSha256": "c16009148648f57d65398d7741a6d805170a278ea3329f781dc4d005bb2c85ad"
+      }
+    },
+    {
+      "id": "express-environment-failure",
+      "project": "express",
+      "split": "held-out",
+      "classification": "environment",
+      "origin": "execution-failure",
+      "expected": "ENVIRONMENT FAILURE",
+      "observed": "ENVIRONMENT FAILURE",
+      "matched": true,
+      "source": {
+        "baseline": "465530faacdb2da1ee2bf2770c95cb8b6642066f08781411e4c457416ba48216",
+        "candidate": "465530faacdb2da1ee2bf2770c95cb8b6642066f08781411e4c457416ba48216",
+        "contract": "398940474548e24d871e5c7c52bf8a1bb75a096a6c63823949e88752c31427b6"
+      },
+      "receipt": "ee419048c5c727f16880e775c45e9f7b3b917b571757eb729150c3a704989c20",
+      "durationMs": 2816,
+      "checks": [
+        {
+          "id": "baseline-tests",
+          "status": "VERIFIED",
+          "detail": "11/11 ordinary tests passed; these do not establish the approved intent"
+        },
+        {
+          "id": "candidate-tests",
+          "status": "VERIFIED",
+          "detail": "11/11 ordinary tests passed; these do not establish the approved intent"
+        },
+        {
+          "id": "preserved-tests",
+          "status": "VERIFIED",
+          "detail": "11/11 ordinary tests passed; these do not establish the approved intent"
+        },
+        {
+          "id": "application:baseline",
+          "status": "ENVIRONMENT FAILURE",
+          "detail": "Error: Error: Application process exited before readiness: node:internal/modules/cjs/loader:1607\n  throw err;\n  ^\n\nError: Cannot find module '/private<evidence-store>/execution-TmH9cB/behaviour-baseline/does-not-exist.cjs'\n    at Module._resolveFilename (node:internal/modules/cjs/loader:1603:15)\n    at wrapResolveFilename (node:internal/modules/cjs/loader:1145:27)\n    at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1169:10)\n    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1196:12)\n    at Module._load (node:internal/modules/cjs/loader:1370:5)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:173:5)\n    at node:internal/main/run_main_module:33:47 {\n  code: 'MODULE_NOT_FOUND',\n  requireStack: []\n}\n\nNode.js v26.12.0\n"
+        },
+        {
+          "id": "application:candidate",
+          "status": "ENVIRONMENT FAILURE",
+          "detail": "Error: Error: Application process exited before readiness: node:internal/modules/cjs/loader:1607\n  throw err;\n  ^\n\nError: Cannot find module '/private<evidence-store>/execution-TmH9cB/behaviour-candidate/does-not-exist.cjs'\n    at Module._resolveFilename (node:internal/modules/cjs/loader:1603:15)\n    at wrapResolveFilename (node:internal/modules/cjs/loader:1145:27)\n    at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1169:10)\n    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1196:12)\n    at Module._load (node:internal/modules/cjs/loader:1370:5)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:173:5)\n    at node:internal/main/run_main_module:33:47 {\n  code: 'MODULE_NOT_FOUND',\n  requireStack: []\n}\n\nNode.js v26.12.0\n"
+        },
+        {
+          "id": "req:invalid-key",
+          "status": "ENVIRONMENT FAILURE",
+          "detail": "Application observation did not complete for both source versions"
+        },
+        {
+          "id": "req:missing-key",
+          "status": "ENVIRONMENT FAILURE",
+          "detail": "Application observation did not complete for both source versions"
+        },
+        {
+          "id": "req:valid-users",
+          "status": "ENVIRONMENT FAILURE",
+          "detail": "Application observation did not complete for both source versions"
+        }
+      ],
+      "ordinary": {
+        "label": "Original upstream Mocha/Supertest suite; only require path adapted",
+        "exitCode": 0,
+        "durationMs": 374,
+        "tests": 11,
+        "passed": 11,
+        "failed": 0
+      },
+      "executionRuntime": {
+        "node": "v26.12.0",
+        "platform": "darwin",
+        "arch": "arm64",
+        "verifierVersion": "1.0.0-rc.1",
+        "applicationProtocol": "1",
+        "applicationCommand": "Exact executed argv is recorded in the baseline and candidate server lifecycle command records.",
+        "applicationEnvironment": "PORT=fresh loopback port; HOST=127.0.0.1; HOME=temporary empty directory; inherited secret variables removed",
+        "browserNetworkPolicy": "same-origin HTTP; WebSockets and service workers blocked; server is not network-isolated",
+        "vitest": "5.0.5",
+        "workerSha256": "c16009148648f57d65398d7741a6d805170a278ea3329f781dc4d005bb2c85ad"
+      }
+    }
+  ],
+  "rawMeasurementSha256": "8de953aab86a3ef3aaca9b6889cd81fcefc23a8cfcc3d2c0c301335261e71acb",
+  "evidenceLocation": "Content-addressed source/receipt/artifact store retained by the executing developer; reproduce with run.mjs"
+}

@@ -1,0 +1,409 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-01T19:44:10.785Z",
+  "project": "expressjs/express examples/web-service",
+  "upstreamCommit": "1c6f1b0fe4000977b9a7b4f34097e4d527dd9824",
+  "baselineAdapterCommit": "b1a5c27e79054cf45cae737d5eaf28034abe6419",
+  "session": "s-mvy8hr75-8cf42673",
+  "objective": "Add the stable error code INVALID_API_KEY to invalid API-key responses while preserving missing-key errors and valid user responses.",
+  "userApproval": "Explicit human approval of four HTTP outcomes and local Codex execution, entered through the actual SENTINEL review and consent interface",
+  "state": "verified",
+  "baselineHash": "e09a095e999c533f7894f5c330515dc32384e28c8e730e3f2b07c85947ccae90",
+  "candidateHash": "b5e2d673c128394e3476c6fe54f1792e95072d5f68290c2be69f464da1fa771c",
+  "contractHash": "5f11c8f47894bcd591aca727857eb5dea144b084d8529eaf215946a1ed17ab00",
+  "agents": [
+    {
+      "agent": "codex",
+      "outcome": "completed",
+      "startedAt": "2026-11-01T19:39:39.201Z",
+      "completedAt": "2026-11-01T19:40:32.653Z",
+      "durationMs": 51983,
+      "exitCode": 0,
+      "signal": null,
+      "handoff": {
+        "contextHash": "a99ecd51229c72a919acc9fc226e68e76405d7ad51ff87836ff716a4d958fc0e",
+        "acknowledged": true,
+        "sourceHash": "ad23db8dcee0f5aa055a0db02498c3dbc15ed9f22677d6457752e86071ecc1a4",
+        "contractHash": "5f11c8f47894bcd591aca727857eb5dea144b084d8529eaf215946a1ed17ab00"
+      },
+      "outputIsVerification": false
+    },
+    {
+      "agent": "codex",
+      "outcome": "interrupted",
+      "startedAt": "2026-11-01T19:41:00.365Z",
+      "completedAt": "2026-11-01T19:41:34.721Z",
+      "durationMs": 33903,
+      "exitCode": 0,
+      "signal": "SIGINT",
+      "handoff": {
+        "contextHash": "f92bbe3a253588300540471e76c16617a40bd9b5173115dd0d35943e01f51ddd",
+        "acknowledged": true,
+        "sourceHash": "b5e2d673c128394e3476c6fe54f1792e95072d5f68290c2be69f464da1fa771c",
+        "contractHash": "5f11c8f47894bcd591aca727857eb5dea144b084d8529eaf215946a1ed17ab00"
+      },
+      "outputIsVerification": false
+    },
+    {
+      "agent": "codex",
+      "outcome": "completed",
+      "startedAt": "2026-11-01T19:42:00.359Z",
+      "completedAt": "2026-11-01T19:43:07.660Z",
+      "durationMs": 66193,
+      "exitCode": 0,
+      "signal": null,
+      "handoff": {
+        "contextHash": "fe5ed35a2735f15996549f35d8633f2cebf1b389a7ac64cb056c527f632b7c43",
+        "acknowledged": true,
+        "sourceHash": "b5e2d673c128394e3476c6fe54f1792e95072d5f68290c2be69f464da1fa771c",
+        "contractHash": "5f11c8f47894bcd591aca727857eb5dea144b084d8529eaf215946a1ed17ab00"
+      },
+      "outputIsVerification": false
+    }
+  ],
+  "receipts": [
+    {
+      "hash": "8ff64656672c6faf913921206340aaee47f63b091e50d8a373a542fc797b43fe",
+      "candidateHash": "b5e2d673c128394e3476c6fe54f1792e95072d5f68290c2be69f464da1fa771c",
+      "status": "VERIFIED",
+      "durationMs": 3052,
+      "checks": [
+        {
+          "id": "baseline-tests",
+          "status": "VERIFIED",
+          "detail": "11/11 ordinary tests passed; these do not establish the approved intent"
+        },
+        {
+          "id": "candidate-tests",
+          "status": "VERIFIED",
+          "detail": "11/11 ordinary tests passed; these do not establish the approved intent"
+        },
+        {
+          "id": "preserved-tests",
+          "status": "VERIFIED",
+          "detail": "11/11 ordinary tests passed; these do not establish the approved intent"
+        },
+        {
+          "id": "application-server:baseline",
+          "status": "VERIFIED",
+          "detail": "Approved server command started on a fresh loopback port and was stopped after observation. This is execution evidence, not an acceptance result."
+        },
+        {
+          "id": "application-server:candidate",
+          "status": "VERIFIED",
+          "detail": "Approved server command started on a fresh loopback port and was stopped after observation. This is execution evidence, not an acceptance result."
+        },
+        {
+          "id": "req:application-f69df4f7",
+          "status": "VERIFIED",
+          "detail": "The approved application scenario passed twice. This establishes only the specified observations.",
+          "requirementId": "application-f69df4f7",
+          "expected": {
+            "status": 401,
+            "body": {
+              "error": "invalid api key",
+              "code": "INVALID_API_KEY"
+            }
+          },
+          "observed": {
+            "status": 401,
+            "body": {
+              "error": "invalid api key",
+              "code": "INVALID_API_KEY"
+            }
+          },
+          "baseline": {
+            "status": 401,
+            "body": {
+              "error": "invalid api key"
+            }
+          }
+        },
+        {
+          "id": "req:application-7c07e3f2",
+          "status": "VERIFIED",
+          "detail": "The approved application scenario passed twice. This establishes only the specified observations.",
+          "requirementId": "application-7c07e3f2",
+          "expected": {
+            "status": 401,
+            "body": {
+              "error": "invalid api key",
+              "code": "INVALID_API_KEY"
+            }
+          },
+          "observed": {
+            "status": 401,
+            "body": {
+              "error": "invalid api key",
+              "code": "INVALID_API_KEY"
+            }
+          },
+          "baseline": {
+            "status": 401,
+            "body": {
+              "error": "invalid api key"
+            }
+          }
+        },
+        {
+          "id": "req:application-b0e782f7",
+          "status": "VERIFIED",
+          "detail": "The approved application scenario passed twice. This establishes only the specified observations.",
+          "requirementId": "application-b0e782f7",
+          "expected": {
+            "status": 400,
+            "body": {
+              "error": "api key required"
+            }
+          },
+          "observed": {
+            "status": 400,
+            "body": {
+              "error": "api key required"
+            }
+          },
+          "baseline": {
+            "status": 400,
+            "body": {
+              "error": "api key required"
+            }
+          }
+        },
+        {
+          "id": "req:application-751d920d",
+          "status": "VERIFIED",
+          "detail": "The approved application scenario passed twice. This establishes only the specified observations.",
+          "requirementId": "application-751d920d",
+          "expected": {
+            "status": 200,
+            "body": [
+              {
+                "name": "tobi"
+              },
+              {
+                "name": "loki"
+              },
+              {
+                "name": "jane"
+              }
+            ]
+          },
+          "observed": {
+            "status": 200,
+            "body": [
+              {
+                "name": "tobi"
+              },
+              {
+                "name": "loki"
+              },
+              {
+                "name": "jane"
+              }
+            ]
+          },
+          "baseline": {
+            "status": 200,
+            "body": [
+              {
+                "name": "tobi"
+              },
+              {
+                "name": "loki"
+              },
+              {
+                "name": "jane"
+              }
+            ]
+          }
+        }
+      ],
+      "changes": [
+        {
+          "path": "app.cjs",
+          "kind": "modified",
+          "classification": "VERIFIED",
+          "reason": "Path authorised by the supplied contract; behaviour is checked separately"
+        }
+      ],
+      "runtime": {
+        "node": "v26.12.0",
+        "verifierVersion": "1.0.0-rc.1",
+        "vitest": "5.0.5",
+        "applicationProtocol": "1"
+      }
+    },
+    {
+      "hash": "474c323561666488e89ed715fa51eae211cde108c88495df32a4bf3633b928f2",
+      "candidateHash": "b5e2d673c128394e3476c6fe54f1792e95072d5f68290c2be69f464da1fa771c",
+      "status": "VERIFIED",
+      "durationMs": 5283,
+      "checks": [
+        {
+          "id": "baseline-tests",
+          "status": "VERIFIED",
+          "detail": "11/11 ordinary tests passed; these do not establish the approved intent"
+        },
+        {
+          "id": "candidate-tests",
+          "status": "VERIFIED",
+          "detail": "11/11 ordinary tests passed; these do not establish the approved intent"
+        },
+        {
+          "id": "preserved-tests",
+          "status": "VERIFIED",
+          "detail": "11/11 ordinary tests passed; these do not establish the approved intent"
+        },
+        {
+          "id": "application-server:baseline",
+          "status": "VERIFIED",
+          "detail": "Approved server command started on a fresh loopback port and was stopped after observation. This is execution evidence, not an acceptance result."
+        },
+        {
+          "id": "application-server:candidate",
+          "status": "VERIFIED",
+          "detail": "Approved server command started on a fresh loopback port and was stopped after observation. This is execution evidence, not an acceptance result."
+        },
+        {
+          "id": "req:application-f69df4f7",
+          "status": "VERIFIED",
+          "detail": "The approved application scenario passed twice. This establishes only the specified observations.",
+          "requirementId": "application-f69df4f7",
+          "expected": {
+            "status": 401,
+            "body": {
+              "error": "invalid api key",
+              "code": "INVALID_API_KEY"
+            }
+          },
+          "observed": {
+            "status": 401,
+            "body": {
+              "error": "invalid api key",
+              "code": "INVALID_API_KEY"
+            }
+          },
+          "baseline": {
+            "status": 401,
+            "body": {
+              "error": "invalid api key"
+            }
+          }
+        },
+        {
+          "id": "req:application-7c07e3f2",
+          "status": "VERIFIED",
+          "detail": "The approved application scenario passed twice. This establishes only the specified observations.",
+          "requirementId": "application-7c07e3f2",
+          "expected": {
+            "status": 401,
+            "body": {
+              "error": "invalid api key",
+              "code": "INVALID_API_KEY"
+            }
+          },
+          "observed": {
+            "status": 401,
+            "body": {
+              "error": "invalid api key",
+              "code": "INVALID_API_KEY"
+            }
+          },
+          "baseline": {
+            "status": 401,
+            "body": {
+              "error": "invalid api key"
+            }
+          }
+        },
+        {
+          "id": "req:application-b0e782f7",
+          "status": "VERIFIED",
+          "detail": "The approved application scenario passed twice. This establishes only the specified observations.",
+          "requirementId": "application-b0e782f7",
+          "expected": {
+            "status": 400,
+            "body": {
+              "error": "api key required"
+            }
+          },
+          "observed": {
+            "status": 400,
+            "body": {
+              "error": "api key required"
+            }
+          },
+          "baseline": {
+            "status": 400,
+            "body": {
+              "error": "api key required"
+            }
+          }
+        },
+        {
+          "id": "req:application-751d920d",
+          "status": "VERIFIED",
+          "detail": "The approved application scenario passed twice. This establishes only the specified observations.",
+          "requirementId": "application-751d920d",
+          "expected": {
+            "status": 200,
+            "body": [
+              {
+                "name": "tobi"
+              },
+              {
+                "name": "loki"
+              },
+              {
+                "name": "jane"
+              }
+            ]
+          },
+          "observed": {
+            "status": 200,
+            "body": [
+              {
+                "name": "tobi"
+              },
+              {
+                "name": "loki"
+              },
+              {
+                "name": "jane"
+              }
+            ]
+          },
+          "baseline": {
+            "status": 200,
+            "body": [
+              {
+                "name": "tobi"
+              },
+              {
+                "name": "loki"
+              },
+              {
+                "name": "jane"
+              }
+            ]
+          }
+        }
+      ],
+      "changes": [
+        {
+          "path": "app.cjs",
+          "kind": "modified",
+          "classification": "VERIFIED",
+          "reason": "Path authorised by the supplied contract; behaviour is checked separately"
+        }
+      ],
+      "runtime": {
+        "node": "v26.12.0",
+        "verifierVersion": "1.0.0-rc.1",
+        "vitest": "5.0.5",
+        "applicationProtocol": "1"
+      }
+    }
+  ],
+  "interpretation": "One attempted live development task; approved outcomes independently demonstrated before and after controlled Codex interruption. No population completion-rate claim. Claude unauthenticated; no live cross-provider claim. Agent self-reported checks excluded from independent counts."
+}

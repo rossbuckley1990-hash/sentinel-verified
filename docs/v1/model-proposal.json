@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-01T19:46:11.776Z",
+  "method": "Authenticated Codex read-only proposal; no approval or source execution attributed to it",
+  "result": {
+    "scenarios": [],
+    "questions": [
+      "What exact status, body type, and complete body should invalid-key responses have, and which field should contain INVALID_API_KEY?",
+      "What exact missing-key response must be preserved? The supplied tests specify status 400 but no body type or body.",
+      "Should the supplied /api/users success expectation be the preservation baseline? Are /api/repos and /api/user/:name/repos also in scope, and if so, what complete successful response bodies should be expected?"
+    ]
+  }
+}

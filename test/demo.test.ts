@@ -9,7 +9,7 @@ import type { Receipt } from '../src/types.js';
 it('executes green-test false success, shrinks evidence, recovers interruption, and checks the correction',async()=>{
  const store=await fs.mkdtemp(path.join(os.tmpdir(),'sentinel-e2e-'));
  try{
-  const r=await runCommand([process.execPath,path.resolve('dist/cli.js'),'demo','--store',store],process.cwd(),{timeoutMs:90000});
+  const r=await runCommand([process.execPath,path.resolve('dist/cli.js'),'demo','--functions','--store',store],process.cwd(),{timeoutMs:90000});
   expect(r.stderr).toBe('');expect(r.exitCode).toBe(0);
   const cp=await loadCheckpoint(store);expect(cp.state).toBe('verified');expect(cp.agents.map(a=>a.outcome)).toEqual(['completed','interrupted','completed']);expect(cp.receipts).toHaveLength(2);
   const bad=JSON.parse((await getObject(store,cp.receipts[0]!)).toString()) as Receipt;const good=JSON.parse((await getObject(store,cp.receipts[1]!)).toString()) as Receipt;

@@ -1,3 +1,4 @@
+import { applicationConfigSchema, applicationScenarioSchema } from './application-schema.js';
 import { z } from 'zod';
 import { isDeepStrictEqual } from 'node:util';
 import { safeRelative } from './store.js';
@@ -9,17 +10,30 @@ const invariant=z.object({argument:z.number().int().min(0).max(19),domain:z.enum
   if(x.argument>=x.args.length) ctx.addIssue({code:'custom',message:'invariant argument must index args'});
   if(x.seeds.some(s=>x.domain==='array'?!Array.isArray(s):typeof s!==x.domain))ctx.addIssue({code:'custom',message:'invariant seeds must belong to the approved domain'});
 });
-export const contractSchema=z.object({schemaVersion:z.union([z.literal(1),z.literal(2)]),objective:z.string().min(1).max(5000),approvedBy:z.string().min(1).max(200),requirements:z.array(z.object({id:z.string().min(1).max(100),kind:z.enum(['must-change','must-preserve']),description:z.string().min(1).max(2000),module:modulePath,export:z.string().regex(/^[a-zA-Z_$][\w$]*$/),cases:z.array(example).max(100),invariant:invariant.optional()}).strict().refine(r=>r.cases.length>0||r.invariant,'requirement must have cases or an invariant')).max(100),probes:z.array(z.object({id:z.string().min(1),module:modulePath,export:z.string().regex(/^[a-zA-Z_$][\w$]*$/),inputs:z.array(z.array(json).max(20)).min(1).max(100)}).strict()).max(50).optional(),allowedPaths:z.array(modulePath).max(500).optional(),discoveryLimits:z.array(z.string().max(2000)).max(150).optional(),unresolved:z.array(z.string().max(2000)).max(100).optional(),approval:z.object({method:z.literal('interactive'),approvedAt:z.string().datetime(),proposalHash:z.string().regex(/^[a-f0-9]{64}$/),baselineHash:z.string().regex(/^[a-f0-9]{64}$/),requirementIds:z.array(z.string().min(1).max(100)).max(100),resolvedQuestions:z.array(z.object({question:z.string().max(2000),reason:z.string().min(1).max(2000)}).strict()).max(100)}).strict().optional()}).strict().superRefine((x,ctx)=>{
+export const contractSchema=z.object({schemaVersion:z.union([z.literal(1),z.literal(2),z.literal(3)]),objective:z.string().min(1).max(5000),approvedBy:z.string().min(1).max(200),requirements:z.array(z.object({id:z.string().min(1).max(100),kind:z.enum(['must-change','must-preserve']),description:z.string().min(1).max(2000),module:modulePath,export:z.string().regex(/^[a-zA-Z_$][\w$]*$/),cases:z.array(example).max(100),invariant:invariant.optional()}).strict().refine(r=>r.cases.length>0||r.invariant,'requirement must have cases or an invariant')).max(100),application:applicationConfigSchema.optional(),scenarios:z.array(applicationScenarioSchema).max(20).optional(),coverage:z.object({intent:z.enum(['change','preserve']).optional(),confirmed:z.boolean(),aspects:z.array(z.object({id:z.string().min(1).max(100),description:z.string().min(1).max(2000),requirementIds:z.array(z.string().min(1).max(100)).max(120)}).strict()).max(30)}).strict().optional(),probes:z.array(z.object({id:z.string().min(1),module:modulePath,export:z.string().regex(/^[a-zA-Z_$][\w$]*$/),inputs:z.array(z.array(json).max(20)).min(1).max(100)}).strict()).max(50).optional(),allowedPaths:z.array(modulePath).max(500).optional(),discoveryLimits:z.array(z.string().max(2000)).max(150).optional(),unresolved:z.array(z.string().max(2000)).max(100).optional(),approval:z.object({method:z.literal('interactive'),approvedAt:z.string().datetime(),proposalHash:z.string().regex(/^[a-f0-9]{64}$/),baselineHash:z.string().regex(/^[a-f0-9]{64}$/),requirementIds:z.array(z.string().min(1).max(100)).max(100),resolvedQuestions:z.array(z.object({question:z.string().max(2000),reason:z.string().min(1).max(2000)}).strict()).max(100)}).strict().optional()}).strict().superRefine((x,ctx)=>{
   if(x.schemaVersion===1&&(x.approval||x.unresolved||x.discoveryLimits))ctx.addIssue({code:'custom',message:'Discovery metadata requires contract schema version 2'});
   if(x.schemaVersion===2&&!x.approval)ctx.addIssue({code:'custom',message:'Version 2 requires explicit interactive approval metadata'});
-  if(x.approval&&JSON.stringify([...x.approval.requirementIds].sort())!==JSON.stringify(x.requirements.map(r=>r.id).sort()))ctx.addIssue({code:'custom',message:'Approval must identify exactly the approved requirements'});
-  const ids=x.requirements.map(r=>r.id);if(new Set(ids).size!==ids.length)ctx.addIssue({code:'custom',message:'Requirement IDs must be unique'});
+  if(x.approval&&JSON.stringify([...x.approval.requirementIds].sort())!==JSON.stringify([...x.requirements,...(x.scenarios??[])].map(r=>r.id).sort()))ctx.addIssue({code:'custom',message:'Approval must identify exactly the approved requirements'});
+  if(x.schemaVersion!==3&&(x.application||x.scenarios||x.coverage))ctx.addIssue({code:'custom',message:'Application scenarios and coverage require schema 3'});
+  if(x.schemaVersion===3){
+   if(!x.coverage)ctx.addIssue({code:'custom',message:'Schema 3 requires explicit finite objective coverage'});
+   if(!!x.application!==!!x.scenarios?.length)ctx.addIssue({code:'custom',message:'Application server and scenarios must be supplied together'});
+   const all=new Set([...x.requirements,...(x.scenarios??[])].map(r=>r.id));
+   if(x.coverage?.aspects.some(a=>a.requirementIds.some(id=>!all.has(id))))ctx.addIssue({code:'custom',message:'Coverage maps to an unknown requirement'});
+   if(x.coverage&&new Set(x.coverage.aspects.map(a=>a.id)).size!==x.coverage.aspects.length)ctx.addIssue({code:'custom',message:'Coverage aspect IDs must be unique'});
+  }
+  const ids=[...x.requirements,...(x.scenarios??[])].map(r=>r.id);if(new Set(ids).size!==ids.length)ctx.addIssue({code:'custom',message:'Requirement IDs must be unique'});
 });
 export function parseContract(value: unknown): Contract {return contractSchema.parse(value) as Contract;}
 
 
 /** Detect single-file contract drift without pretending the whole local store is authenticated. */
 export function validateApprovalProposal(contract:Contract,proposal:unknown):void {
+ if(contract.schemaVersion===3){
+  if(!contract.approval)return;
+  const p=proposal as {schemaVersion?:number;contract?:unknown;resolvedQuestions?:unknown};const {approval,...body}=contract;
+  if(p?.schemaVersion!==2||!isDeepStrictEqual(p.contract,body)||!isDeepStrictEqual(p.resolvedQuestions,approval.resolvedQuestions))throw new Error('Contract differs from the reviewed application proposal. Review and approve a fresh plan.');return;
+ }
  if(contract.schemaVersion!==2)return;
  if(!proposal||typeof proposal!=='object')throw new Error('Approved proposal is malformed; review a fresh plan.');
  const p=proposal as {schemaVersion?:number;objective?:unknown;proposed?:{selected?:unknown;requirement?:unknown}[];uncertainties?:unknown;resolvedQuestions?:unknown};

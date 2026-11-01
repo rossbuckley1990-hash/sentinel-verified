@@ -1,3 +1,4 @@
+import { VERSION } from './version.js';
 import { chmod, mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -9,7 +10,7 @@ import { verify } from './verifier.js';
 import type { Receipt, VerificationOptions } from './types.js';
 
 export type RunnerChoice = { kind: 'local' } | { kind: 'docker'; image: string };
-export const DEFAULT_RUNNER_IMAGE = 'sentinel-runner:0.2.0';
+export const DEFAULT_RUNNER_IMAGE = `sentinel-runner:${VERSION}`;
 export interface ContainerRequest { schemaVersion: 1; baselineHash: string; candidateHash: string; contractHash: string | null; timeoutMs: number }
 const imagePattern = /^[a-zA-Z0-9][a-zA-Z0-9_.:/@-]{0,255}$/;
 const imageIdPattern = /^sha256:[a-f0-9]{64}$/;
@@ -50,6 +51,7 @@ export function dockerVerificationCommand(imageId: string, inputDirectory: strin
 export async function executeVerification(options: VerificationOptions, runner: RunnerChoice = { kind: 'local' }): Promise<Receipt> {
   if (runner.kind === 'local') return verify(options);
   if (runner.kind !== 'docker') throw new Error('Unknown verification runner. No local fallback was attempted.');
+  if(options.contract?.application)throw new Error('Application/browser verification currently requires the explicitly approved local runner. Docker application verification is unsupported; no local fallback was attempted.');
   const readiness = await inspectDocker(runner.image);
   if (!readiness.available || !readiness.imageId) throw new Error(`Requested Docker isolation is unavailable. No local fallback was attempted. ${readiness.reason}`);
   const baseline = await readSnapshot(options.store, options.baseline.hash);
@@ -79,7 +81,7 @@ export async function executeVerification(options: VerificationOptions, runner: 
     const lines = result.stdout.split('\n').filter(line => line.startsWith(prefix));
     if (lines.length !== 1) throw new Error('Container produced no unique receipt. No local fallback was attempted.');
     const receipt = JSON.parse(lines[0]!.slice(prefix.length)) as Receipt;
-    if (receipt.schemaVersion !== 1 || receipt.baselineHash !== baseline.hash || receipt.candidateHash !== candidate.hash || receipt.contractHash !== options.contractHash || !Array.isArray(receipt.checks) || !Array.isArray(receipt.limitations)) throw new Error('Container receipt does not match the requested source and contract.');
+    if (![1,2].includes(receipt.schemaVersion) || receipt.baselineHash !== baseline.hash || receipt.candidateHash !== candidate.hash || receipt.contractHash !== options.contractHash || !Array.isArray(receipt.checks) || !Array.isArray(receipt.limitations)) throw new Error('Container receipt does not match the requested source and contract.');
     // Docker contains source execution; neither the image nor the evidence is cryptographically authenticated.
     receipt.runner = 'container-isolated';
     receipt.runtime = { ...receipt.runtime, containerImageId: readiness.imageId, containerNetwork: 'none', containerMemory: '1g', containerCpus: '2', containerCheckTimeoutMs: String(request.timeoutMs), containerTotalTimeoutMs: '180000' };

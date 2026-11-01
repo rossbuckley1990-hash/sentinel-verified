@@ -1,0 +1,293 @@
+Ordinary developer handoff summary for a fresh coding-agent context. This is an explicit evidence-rich control, not a reconstruction of hidden reasoning.
+
+Original objective: Add the stable error code INVALID_API_KEY to invalid API-key responses while preserving missing-key errors and valid user responses.
+Current workspace: <direct-control>/project
+The implementation attempt has finished. Exact current source is available in app.cjs; preserve it unless a reviewed criterion still fails. This handoff follows a completed attempt, not an artificially claimed process crash.
+
+Approved criteria, unchanged:
+[
+  {
+    "id": "application-f69df4f7",
+    "kind": "must-change",
+    "description": "Return a stable error code for invalid API keys on users",
+    "type": "http",
+    "method": "GET",
+    "path": "/api/users?api-key=wrong",
+    "expected": {
+      "status": 401,
+      "bodyType": "json",
+      "body": {
+        "error": "invalid api key",
+        "code": "INVALID_API_KEY"
+      }
+    }
+  },
+  {
+    "id": "application-7c07e3f2",
+    "kind": "must-change",
+    "description": "Return the same stable invalid-key code for repositories",
+    "type": "http",
+    "method": "GET",
+    "path": "/api/repos?api-key=wrong",
+    "expected": {
+      "status": 401,
+      "bodyType": "json",
+      "body": {
+        "error": "invalid api key",
+        "code": "INVALID_API_KEY"
+      }
+    }
+  },
+  {
+    "id": "application-b0e782f7",
+    "kind": "must-preserve",
+    "description": "Preserve the missing-key validation response",
+    "type": "http",
+    "method": "GET",
+    "path": "/api/users",
+    "expected": {
+      "status": 400,
+      "bodyType": "json",
+      "body": {
+        "error": "api key required"
+      }
+    }
+  },
+  {
+    "id": "application-751d920d",
+    "kind": "must-preserve",
+    "description": "Preserve the existing valid user list",
+    "type": "http",
+    "method": "GET",
+    "path": "/api/users?api-key=foo",
+    "expected": {
+      "status": 200,
+      "bodyType": "json",
+      "body": [
+        {
+          "name": "tobi"
+        },
+        {
+          "name": "loki"
+        },
+        {
+          "name": "jane"
+        }
+      ]
+    }
+  }
+]
+
+Independent external evaluation of this exact source snapshot ce903c480146d2db8a1947a7e96c1cd911da6c4a0320e5afad87f5bf89f8c755: VERIFIED.
+Checks, including passing and failing outcomes with expected and observed results:
+[
+  {
+    "id": "baseline-tests",
+    "label": "Baseline tests",
+    "status": "VERIFIED",
+    "detail": "11/11 ordinary tests passed; these do not establish the approved intent"
+  },
+  {
+    "id": "candidate-tests",
+    "label": "Candidate ordinary tests",
+    "status": "VERIFIED",
+    "detail": "11/11 ordinary tests passed; these do not establish the approved intent"
+  },
+  {
+    "id": "preserved-tests",
+    "label": "Preserved baseline tests",
+    "status": "VERIFIED",
+    "detail": "11/11 ordinary tests passed; these do not establish the approved intent"
+  },
+  {
+    "id": "application-server:baseline",
+    "label": "baseline server lifecycle",
+    "status": "VERIFIED",
+    "detail": "Approved server command started on a fresh loopback port and was stopped after observation. This is execution evidence, not an acceptance result."
+  },
+  {
+    "id": "application-server:candidate",
+    "label": "candidate server lifecycle",
+    "status": "VERIFIED",
+    "detail": "Approved server command started on a fresh loopback port and was stopped after observation. This is execution evidence, not an acceptance result."
+  },
+  {
+    "id": "req:application-f69df4f7",
+    "requirementId": "application-f69df4f7",
+    "label": "Return a stable error code for invalid API keys on users",
+    "status": "VERIFIED",
+    "detail": "The approved application scenario passed twice. This establishes only the specified observations.",
+    "args": [
+      {
+        "type": "http",
+        "path": "/api/users?api-key=wrong",
+        "method": "GET",
+        "body": null
+      }
+    ],
+    "expected": {
+      "status": 401,
+      "body": {
+        "error": "invalid api key",
+        "code": "INVALID_API_KEY"
+      }
+    },
+    "observed": {
+      "status": 401,
+      "body": {
+        "error": "invalid api key",
+        "code": "INVALID_API_KEY"
+      }
+    },
+    "baseline": {
+      "status": 401,
+      "body": {
+        "error": "invalid api key"
+      }
+    }
+  },
+  {
+    "id": "req:application-7c07e3f2",
+    "requirementId": "application-7c07e3f2",
+    "label": "Return the same stable invalid-key code for repositories",
+    "status": "VERIFIED",
+    "detail": "The approved application scenario passed twice. This establishes only the specified observations.",
+    "args": [
+      {
+        "type": "http",
+        "path": "/api/repos?api-key=wrong",
+        "method": "GET",
+        "body": null
+      }
+    ],
+    "expected": {
+      "status": 401,
+      "body": {
+        "error": "invalid api key",
+        "code": "INVALID_API_KEY"
+      }
+    },
+    "observed": {
+      "status": 401,
+      "body": {
+        "error": "invalid api key",
+        "code": "INVALID_API_KEY"
+      }
+    },
+    "baseline": {
+      "status": 401,
+      "body": {
+        "error": "invalid api key"
+      }
+    }
+  },
+  {
+    "id": "req:application-b0e782f7",
+    "requirementId": "application-b0e782f7",
+    "label": "Preserve the missing-key validation response",
+    "status": "VERIFIED",
+    "detail": "The approved application scenario passed twice. This establishes only the specified observations.",
+    "args": [
+      {
+        "type": "http",
+        "path": "/api/users",
+        "method": "GET",
+        "body": null
+      }
+    ],
+    "expected": {
+      "status": 400,
+      "body": {
+        "error": "api key required"
+      }
+    },
+    "observed": {
+      "status": 400,
+      "body": {
+        "error": "api key required"
+      }
+    },
+    "baseline": {
+      "status": 400,
+      "body": {
+        "error": "api key required"
+      }
+    }
+  },
+  {
+    "id": "req:application-751d920d",
+    "requirementId": "application-751d920d",
+    "label": "Preserve the existing valid user list",
+    "status": "VERIFIED",
+    "detail": "The approved application scenario passed twice. This establishes only the specified observations.",
+    "args": [
+      {
+        "type": "http",
+        "path": "/api/users?api-key=foo",
+        "method": "GET",
+        "body": null
+      }
+    ],
+    "expected": {
+      "status": 200,
+      "body": [
+        {
+          "name": "tobi"
+        },
+        {
+          "name": "loki"
+        },
+        {
+          "name": "jane"
+        }
+      ]
+    },
+    "observed": {
+      "status": 200,
+      "body": [
+        {
+          "name": "tobi"
+        },
+        {
+          "name": "loki"
+        },
+        {
+          "name": "jane"
+        }
+      ]
+    },
+    "baseline": {
+      "status": 200,
+      "body": [
+        {
+          "name": "tobi"
+        },
+        {
+          "name": "loki"
+        },
+        {
+          "name": "jane"
+        }
+      ]
+    }
+  }
+]
+
+Source changes:
+[
+  {
+    "path": "app.cjs",
+    "kind": "modified",
+    "classification": "VERIFIED",
+    "reason": "Path authorised by the supplied contract; behaviour is checked separately"
+  }
+]
+
+Environment: Node v26.12.0; Express5.3.0, Mocha12.0.3, Supertest7.3.1, Vitest5.0.5. Dependencies already present via node_modules. Server: node server.cjs with PORT set, binds127.0.0.1; /health signals readiness. Original eleven Mocha tests: node node_modules/mocha/bin/mocha.js upstream-mocha.cjs. Current checks are finite and local advisory; no general correctness claim. No private model reasoning was transferred.
+
+Unverified claims: the previous agent's own claims are not used as evidence; rely on current code and the independently recorded results above.
+Next actions: inspect current code and the provided evidence, resolve any explicit failed criterion within app.cjs only, preserve existing tests and all passing behavior. If all approved outcomes are already met, avoid unnecessary changes and clearly say what remains unknown. You may run appropriate checks. Do not install dependencies or commit.
+
+PRIOR EXECUTION LIMITATIONS — retained explicitly for this handoff:
+The earlier Codex workspace-write process could not bind a loopback socket (listen EPERM). Its initial Vitest command also could not write node_modules/.vitest-cache through the external dependency symlink; disabling cache did not resolve the socket restriction. These are observed agent-environment failures, not evidence that app.cjs is wrong. The independent evaluator ran outside that agent sandbox with the approved local-execution consent and established all four real HTTP criteria and eleven tests. The source has not changed since that evaluation. Do not repeat the same known-blocked network commands merely to rediscover this limitation; inspect the code/diff or run supported non-network checks if useful. Report any unverified scope honestly. An in-process response check is not a live HTTP check.
+

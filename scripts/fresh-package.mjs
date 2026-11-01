@@ -19,5 +19,5 @@ await run('npm',['install','--prefix',prefix,'--ignore-scripts','--no-audit','--
 const cli=path.join(prefix,'node_modules','sentinel-verified','dist','cli.js');
 const version=(await run(process.execPath,[cli,'--version'],root)).trim();
 await run(process.execPath,[cli,'demo','--store',store],root);
-const result={schemaVersion:1,date:new Date().toISOString(),archive,version,node:process.version,platform:process.platform,arch:process.arch,emptyNpmCache:true,freshInstallPrefix:true,lifecycleScriptsDisabled:true,preinstalled:['Node.js','npm','Git'],firstMeaningfulMs,totalMs:Math.round(performance.now()-begun),under90Seconds:typeof firstMeaningfulMs==='number'&&firstMeaningfulMs<90000,steps};
+const result={schemaVersion:1,date:new Date().toISOString(),archive,version,node:process.version,platform:process.platform,arch:process.arch,emptyNpmCache:true,freshInstallPrefix:true,lifecycleScriptsDisabled:true,preinstalled:['Node.js','npm','Git','Compatible installed browser'],firstMeaningfulMs,totalMs:Math.round(performance.now()-begun),under90Seconds:typeof firstMeaningfulMs==='number'&&firstMeaningfulMs<90000,steps};
 const output=process.argv[3]??path.join(root,'fresh-package.json');await fs.writeFile(output,JSON.stringify(result,null,2)+'\n');console.log(`Fresh package measurement: ${output}`);

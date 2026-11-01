@@ -17,5 +17,5 @@ await run('git',['clone','--branch',ref,'https://github.com/rossbuckley1990-hash
 const repo=path.join(root,'project');
 const commit=(await run('git',['rev-parse','HEAD'],repo)).trim();
 await run('npm',['ci'],repo);await run('npm',['run','build'],repo);await run(process.execPath,['dist/cli.js','demo'],repo);
-const result={schemaVersion:1,date:new Date().toISOString(),platform:process.platform,arch:process.arch,node:process.version,commit,ref,emptyNpmCache:true,preinstalled:['Node.js','npm','Git'],firstMeaningfulMs,totalMs:Math.round(performance.now()-start),under90Seconds:typeof firstMeaningfulMs==='number'&&firstMeaningfulMs<90000,steps};
+const result={schemaVersion:1,date:new Date().toISOString(),platform:process.platform,arch:process.arch,node:process.version,commit,ref,emptyNpmCache:true,preinstalled:['Node.js','npm','Git','Compatible installed browser'],firstMeaningfulMs,totalMs:Math.round(performance.now()-start),under90Seconds:typeof firstMeaningfulMs==='number'&&firstMeaningfulMs<90000,steps};
 const out=process.argv[2]??path.join(root,'fresh-install.json');await fs.writeFile(out,JSON.stringify(result,null,2)+'\n');console.log(`Fresh-install result: ${out}`);
