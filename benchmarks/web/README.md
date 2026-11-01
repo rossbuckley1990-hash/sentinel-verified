@@ -51,3 +51,5 @@ To replay retained API/browser source after optionally removing only the benchma
 ```sh
 node benchmarks/web/replay.mjs --allow-local --results=/tmp/sentinel-web-results.json --remove-originals --out=/tmp/sentinel-web-replays.json
 ```
+
+The [authenticated direct-agent and complete ordinary-summary control](../../docs/V1-AGENT-COMPARISON.md) is separate from this scripted corpus. It uses the same approved Express task and records successful baselines without inferring a productivity advantage.

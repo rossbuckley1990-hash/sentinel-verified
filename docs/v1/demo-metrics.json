@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "controlledDemo": true,
+  "application": true,
+  "node": "v26.12.0",
+  "platform": "darwin",
+  "arch": "arm64",
+  "firstResultMs": 24087,
+  "totalMs": 41718,
+  "session": "s-mvy8bh5e-6ddfd652",
+  "initialReceipt": "2a769d3e3c5fdd6a03bb9e9cca4a404a0d7131b02bc59955c21adf4f8e52518b",
+  "finalReceipt": "20efe805f12ea6992076c6fc34c1e98563ca489ff76c6578d7c5963ed5d58253"
+}

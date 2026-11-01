@@ -1,0 +1,760 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-01T19:47:47.226Z",
+  "task": "Add INVALID_API_KEY to invalid API-key responses in the pinned Express example; preserve missing-key and valid-user behavior",
+  "source": {
+    "repository": "https://github.com/expressjs/express",
+    "upstreamCommit": "1c6f1b0fe4000977b9a7b4f34097e4d527dd9824",
+    "adapterBaselineCommit": "b1a5c27e79054cf45cae737d5eaf28034abe6419",
+    "contractHash": "5f11c8f47894bcd591aca727857eb5dea144b084d8529eaf215946a1ed17ab00",
+    "baselineHash": "e09a095e999c533f7894f5c330515dc32384e28c8e730e3f2b07c85947ccae90"
+  },
+  "humanAndOperatorActions": {
+    "humanApprovalAnswers": 1,
+    "description": "One human approval answer was forwarded into two actual UI decisions: criteria approval and local-execution consent. The operator populated the four HTTP scenarios. Direct controls reused the same approved criteria; no additional human approval was solicited for each control.",
+    "notMeasured": "Human effort, onboarding time and a population task-completion rate were not measured."
+  },
+  "sentinel": {
+    "sessionId": "s-mvy8hr75-8cf42673",
+    "state": "verified",
+    "baselineHash": "e09a095e999c533f7894f5c330515dc32384e28c8e730e3f2b07c85947ccae90",
+    "candidateHash": "b5e2d673c128394e3476c6fe54f1792e95072d5f68290c2be69f464da1fa771c",
+    "contractHash": "5f11c8f47894bcd591aca727857eb5dea144b084d8529eaf215946a1ed17ab00",
+    "stages": [
+      {
+        "index": 0,
+        "agent": "codex",
+        "outcome": "completed",
+        "agentDurationMs": 51983,
+        "acknowledged": true,
+        "startedAt": "2026-11-01T19:39:39.201Z",
+        "completedAt": "2026-11-01T19:40:32.653Z",
+        "completedCommandEvents": 9,
+        "nonzeroCommandEvents": 3,
+        "commands": [
+          {
+            "command": "/bin/zsh -lc 'cat <sentinel-store>/objects/5f11c8f47894bcd591aca727857eb5dea144b084d8529eaf215946a1ed17ab00'",
+            "commandSha256": "05a04a6aa4230a23140755d0752ca4121ced96a4bcd37d56aea300b18cb9008d",
+            "exitCode": 0,
+            "status": "completed"
+          },
+          {
+            "command": "/bin/zsh -lc \"pwd && rg --files -g 'AGENTS.md' -g 'app.cjs' -g 'server.cjs' -g 'package.json' -g '*test*' -g '*spec*'\"",
+            "commandSha256": "04fcf153888bdb4cc9b625d4af2fb2e3c1c32f0d584e2ee87cdaa1c515406317",
+            "exitCode": 0,
+            "status": "completed"
+          },
+          {
+            "command": "/bin/zsh -lc 'git status --short && git diff -- app.cjs'",
+            "commandSha256": "3a675144dc6f23e65267527ccedafd4e2b9afe9df1cb3f598be685c4bf69b96c",
+            "exitCode": 0,
+            "status": "completed"
+          },
+          {
+            "command": "/bin/zsh -lc 'cat app.cjs server.cjs package.json api.test.js'",
+            "commandSha256": "7c43b295e1e4bc537f5e5aaa1b864430fe56610bf0820081adaa18be31ee1949",
+            "exitCode": 0,
+            "status": "completed"
+          },
+          {
+            "command": "/bin/zsh -lc 'for d in / /private /private/tmp <sentinel-store> <sentinel-store>/workspaces <sentinel-store>/workspaces/s-mvy8hr75-8cf42673; do if [ -f \"$d/AGENTS.md\" ]; then printf '\"'%s\\\\n' \\\"\"'$d/AGENTS.md\"; cat \"$d/AGENTS.md\"; fi; done\nls -ld node_modules\nrg --files --hidden -g '\"'AGENTS.md' -g '\"'!node_modules'\"' -g '\"'!.git'\"'\"",
+            "commandSha256": "fb3a3f5873cff014e8fe15f1b5bf7449f4fe7414fa1e3ce363d36908824c09e7",
+            "exitCode": 1,
+            "status": "failed"
+          },
+          {
+            "command": "/bin/zsh -lc \"node -p 'JSON.stringify(Object.fromEntries([\\\"express\\\", \\\"vitest\\\", \\\"supertest\\\"].map(name => [name, require(name + \\\"/package.json\\\").version])))'\nnode --check app.cjs\ngit diff --check\"",
+            "commandSha256": "b23626cbb99119c912191ab5210c6ce7982c4de5bfcde61176d42cf92b1c717e",
+            "exitCode": 0,
+            "status": "completed"
+          },
+          {
+            "command": "/bin/zsh -lc \"node <<'NODE'\nconst assert = require('node:assert/strict');\nconst fs = require('node:fs');\nconst net = require('node:net');\nconst { spawn } = require('node:child_process');\nconst { once } = require('node:events');\nconst { setTimeout: delay } = require('node:timers/promises');\n(async () => {\n  const contract = JSON.parse(fs.readFileSync('<sentinel-store>/objects/5f11c8f47894bcd591aca727857eb5dea144b084d8529eaf215946a1ed17ab00', 'utf8'));\n  const probe = net.createServer();\n  probe.listen(0, '127.0.0.1');\n  await once(probe, 'listening');\n  const port = probe.address().port;\n  await new Promise(resolve => probe.close(resolve));\n  const child = spawn(process.execPath, ['server.cjs'], { env: { ...process.env, PORT: String(port) }, stdio: ['ignore', 'pipe', 'pipe'] });\n  let output = '';\n  child.stdout.on('data', chunk => output += chunk);\n  child.stderr.on('data', chunk => output += chunk);\n  try {\n    const base = \"'`http://127.0.0.1:${port}`;\n    let ready = false;\n    for (let attempt = 0; attempt < 100; attempt++) {\n      if (child.exitCode !== null) throw new Error(`Server exited: ${output}`);\n      try { ready = (await fetch(base + contract.application.readyPath)).status === 200; } catch {}\n      if (ready) break;\n      await delay(50);\n    }\n    assert.ok(ready, `Server readiness failed: ${output}`);\n    for (const scenario of contract.scenarios) {\n      const response = await fetch(base + scenario.path, { method: scenario.method });\n      assert.equal(response.status, scenario.expected.status, scenario.id);\n      assert.match(response.headers.get('\"'content-type'), /\"'^application'\"\\\\/json\\\\b/, scenario.id);\n      assert.deepEqual(await response.json(), scenario.expected.body, scenario.id);\n      console.log(\"'`PASS ${scenario.description}`);\n    }\n    for (const path of ['\"'/api/repos', '/api/user/loki/repos', '/api/users']) {\n      for (const query of ['', '?api-key=', '?api-key=rawr', '?api-key=[REDACTED_SECRET]']) {\n        const response = await fetch(base + path + query);\n        const invalid = query && query \"'!== '\"'?api-key=';\n        assert.equal(response.status, invalid ? 401 : 400);\n        assert.deepEqual(await response.json(), invalid ? {error: 'invalid api key', code: 'INVALID_API_KEY'} : {error: 'api key required'});\n      }\n    }\n    console.log('PASS 12 additional missing, empty, and invalid-key checks across API routes');\n    for (const key of ['foo', 'bar', 'baz']) {\n      const response = await fetch(base + '/api/users?api-key=' + key);\n      assert.equal(response.status, 200);\n      assert.deepEqual(await response.json(), [{name: 'tobi'}, {name: 'loki'}, {name: 'jane'}]);\n    }\n    console.log('PASS user list with all 3 configured valid keys');\n  } finally {\n    if (child.exitCode === null) {\n      const closed = once(child, 'close');\n      child.kill();\n      await closed;\n    }\n  }\n})().catch(error => { console.error(error); process.exitCode = 1; });\nNODE\"",
+            "commandSha256": "d1b3141060d3a42269b09fa449ac51a894dca0fbfeff57ba5a09f6dbc18a7611",
+            "exitCode": 1,
+            "status": "failed"
+          },
+          {
+            "command": "/bin/zsh -lc 'node node_modules/vitest/vitest.mjs run api.test.js --no-cache'",
+            "commandSha256": "a4ebaeec32e1f80d16b0aefaa96e6ee25c3a7e205639e343df087c56cd1650c9",
+            "exitCode": 1,
+            "status": "failed"
+          },
+          {
+            "command": "/bin/zsh -lc \"node <<'NODE'\nconst assert = require('node:assert/strict');\nconst fs = require('node:fs');\nconst http = require('node:http');\nconst net = require('node:net');\nconst app = require('./app.cjs');\nconst contract = JSON.parse(fs.readFileSync('<sentinel-store>/objects/5f11c8f47894bcd591aca727857eb5dea144b084d8529eaf215946a1ed17ab00', 'utf8'));\nfunction request(path, method = 'GET') {\n  return new Promise((resolve, reject) => {\n    const req = new http.IncomingMessage(new net.Socket());\n    req.method = method;\n    req.url = path;\n    req.headers = { host: 'localhost' };\n    const res = new http.ServerResponse(req);\n    const timeout = setTimeout(() => reject(new Error(\"'`No response for ${path}`)), 2000);\n    res.end = function(chunk) {\n      clearTimeout(timeout);\n      try {\n        resolve({ status: this.statusCode, headers: this.getHeaders(), body: JSON.parse(String(chunk)) });\n      } catch (error) { reject(error); }\n      return this;\n    };\n    app(req, res);\n  });\n}\n(async () => {\n  for (const scenario of contract.scenarios) {\n    const response = await request(scenario.path, scenario.method);\n    assert.equal(response.status, scenario.expected.status, scenario.id);\n    assert.match(response.headers['\"'content-type'], /\"'^application'\"\\\\/json\\\\b/, scenario.id);\n    assert.deepEqual(response.body, scenario.expected.body, scenario.id);\n    console.log(\"'`PASS ${scenario.description}`);\n  }\n  for (const path of ['\"'/api/repos', '/api/user/loki/repos', '/api/users']) {\n    for (const query of ['', '?api-key=', '?api-key=rawr', '?api-key=[REDACTED_SECRET]']) {\n      const response = await request(path + query);\n      const invalid = Boolean(query && query \"'!== '\"'?api-key=');\n      assert.equal(response.status, invalid ? 401 : 400);\n      assert.deepEqual(response.body, invalid ? {error: 'invalid api key', code: 'INVALID_API_KEY'} : {error: 'api key required'});\n    }\n  }\n  console.log('PASS 12 additional missing, empty, and invalid-key checks across API routes');\n  for (const key of ['foo', 'bar', 'baz']) {\n    const response = await request('/api/users?api-key=' + key);\n    assert.equal(response.status, 200);\n    assert.deepEqual(response.body, [{name: 'tobi'}, {name: 'loki'}, {name: 'jane'}]);\n  }\n  console.log('PASS user list with all 3 configured valid keys');\n  const repos = [\n    {name: 'express', url: 'https://github.com/expressjs/express'},\n    {name: 'stylus', url: 'https://github.com/learnboost/stylus'},\n    {name: 'cluster', url: 'https://github.com/learnboost/cluster'}\n  ];\n  for (const [path, status, body] of [\n    ['/api/repos?api-key=foo', 200, repos],\n    ['/api/user/loki/repos?api-key=foo', 200, [repos[1]]],\n    ['/api/user/bob/repos?api-key=foo', 404, {error: \\\"Sorry, can't find that\\\"}],\n    ['/api/something?api-key=bar', 404, {error: \\\"Sorry, can't find that\\\"}]\n  ]) {\n    const response = await request(path);\n    assert.equal(response.status, status);\n    assert.deepEqual(response.body, body);\n  }\n  console.log('PASS 4 repository and unknown-route regression checks');\n  console.log('23 in-process response checks passed; network transport was not exercised.');\n})().catch(error => { console.error(error); process.exitCode = 1; });\nNODE\nnode --check app.cjs\ngit diff --check\ngit diff --stat\ngit diff -- app.cjs\ngit status --short\"",
+            "commandSha256": "663658188dcb3cb2b49a235c964f748cf2e47170539a90d3f39c914e7c36e62e",
+            "exitCode": 0,
+            "status": "completed"
+          }
+        ]
+      },
+      {
+        "index": 1,
+        "agent": "codex",
+        "outcome": "interrupted",
+        "agentDurationMs": 33903,
+        "acknowledged": true,
+        "startedAt": "2026-11-01T19:41:00.365Z",
+        "completedAt": "2026-11-01T19:41:34.721Z",
+        "completedCommandEvents": 8,
+        "nonzeroCommandEvents": 2,
+        "commands": [
+          {
+            "command": "/bin/zsh -lc 'cat <sentinel-store>/objects/5f11c8f47894bcd591aca727857eb5dea144b084d8529eaf215946a1ed17ab00'",
+            "commandSha256": "05a04a6aa4230a23140755d0752ca4121ced96a4bcd37d56aea300b18cb9008d",
+            "exitCode": 0,
+            "status": "completed"
+          },
+          {
+            "command": "/bin/zsh -lc \"pwd; rg --files -g 'AGENTS.md' -g 'package.json' -g '*.cjs' -g '*test*' -g '\"'!node_modules'\"' -g '\"'!package-lock.json'\"'\"",
+            "commandSha256": "78de105f9cd5bb483886ebb6e3e57f4fa305671d0971c66cdcea68ffd1c9c265",
+            "exitCode": 0,
+            "status": "completed"
+          },
+          {
+            "command": "/bin/zsh -lc 'git status --short; git diff -- app.cjs'",
+            "commandSha256": "28352ebfd6471e21918a7c4e76776bea0e877a991a1c2d45e080009aa206db4d",
+            "exitCode": 0,
+            "status": "completed"
+          },
+          {
+            "command": "/bin/zsh -lc 'for dir in / /private /private/tmp <sentinel-store> <sentinel-store>/workspaces <sentinel-store>/workspaces/s-mvy8hr75-8cf42673; do if [ -f \"$dir/AGENTS.md\" ]; then printf '\"'%s\\\\n' \\\"\"'$dir/AGENTS.md\"; cat \"$dir/AGENTS.md\"; fi; done; ls -ld node_modules; readlink node_modules'",
+            "commandSha256": "d118930b95487a7615988dd7c6e3c91369b04acb57334dfa688b2682eac7d0d6",
+            "exitCode": 0,
+            "status": "completed"
+          },
+          {
+            "command": "/bin/zsh -lc 'cat app.cjs server.cjs package.json api.test.js upstream-mocha.cjs'",
+            "commandSha256": "c28b90ab97313e06667d15c2f243f1b18130fa3eb3cf10f009d19442ac0edf94",
+            "exitCode": 0,
+            "status": "completed"
+          },
+          {
+            "command": "/bin/zsh -lc \"node --version; node -e 'for (const name of [\\\"express\\\", \\\"supertest\\\", \\\"vitest\\\"]) { const path = require.resolve(name + \\\"/package.json\\\"); const pkg = require(path); console.log(JSON.stringify({name,version:pkg.version,path,bin:pkg.bin})); }'; git diff --check\"",
+            "commandSha256": "359fc76ef19492d7fed8eb43c11fa199351a129b3a3b63fa66bf9821942f2d02",
+            "exitCode": 0,
+            "status": "completed"
+          },
+          {
+            "command": "/bin/zsh -lc \"node --input-type=module <<'NODE'\nimport assert from 'node:assert/strict';\nimport {spawn} from 'node:child_process';\nimport {once} from 'node:events';\nimport {readFileSync, mkdtempSync, rmSync} from 'node:fs';\nimport {createServer} from 'node:net';\nimport {tmpdir} from 'node:os';\nimport {join} from 'node:path';\nimport {setTimeout as delay} from 'node:timers/promises';\nconst contract = JSON.parse(readFileSync('<sentinel-store>/objects/5f11c8f47894bcd591aca727857eb5dea144b084d8529eaf215946a1ed17ab00', 'utf8'));\nconst listener = createServer();\nlistener.listen(0, '127.0.0.1');\nawait once(listener, 'listening');\nconst port = listener.address().port;\nawait new Promise(resolve => listener.close(resolve));\nconst tempHome = mkdtempSync(join(tmpdir(), 'sentinel-api-check-'));\nconst child = spawn(process.execPath, ['server.cjs'], {env: {PATH: process.env.PATH, HOME: tempHome, PORT: String(port), HOST: '127.0.0.1'}, stdio: ['ignore', 'pipe', 'pipe']});\nlet output = '';\nchild.stdout.on('data', data => output += data);\nchild.stderr.on('data', data => output += data);\nconst exited = once(child, 'exit');\nconst base = \"'`http://127.0.0.1:${port}`;\nasync function check(path, status, body) {\n  const response = await fetch(base + path, {signal: AbortSignal.timeout(2000)});\n  assert.equal(response.status, status, path);\n  assert.match(response.headers.get('\"'content-type'), /\"'^application'\"\\\\/json\\\\b/, path);\n  assert.deepEqual(await response.json(), body, path);\n}\ntry {\n  let ready = false;\n  for (let i = 0; i < 100; i++) {\n    if (child.exitCode \"'!== null) throw new Error(`Server exited: ${output}`);\n    try { ready = (await fetch(base + '\"'/health', {signal: AbortSignal.timeout(200)})).status === 200; } catch {}\n    if (ready) break;\n    await delay(50);\n  }\n  assert.ok(ready, \"'`Server never became ready: ${output}`);\n  for (const scenario of contract.scenarios) {\n    await check(scenario.path, scenario.expected.status, scenario.expected.body);\n    console.log(`PASS approved: ${scenario.description}`);\n  }\n  let extra = 0;\n  for (const path of ['\"'/api/users', '/api/repos', '/api/user/loki/repos']) {\n    for (const query of ['', '?api-key=']) {\n      await check(path + query, 400, {error: 'api key required'});\n      extra++;\n    }\n    await check(path + '?api-key=rawr', 401, {error: 'invalid api key', code: 'INVALID_API_KEY'});\n    extra++;\n  }\n  for (const key of ['bar', 'baz']) {\n    await check('/api/users?api-key=' + key, 200, [{name:'tobi'}, {name:'loki'}, {name:'jane'}]);\n    extra++;\n  }\n  await check('/api/something?api-key=bar', 404, {error: \\\"Sorry, can't find that\\\"});\n  extra++;\n  console.log(\"'`PASS ${contract.scenarios.length} approved scenarios and ${extra} additional response checks`);\n} finally {\n  if (child.exitCode === null) child.kill('\"'SIGTERM');\n  await exited;\n  rmSync(tempHome, {recursive:true, force:true});\n}\nNODE\"",
+            "commandSha256": "f1e218f6e945851aa90a65ecb12362b115bcae02aac88c52bd3149eac5eeff69",
+            "exitCode": 1,
+            "status": "failed"
+          },
+          {
+            "command": "/bin/zsh -lc 'node node_modules/vitest/vitest.mjs run api.test.js --environment node --no-cache'",
+            "commandSha256": "a7c33166cc2011a6d40b3a86a0c78050f67cf18202a0a12820d2e6cc57faee07",
+            "exitCode": 1,
+            "status": "failed"
+          }
+        ]
+      },
+      {
+        "index": 2,
+        "agent": "codex",
+        "outcome": "completed",
+        "agentDurationMs": 66193,
+        "acknowledged": true,
+        "startedAt": "2026-11-01T19:42:00.359Z",
+        "completedAt": "2026-11-01T19:43:07.660Z",
+        "completedCommandEvents": 12,
+        "nonzeroCommandEvents": 3,
+        "commands": [
+          {
+            "command": "/bin/zsh -lc 'cat <sentinel-store>/objects/5f11c8f47894bcd591aca727857eb5dea144b084d8529eaf215946a1ed17ab00'",
+            "commandSha256": "05a04a6aa4230a23140755d0752ca4121ced96a4bcd37d56aea300b18cb9008d",
+            "exitCode": 0,
+            "status": "completed"
+          },
+          {
+            "command": "/bin/zsh -lc \"pwd; rg --files -g 'AGENTS.md' -g 'package.json' -g '*test*' -g '*.cjs' -g '*lock*' -g '\"'!node_modules'\"' -g '\"'!vendor'\"'\"",
+            "commandSha256": "2d4c795fba3057cece48fe18f5b1f9a716fba2de8da603af103ebf20b54d4e47",
+            "exitCode": 0,
+            "status": "completed"
+          },
+          {
+            "command": "/bin/zsh -lc 'git status --short; git diff -- app.cjs'",
+            "commandSha256": "28352ebfd6471e21918a7c4e76776bea0e877a991a1c2d45e080009aa206db4d",
+            "exitCode": 0,
+            "status": "completed"
+          },
+          {
+            "command": "/bin/zsh -lc 'cat app.cjs server.cjs package.json api.test.js upstream-mocha.cjs'",
+            "commandSha256": "c28b90ab97313e06667d15c2f243f1b18130fa3eb3cf10f009d19442ac0edf94",
+            "exitCode": 0,
+            "status": "completed"
+          },
+          {
+            "command": "/bin/zsh -lc 'for dir in / /private /private/tmp <sentinel-store> <sentinel-store>/workspaces <sentinel-store>/workspaces/s-mvy8hr75-8cf42673; do if [ -f \"$dir/AGENTS.md\" ]; then cat \"$dir/AGENTS.md\"; fi; done; ls -ld node_modules; node --version; shasum -a 256 app.cjs <sentinel-store>/objects/5f11c8f47894bcd591aca727857eb5dea144b084d8529eaf215946a1ed17ab00'",
+            "commandSha256": "334a6722b4706f865cd30b1f364b036ee7191344b604d2f43d2bc1b0e425042a",
+            "exitCode": 0,
+            "status": "completed"
+          },
+          {
+            "command": "/bin/zsh -lc \"rg --files --hidden -g '\"'!node_modules'\"' -g '\"'!.git'\"'; node -e \\\"for (const name of ['express', 'supertest', 'vitest']) { const path = require.resolve(name + '/package.json'); const pkg = require(path); console.log(JSON.stringify({name, version: pkg.version, path})); }\\\"\"",
+            "commandSha256": "efc55c0da33633192b1bfee4e015be5e6644c68fe9b85564fa62686b65a6028c",
+            "exitCode": 0,
+            "status": "completed"
+          },
+          {
+            "command": "/bin/zsh -lc 'git diff --check; node --check app.cjs; git show HEAD:app.cjs'",
+            "commandSha256": "8d16a86554d10348de344b30827994d653b088a32385e227b389773c8d0e259d",
+            "exitCode": 0,
+            "status": "completed"
+          },
+          {
+            "command": "/bin/zsh -lc \"node --input-type=module <<'NODE'\nimport assert from 'node:assert/strict';\nimport { readFile } from 'node:fs/promises';\nimport { createServer } from 'node:net';\nimport { spawn } from 'node:child_process';\nimport { once } from 'node:events';\nimport { setTimeout as delay } from 'node:timers/promises';\n\nconst contract = JSON.parse(await readFile('<sentinel-store>/objects/5f11c8f47894bcd591aca727857eb5dea144b084d8529eaf215946a1ed17ab00', 'utf8'));\nconst probe = createServer();\nprobe.listen(0, '127.0.0.1');\nawait once(probe, 'listening');\nconst port = probe.address().port;\nawait new Promise((resolve, reject) => probe.close(error => error ? reject(error) : resolve()));\nconst child = spawn(process.execPath, ['server.cjs'], {\n  cwd: process.cwd(),\n  env: { PORT: String(port), HOST: '127.0.0.1', NODE_ENV: 'test' },\n  stdio: ['ignore', 'pipe', 'pipe']\n});\nlet output = '';\nchild.stdout.on('data', data => { output += data; });\nchild.stderr.on('data', data => { output += data; });\nconst stopped = once(child, 'exit');\nconst base = \"'`http://127.0.0.1:${port}`;\nlet count = 0;\nasync function check(path, status, body) {\n  const response = await fetch(base + path, { signal: AbortSignal.timeout(2000) });\n  assert.equal(response.status, status, path);\n  assert.match(response.headers.get('\"'content-type'), /\"'^application'\"\\\\/json\\\\b/, path);\n  assert.deepEqual(await response.json(), body, path);\n  count++;\n}\ntry {\n  let ready = false;\n  for (let attempt = 0; attempt < 100; attempt++) {\n    if (child.exitCode \"'!== null) throw new Error(`Server exited: ${output}`);\n    try {\n      const response = await fetch(base + contract.application.readyPath, { signal: AbortSignal.timeout(1000) });\n      ready = response.status === 200;\n      await response.text();\n      if (ready) break;\n    } catch {}\n    await delay(50);\n  }\n  assert.ok(ready, `Server did not become ready: ${output}`);\n  for (let pass = 0; pass < 2; pass++) {\n    for (const scenario of contract.scenarios) {\n      assert.equal(scenario.method, '\"'GET');\n      await check(scenario.path, scenario.expected.status, scenario.expected.body);\n      console.log(\"'`PASS ${scenario.id} (run ${pass + 1})`);\n    }\n  }\n  for (const route of ['\"'/api/users', '/api/repos', '/api/user/loki/repos']) {\n    for (const query of ['', '?api-key=']) {\n      await check(route + query, 400, { error: 'api key required' });\n    }\n    for (const key of ['rawr', 'not-a-valid-key']) {\n      await check(\"'`${route}?api-key=[REDACTED_SECRET] 401, { error: '\"'invalid api key', code: 'INVALID_API_KEY' });\n    }\n  }\n  for (const key of ['foo', 'bar', 'baz']) {\n    await check(\"'`/api/users?api-key=[REDACTED_SECRET] 200, [{ name: '\"'tobi' }, { name: 'loki' }, { name: 'jane' }]);\n  }\n  console.log(\"'`PASS ${count} live HTTP checks; results cover these sampled requests only.`);\n} finally {\n  child.kill('\"'SIGTERM');\n  await stopped;\n}\nNODE\"",
+            "commandSha256": "7fe7393c53c66af752ff26ecf6385c5278695833ddbaf4329b7cd676b7ad7254",
+            "exitCode": 1,
+            "status": "failed"
+          },
+          {
+            "command": "/bin/zsh -lc 'node node_modules/vitest/vitest.mjs run api.test.js --environment node --no-cache'",
+            "commandSha256": "a7c33166cc2011a6d40b3a86a0c78050f67cf18202a0a12820d2e6cc57faee07",
+            "exitCode": 1,
+            "status": "failed"
+          },
+          {
+            "command": "/bin/zsh -lc \"node --input-type=module <<'NODE'\nimport assert from 'node:assert/strict';\nimport { readFile } from 'node:fs/promises';\nimport { IncomingMessage, ServerResponse } from 'node:http';\nimport { Duplex } from 'node:stream';\nimport { once } from 'node:events';\nimport app from './app.cjs';\n\nconst contract = JSON.parse(await readFile('<sentinel-store>/objects/5f11c8f47894bcd591aca727857eb5dea144b084d8529eaf215946a1ed17ab00', 'utf8'));\nlet count = 0;\nasync function check(path, status, body) {\n  const chunks = [];\n  const socket = new Duplex({ read() {}, write(chunk, encoding, callback) { chunks.push(Buffer.from(chunk)); callback(); } });\n  const req = new IncomingMessage(socket);\n  req.method = 'GET';\n  req.url = path;\n  req.headers = { host: 'localhost' };\n  req.httpVersion = '1.1';\n  req.httpVersionMajor = 1;\n  req.httpVersionMinor = 1;\n  const res = new ServerResponse(req);\n  res.assignSocket(socket);\n  const finished = once(res, 'finish', { signal: AbortSignal.timeout(2000) });\n  app(req, res);\n  await finished;\n  const raw = Buffer.concat(chunks).toString('utf8');\n  const separator = raw.indexOf('\\\\r\\\\n\\\\r\\\\n');\n  assert.ok(separator >= 0, path);\n  const payload = raw.slice(separator + 4);\n  assert.equal(Buffer.byteLength(payload), Number(res.getHeader('content-length')), path);\n  assert.equal(res.statusCode, status, path);\n  assert.match(String(res.getHeader('content-type')), /\"'^application'\"\\\\/json\\\\b/, path);\n  assert.deepEqual(JSON.parse(payload), body, path);\n  socket.destroy();\n  count++;\n}\nfor (let pass = 0; pass < 2; pass++) {\n  for (const scenario of contract.scenarios) {\n    assert.equal(scenario.method, 'GET');\n    await check(scenario.path, scenario.expected.status, scenario.expected.body);\n    console.log(\"'`PASS ${scenario.id} (in-process run ${pass + 1})`);\n  }\n}\nfor (const route of ['\"'/api/users', '/api/repos', '/api/user/loki/repos']) {\n  for (const query of ['', '?api-key=']) {\n    await check(route + query, 400, { error: 'api key required' });\n  }\n  for (const key of ['rawr', 'not-a-valid-key']) {\n    await check(\"'`${route}?api-key=[REDACTED_SECRET] 401, { error: '\"'invalid api key', code: 'INVALID_API_KEY' });\n  }\n}\nfor (const key of ['foo', 'bar', 'baz']) {\n  await check(\"'`/api/users?api-key=[REDACTED_SECRET] 200, [{ name: '\"'tobi' }, { name: 'loki' }, { name: 'jane' }]);\n}\nconsole.log(\"'`PASS ${count} in-process request checks. No TCP server was used; results cover sampled requests only.`);\nNODE\n'",
+            "commandSha256": "b1a069c8e77f0104f7a5d660fe0cc5ad56773309f56349550150cc71d8adfdf1",
+            "exitCode": 1,
+            "status": "failed"
+          },
+          {
+            "command": "/bin/zsh -lc \"node <<'NODE'\nconst assert = require('node:assert/strict');\nconst { readFileSync } = require('node:fs');\nconst { IncomingMessage, ServerResponse } = require('node:http');\nconst { Duplex } = require('node:stream');\nconst { once } = require('node:events');\nconst app = require('./app.cjs');\nconst contract = JSON.parse(readFileSync('<sentinel-store>/objects/5f11c8f47894bcd591aca727857eb5dea144b084d8529eaf215946a1ed17ab00', 'utf8'));\nlet count = 0;\nasync function check(path, status, body) {\n  const chunks = [];\n  const socket = new Duplex({ read() {}, write(chunk, encoding, callback) { chunks.push(Buffer.from(chunk)); callback(); } });\n  const req = new IncomingMessage(socket);\n  req.method = 'GET';\n  req.url = path;\n  req.headers = { host: 'localhost' };\n  req.httpVersion = '1.1';\n  req.httpVersionMajor = 1;\n  req.httpVersionMinor = 1;\n  const res = new ServerResponse(req);\n  res.assignSocket(socket);\n  const finished = once(res, 'finish', { signal: AbortSignal.timeout(2000) });\n  app(req, res);\n  await finished;\n  const raw = Buffer.concat(chunks).toString('utf8');\n  const separator = raw.indexOf('\\\\r\\\\n\\\\r\\\\n');\n  assert.ok(separator >= 0, path);\n  const payload = raw.slice(separator + 4);\n  assert.equal(Buffer.byteLength(payload), Number(res.getHeader('content-length')), path);\n  assert.equal(res.statusCode, status, path);\n  assert.match(String(res.getHeader('content-type')), /\"'^application'\"\\\\/json\\\\b/, path);\n  assert.deepEqual(JSON.parse(payload), body, path);\n  socket.destroy();\n  count++;\n}\n(async () => {\n  for (let pass = 0; pass < 2; pass++) {\n    for (const scenario of contract.scenarios) {\n      assert.equal(scenario.method, 'GET');\n      await check(scenario.path, scenario.expected.status, scenario.expected.body);\n      console.log(\"'`PASS ${scenario.id} (in-process run ${pass + 1})`);\n    }\n  }\n  for (const route of ['\"'/api/users', '/api/repos', '/api/user/loki/repos']) {\n    for (const query of ['', '?api-key=']) {\n      await check(route + query, 400, { error: 'api key required' });\n    }\n    for (const key of ['rawr', 'not-a-valid-key']) {\n      await check(\"'`${route}?api-key=[REDACTED_SECRET] 401, { error: '\"'invalid api key', code: 'INVALID_API_KEY' });\n    }\n  }\n  for (const key of ['foo', 'bar', 'baz']) {\n    await check(\"'`/api/users?api-key=[REDACTED_SECRET] 200, [{ name: '\"'tobi' }, { name: 'loki' }, { name: 'jane' }]);\n  }\n  console.log(\"'`PASS ${count} in-process request checks. No TCP server was used; results cover sampled requests only.`);\n})().catch(error => { console.error(error); process.exitCode = 1; });\nNODE'",
+            "commandSha256": "8a498a39bc7d5cbdd853feaa7648465867eff582acfd61cd7770e9d9490f9d27",
+            "exitCode": 0,
+            "status": "completed"
+          },
+          {
+            "command": "/bin/zsh -lc 'git diff --check; git status --short; shasum -a 256 app.cjs'",
+            "commandSha256": "4545edd9ca2d117e3cb892b1e98183f1fb8027c6bd82d238d8d5e1cfb269de47",
+            "exitCode": 0,
+            "status": "completed"
+          }
+        ]
+      }
+    ],
+    "receipts": [
+      {
+        "hash": "8ff64656672c6faf913921206340aaee47f63b091e50d8a373a542fc797b43fe",
+        "status": "VERIFIED",
+        "durationMs": 3052,
+        "baselineHash": "e09a095e999c533f7894f5c330515dc32384e28c8e730e3f2b07c85947ccae90",
+        "candidateHash": "b5e2d673c128394e3476c6fe54f1792e95072d5f68290c2be69f464da1fa771c",
+        "contractHash": "5f11c8f47894bcd591aca727857eb5dea144b084d8529eaf215946a1ed17ab00",
+        "approvedRequirementChecks": [
+          {
+            "id": "req:application-f69df4f7",
+            "status": "VERIFIED"
+          },
+          {
+            "id": "req:application-7c07e3f2",
+            "status": "VERIFIED"
+          },
+          {
+            "id": "req:application-b0e782f7",
+            "status": "VERIFIED"
+          },
+          {
+            "id": "req:application-751d920d",
+            "status": "VERIFIED"
+          }
+        ],
+        "testChecks": [
+          {
+            "id": "baseline-tests",
+            "status": "VERIFIED",
+            "detail": "11/11 ordinary tests passed; these do not establish the approved intent"
+          },
+          {
+            "id": "candidate-tests",
+            "status": "VERIFIED",
+            "detail": "11/11 ordinary tests passed; these do not establish the approved intent"
+          },
+          {
+            "id": "preserved-tests",
+            "status": "VERIFIED",
+            "detail": "11/11 ordinary tests passed; these do not establish the approved intent"
+          }
+        ],
+        "runtime": {
+          "node": "v26.12.0",
+          "platform": "darwin",
+          "arch": "arm64",
+          "verifierVersion": "1.0.0-rc.1",
+          "applicationProtocol": "1",
+          "applicationCommand": "[\"node\",\"server.cjs\"]",
+          "applicationEnvironment": "PORT=fresh loopback port; HOST=127.0.0.1; HOME=temporary empty directory; inherited secret variables removed",
+          "browserNetworkPolicy": "same-origin HTTP; WebSockets and service workers blocked; server is not network-isolated",
+          "baselineApplicationOrigin": "http://127.0.0.1:54759",
+          "candidateApplicationOrigin": "http://127.0.0.1:54768",
+          "vitest": "5.0.5",
+          "workerSha256": "c16009148648f57d65398d7741a6d805170a278ea3329f781dc4d005bb2c85ad"
+        }
+      },
+      {
+        "hash": "474c323561666488e89ed715fa51eae211cde108c88495df32a4bf3633b928f2",
+        "status": "VERIFIED",
+        "durationMs": 5283,
+        "baselineHash": "e09a095e999c533f7894f5c330515dc32384e28c8e730e3f2b07c85947ccae90",
+        "candidateHash": "b5e2d673c128394e3476c6fe54f1792e95072d5f68290c2be69f464da1fa771c",
+        "contractHash": "5f11c8f47894bcd591aca727857eb5dea144b084d8529eaf215946a1ed17ab00",
+        "approvedRequirementChecks": [
+          {
+            "id": "req:application-f69df4f7",
+            "status": "VERIFIED"
+          },
+          {
+            "id": "req:application-7c07e3f2",
+            "status": "VERIFIED"
+          },
+          {
+            "id": "req:application-b0e782f7",
+            "status": "VERIFIED"
+          },
+          {
+            "id": "req:application-751d920d",
+            "status": "VERIFIED"
+          }
+        ],
+        "testChecks": [
+          {
+            "id": "baseline-tests",
+            "status": "VERIFIED",
+            "detail": "11/11 ordinary tests passed; these do not establish the approved intent"
+          },
+          {
+            "id": "candidate-tests",
+            "status": "VERIFIED",
+            "detail": "11/11 ordinary tests passed; these do not establish the approved intent"
+          },
+          {
+            "id": "preserved-tests",
+            "status": "VERIFIED",
+            "detail": "11/11 ordinary tests passed; these do not establish the approved intent"
+          }
+        ],
+        "runtime": {
+          "node": "v26.12.0",
+          "platform": "darwin",
+          "arch": "arm64",
+          "verifierVersion": "1.0.0-rc.1",
+          "applicationProtocol": "1",
+          "applicationCommand": "Exact executed argv is recorded in the baseline and candidate server lifecycle command records.",
+          "applicationEnvironment": "PORT=fresh loopback port; HOST=127.0.0.1; HOME=temporary empty directory; inherited secret variables removed",
+          "browserNetworkPolicy": "same-origin HTTP; WebSockets and service workers blocked; server is not network-isolated",
+          "baselineApplicationOrigin": "http://127.0.0.1:55449",
+          "candidateApplicationOrigin": "http://127.0.0.1:55462",
+          "vitest": "5.0.5",
+          "workerSha256": "c16009148648f57d65398d7741a6d805170a278ea3329f781dc4d005bb2c85ad"
+        }
+      }
+    ]
+  },
+  "directControl": {
+    "schemaVersion": 1,
+    "date": "2026-11-01T19:42:44.424Z",
+    "version": "codex-cli 0.163.0",
+    "node": "v26.12.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "sourceSentinelSession": "s-mvy8hr75-8cf42673",
+    "criteriaCount": 4,
+    "additionalHumanInterventionsDuringControls": 0,
+    "initial": {
+      "label": "Direct Codex implementation followed by external independent evaluation; no automatic repair",
+      "agentExitCode": 0,
+      "agentTimedOut": false,
+      "agentDurationMs": 35424,
+      "visibleCommands": [
+        {
+          "command": "/bin/zsh -lc \"pwd && rg --files -g 'AGENTS.md' -g 'app.cjs' -g '*test*' -g 'upstream-mocha.cjs' -g 'package.json' -g '*config*' -g '\"'!node_modules'\"' -g '\"'!package-lock.json'\"'\"",
+          "exitCode": 0,
+          "status": "completed",
+          "commandSha256": "cc46a260d7769cde2830bfb921a41935d5692a17277b517a11ad18e46ea0a075"
+        },
+        {
+          "command": "/bin/zsh -lc 'git status --short && cat app.cjs && cat package.json && cat api.test.js && cat upstream-mocha.cjs'",
+          "exitCode": 0,
+          "status": "completed",
+          "commandSha256": "afd2b5226333a331d839a96d0e24a18032b07969cfa8b0b8773f1fa2d0e2eb23"
+        },
+        {
+          "command": "/bin/zsh -lc 'for dir in \"$PWD\" \"$(dirname \"$PWD\")\" \"$(dirname \"$(dirname \"$PWD\")\")\"; do if [ -f \"$dir/AGENTS.md\" ]; then cat \"$dir/AGENTS.md\"; fi; done'",
+          "exitCode": 0,
+          "status": "completed",
+          "commandSha256": "89079583f4b7febd624eee8eb8e99e4d56147b8d73def028ae4860f6be985e0d"
+        },
+        {
+          "command": "/bin/zsh -lc 'git diff --check && git diff -- app.cjs && git status --short'",
+          "exitCode": 0,
+          "status": "completed",
+          "commandSha256": "b61238a25c288d81094a615fb9ae0e5dc5f9b6b4db6986420b402222d923eb37"
+        },
+        {
+          "command": "/bin/zsh -lc \"node <<'NODE'\nconst assert = require('node:assert/strict');\nconst request = require('supertest');\nconst app = require('./app.cjs');\nconst cases = [\n  ['/api/users?api-key=wrong', 401, { error: 'invalid api key', code: 'INVALID_API_KEY' }],\n  ['/api/repos?api-key=wrong', 401, { error: 'invalid api key', code: 'INVALID_API_KEY' }],\n  ['/api/users', 400, { error: 'api key required' }],\n  ['/api/users?api-key=foo', 200, [{ name: 'tobi' }, { name: 'loki' }, { name: 'jane' }]]\n];\n(async () => {\n  for (const [path, status, body] of cases) {\n    const response = await request(app).get(path).expect(status).expect('Content-Type', /json/);\n    assert.deepStrictEqual(response.body, body);\n    console.log('PASS ' + path);\n  }\n})().catch(error => {\n  console.error(error);\n  process.exitCode = 1;\n});\nNODE\"",
+          "exitCode": 1,
+          "status": "failed",
+          "commandSha256": "e47601a532223b8685acc0b367d31c5e64e924f1984e71f8f6d8a20eccf84b25"
+        },
+        {
+          "command": "/bin/zsh -lc './node_modules/.bin/vitest run api.test.js'",
+          "exitCode": 1,
+          "status": "failed",
+          "commandSha256": "d2838ab4f2f2f2ae9d60b8295aea6d037ab70c2b931379fbc009abacadb4ee7e"
+        },
+        {
+          "command": "/bin/zsh -lc \"rg -n 'vitest-cache|cacheDir|VITEST.*CACHE' node_modules/vitest/dist -g '*.js' | head -60\"",
+          "exitCode": 0,
+          "status": "completed",
+          "commandSha256": "e80b328c2dd9851369d088d7e2eae0c075e78df514af84875e25cbcf8fcfec9c"
+        },
+        {
+          "command": "/bin/zsh -lc \"node --check app.cjs && rg -n 'assignSocket|_implicitHeader|ServerResponse' node_modules/supertest/lib/test.js node_modules/express/lib/response.js\"",
+          "exitCode": 0,
+          "status": "completed",
+          "commandSha256": "6c34e70aebc88bf4e4b61fd8f58755f657baca7ec8eec8ae4353f3b09fd272d5"
+        },
+        {
+          "command": "/bin/zsh -lc './node_modules/.bin/vitest --help --cache'",
+          "exitCode": 0,
+          "status": "completed",
+          "commandSha256": "3634e30db1b18cb46c0bbfe9a28c2fead18c503174c8e4c3edee001318c19053"
+        },
+        {
+          "command": "/bin/zsh -lc \"sed -n '1140,1165p' node_modules/vitest/dist/chunks/cac.CLrZKo1g.js && sed -n '5565,5590p' node_modules/vitest/dist/chunks/cli-api.De07GUeT.js\"",
+          "exitCode": 0,
+          "status": "completed",
+          "commandSha256": "6b2a64eafae005cae3ccd555d225c960c4d5738132e7a1c52d76906d7d0dc970"
+        },
+        {
+          "command": "/bin/zsh -lc \"node <<'NODE'\nconst assert = require('node:assert/strict');\nconst http = require('node:http');\nconst { Duplex } = require('node:stream');\nconst app = require('./app.cjs');\nconst cases = [\n  ['/api/users?api-key=wrong', 401, { error: 'invalid api key', code: 'INVALID_API_KEY' }],\n  ['/api/repos?api-key=wrong', 401, { error: 'invalid api key', code: 'INVALID_API_KEY' }],\n  ['/api/users', 400, { error: 'api key required' }],\n  ['/api/users?api-key=foo', 200, [{ name: 'tobi' }, { name: 'loki' }, { name: 'jane' }]]\n];\nasync function check(path, status, body) {\n  const chunks = [];\n  const socket = new Duplex({ read() {}, write(chunk, encoding, callback) { chunks.push(Buffer.from(chunk)); callback(); } });\n  const req = new http.IncomingMessage(socket);\n  req.method = 'GET';\n  req.url = path;\n  req.headers = { host: 'localhost' };\n  req.httpVersion = '1.1';\n  req.httpVersionMajor = 1;\n  req.httpVersionMinor = 1;\n  const res = new http.ServerResponse(req);\n  res.assignSocket(socket);\n  await new Promise((resolve, reject) => {\n    res.once('finish', resolve);\n    res.once('error', reject);\n    app.handle(req, res);\n  });\n  assert.equal(res.statusCode, status);\n  assert.match(res.getHeader('Content-Type'), /\"'^application'\"\\\\/json/);\n  const wireResponse = Buffer.concat(chunks).toString();\n  const responseBody = wireResponse.slice(wireResponse.indexOf('\\\\r\\\\n\\\\r\\\\n') + 4);\n  assert.deepStrictEqual(JSON.parse(responseBody), body);\n  socket.destroy();\n  console.log('PASS in-process GET ' + path);\n}\n(async () => {\n  for (const [path, status, body] of cases) await check(path, status, body);\n})().catch(error => { console.error(error); process.exitCode = 1; });\nNODE\"",
+          "exitCode": 0,
+          "status": "completed",
+          "commandSha256": "e181cbac40290ff61765daec0c8d1f61c7d4278ec8e9dd2ad4eff791f229c3e6"
+        },
+        {
+          "command": "/bin/zsh -lc './node_modules/.bin/vitest run api.test.js --no-cache --no-fsModuleCache'",
+          "exitCode": 1,
+          "status": "failed",
+          "commandSha256": "5487abff07e6b3c7b6256e5c340c997bc5f8a58e8fef8825983a8c62d6e35bd5"
+        },
+        {
+          "command": "/bin/zsh -lc 'git diff --check && git diff --stat && git status --short'",
+          "exitCode": 0,
+          "status": "completed",
+          "commandSha256": "ea37483fc69dddc0a76215ae04d2dd0d3cbfffab0bd5c8f338ee5e8c352d4afc"
+        }
+      ],
+      "verificationStatus": "VERIFIED",
+      "verificationDurationMs": 4232,
+      "receiptHash": "f82e58c822ee953d0d34de4e7f7fb0f40d24411634fddfc7b2ec28372096d8e8",
+      "baselineHash": "e09a095e999c533f7894f5c330515dc32384e28c8e730e3f2b07c85947ccae90",
+      "candidateHash": "ce903c480146d2db8a1947a7e96c1cd911da6c4a0320e5afad87f5bf89f8c755",
+      "contractHash": "5f11c8f47894bcd591aca727857eb5dea144b084d8529eaf215946a1ed17ab00",
+      "totalMs": 39893,
+      "completedCommandEvents": 13,
+      "nonzeroCommandEvents": 3,
+      "independentReceipt": {
+        "hash": "f82e58c822ee953d0d34de4e7f7fb0f40d24411634fddfc7b2ec28372096d8e8",
+        "status": "VERIFIED",
+        "durationMs": 4232,
+        "baselineHash": "e09a095e999c533f7894f5c330515dc32384e28c8e730e3f2b07c85947ccae90",
+        "candidateHash": "ce903c480146d2db8a1947a7e96c1cd911da6c4a0320e5afad87f5bf89f8c755",
+        "contractHash": "5f11c8f47894bcd591aca727857eb5dea144b084d8529eaf215946a1ed17ab00",
+        "approvedRequirementChecks": [
+          {
+            "id": "req:application-f69df4f7",
+            "status": "VERIFIED"
+          },
+          {
+            "id": "req:application-7c07e3f2",
+            "status": "VERIFIED"
+          },
+          {
+            "id": "req:application-b0e782f7",
+            "status": "VERIFIED"
+          },
+          {
+            "id": "req:application-751d920d",
+            "status": "VERIFIED"
+          }
+        ],
+        "testChecks": [
+          {
+            "id": "baseline-tests",
+            "status": "VERIFIED",
+            "detail": "11/11 ordinary tests passed; these do not establish the approved intent"
+          },
+          {
+            "id": "candidate-tests",
+            "status": "VERIFIED",
+            "detail": "11/11 ordinary tests passed; these do not establish the approved intent"
+          },
+          {
+            "id": "preserved-tests",
+            "status": "VERIFIED",
+            "detail": "11/11 ordinary tests passed; these do not establish the approved intent"
+          }
+        ],
+        "runtime": {
+          "node": "v26.12.0",
+          "platform": "darwin",
+          "arch": "arm64",
+          "verifierVersion": "1.0.0-rc.1",
+          "applicationProtocol": "1",
+          "applicationCommand": "Exact executed argv is recorded in the baseline and candidate server lifecycle command records.",
+          "applicationEnvironment": "PORT=fresh loopback port; HOST=127.0.0.1; HOME=temporary empty directory; inherited secret variables removed",
+          "browserNetworkPolicy": "same-origin HTTP; WebSockets and service workers blocked; server is not network-isolated",
+          "baselineApplicationOrigin": "http://127.0.0.1:55154",
+          "candidateApplicationOrigin": "http://127.0.0.1:55166",
+          "vitest": "5.0.5",
+          "workerSha256": "c16009148648f57d65398d7741a6d805170a278ea3329f781dc4d005bb2c85ad"
+        }
+      }
+    },
+    "ordinarySummary": {
+      "label": "Complete ordinary summary includes all criteria, exact independent evidence and known agent environment limitations",
+      "summaryBytes": 9080,
+      "agentExitCode": 0,
+      "agentTimedOut": false,
+      "agentDurationMs": 29529,
+      "visibleCommands": [
+        {
+          "command": "/bin/zsh -lc \"pwd; rg --files -g 'AGENTS.md' -g 'app.cjs' -g 'package.json' -g 'server.cjs' -g 'upstream-mocha.cjs' -g '\"'!node_modules'\"' -g '\"'!*lock*'\"'\"",
+          "exitCode": 0,
+          "status": "completed",
+          "commandSha256": "99fa189ccd301bce056f38f5c6e00ec20229b7a85ca4bc38e5400b0cabe75755"
+        },
+        {
+          "command": "/bin/zsh -lc 'git status --short'",
+          "exitCode": 0,
+          "status": "completed",
+          "commandSha256": "7678ae510885e9d497cebabe17b6aafa36785e52ba28bb198426fe3313613fb2"
+        },
+        {
+          "command": "/bin/zsh -lc 'cat package.json upstream-mocha.cjs server.cjs'",
+          "exitCode": 0,
+          "status": "completed",
+          "commandSha256": "9869c0b20958b595ff335b32352624f06d5d1fa7a6f390cdaacd169b0088f747"
+        },
+        {
+          "command": "/bin/zsh -lc 'for dir in / /private /private/var /private/var/folders <temporary-path> <temporary-path> <temporary-path> <direct-control> <direct-control>/project; do if [ -f \"$dir/AGENTS.md\" ]; then cat \"$dir/AGENTS.md\"; fi; done'",
+          "exitCode": 0,
+          "status": "completed",
+          "commandSha256": "f8a9b331a939e26b5e20d1b3fa40b296b647b2c72c1dab21b5212757c9449f24"
+        },
+        {
+          "command": "/bin/zsh -lc 'cat app.cjs'",
+          "exitCode": 0,
+          "status": "completed",
+          "commandSha256": "653aecad29aa3b1dca9ba8ce5f47cfc055fa6763ee3ad06746899d30d7c9b285"
+        },
+        {
+          "command": "/bin/zsh -lc 'git diff -- app.cjs'",
+          "exitCode": 0,
+          "status": "completed",
+          "commandSha256": "36f81ac5021b7e6e74f51b1fe06eb636bf5f18443f04b9b46401ee4d0902eae5"
+        },
+        {
+          "command": "/bin/zsh -lc 'shasum -a 256 app.cjs; node --check app.cjs'",
+          "exitCode": 0,
+          "status": "completed",
+          "commandSha256": "8a857d4a89439f2e51cfeb9bbed5ed01af3358533b23815abcb3045095c0d30a"
+        },
+        {
+          "command": "/bin/zsh -lc \"node <<'NODE'\nconst assert = require('node:assert/strict');\nconst http = require('node:http');\nconst { PassThrough } = require('node:stream');\nconst app = require('./app.cjs');\nconst cases = [\n  ['/api/users?api-key=wrong', 401, { error: 'invalid api key', code: 'INVALID_API_KEY' }],\n  ['/api/repos?api-key=wrong', 401, { error: 'invalid api key', code: 'INVALID_API_KEY' }],\n  ['/api/users', 400, { error: 'api key required' }],\n  ['/api/users?api-key=foo', 200, [{ name: 'tobi' }, { name: 'loki' }, { name: 'jane' }]],\n];\n(async () => {\n  for (const [path, status, body] of cases) {\n    await new Promise((resolve, reject) => {\n      const stream = new PassThrough();\n      const req = new http.IncomingMessage(stream);\n      req.method = 'GET';\n      req.url = path;\n      const res = new http.ServerResponse(req);\n      res.end = function(chunk) {\n        try {\n          assert.equal(this.statusCode, status);\n          assert.match(this.getHeader('content-type'), /\"'^application'\"\\\\/json\\\\b/);\n          assert.deepEqual(JSON.parse(String(chunk)), body);\n          console.log('PASS (in-process only): ' + path);\n          resolve();\n        } catch (err) { reject(err); }\n        finally { stream.destroy(); }\n        return this;\n      };\n      app.handle(req, res, err => reject(err || new Error('No response for ' + path)));\n    });\n  }\n})().catch(err => { console.error(err); process.exitCode = 1; });\nNODE\"",
+          "exitCode": 0,
+          "status": "completed",
+          "commandSha256": "b23d999d4833ca8855dd0f3e115a56ce5f8caaa64a904deb43066e997a2670d8"
+        }
+      ],
+      "sourceChanged": false,
+      "verificationStatus": "VERIFIED",
+      "verificationDurationMs": 6313,
+      "receiptHash": "0e6b99e2abce799bba24a2f8494b6511c2ab4a4481be09f675ec2f3116df8f5e",
+      "totalMs": 36036,
+      "completedCommandEvents": 8,
+      "nonzeroCommandEvents": 0,
+      "independentReceipt": {
+        "hash": "0e6b99e2abce799bba24a2f8494b6511c2ab4a4481be09f675ec2f3116df8f5e",
+        "status": "VERIFIED",
+        "durationMs": 6313,
+        "baselineHash": "e09a095e999c533f7894f5c330515dc32384e28c8e730e3f2b07c85947ccae90",
+        "candidateHash": "ce903c480146d2db8a1947a7e96c1cd911da6c4a0320e5afad87f5bf89f8c755",
+        "contractHash": "5f11c8f47894bcd591aca727857eb5dea144b084d8529eaf215946a1ed17ab00",
+        "approvedRequirementChecks": [
+          {
+            "id": "req:application-f69df4f7",
+            "status": "VERIFIED"
+          },
+          {
+            "id": "req:application-7c07e3f2",
+            "status": "VERIFIED"
+          },
+          {
+            "id": "req:application-b0e782f7",
+            "status": "VERIFIED"
+          },
+          {
+            "id": "req:application-751d920d",
+            "status": "VERIFIED"
+          }
+        ],
+        "testChecks": [
+          {
+            "id": "baseline-tests",
+            "status": "VERIFIED",
+            "detail": "11/11 ordinary tests passed; these do not establish the approved intent"
+          },
+          {
+            "id": "candidate-tests",
+            "status": "VERIFIED",
+            "detail": "11/11 ordinary tests passed; these do not establish the approved intent"
+          },
+          {
+            "id": "preserved-tests",
+            "status": "VERIFIED",
+            "detail": "11/11 ordinary tests passed; these do not establish the approved intent"
+          }
+        ],
+        "runtime": {
+          "node": "v26.12.0",
+          "platform": "darwin",
+          "arch": "arm64",
+          "verifierVersion": "1.0.0-rc.1",
+          "applicationProtocol": "1",
+          "applicationCommand": "Exact executed argv is recorded in the baseline and candidate server lifecycle command records.",
+          "applicationEnvironment": "PORT=fresh loopback port; HOST=127.0.0.1; HOME=temporary empty directory; inherited secret variables removed",
+          "browserNetworkPolicy": "same-origin HTTP; WebSockets and service workers blocked; server is not network-isolated",
+          "baselineApplicationOrigin": "http://127.0.0.1:56087",
+          "candidateApplicationOrigin": "http://127.0.0.1:56106",
+          "vitest": "5.0.5",
+          "workerSha256": "c16009148648f57d65398d7741a6d805170a278ea3329f781dc4d005bb2c85ad"
+        }
+      }
+    },
+    "limitations": [
+      "One task and one model, sequential trials, not randomized or blinded. Prior model/service cache or scheduling may affect timing.",
+      "The ordinary summary explicitly preserves all criteria and independent findings; no information was deliberately withheld.",
+      "The direct-control handoff followed a completed attempt; it is not an independently simulated crash. The SENTINEL experiment separately demonstrates actual interruption.",
+      "Command counts include only visible completed command_execution events, not private reasoning or self-reported tests.",
+      "External evaluation is run after each control to measure outcome; it is not provided as an automatic repair loop."
+    ],
+    "ordinarySummaryInitial": {
+      "label": "Well-written ordinary summary; same source and all exact criteria/results retained",
+      "summaryBytes": 8198,
+      "agentExitCode": 0,
+      "agentTimedOut": false,
+      "agentDurationMs": 27286,
+      "visibleCommands": [
+        {
+          "command": "/bin/zsh -lc \"pwd; rg --files -g 'AGENTS.md' -g 'app.cjs' -g 'package.json' -g 'server.cjs' -g 'upstream-mocha.cjs'\"",
+          "exitCode": 0,
+          "status": "completed",
+          "commandSha256": "59c880f3027d7f9018dac53c77e803331250bd53769742b8bb0bb7637f600313"
+        },
+        {
+          "command": "/bin/zsh -lc 'git status --short; git diff -- app.cjs; shasum -a 256 app.cjs; cat app.cjs'",
+          "exitCode": 0,
+          "status": "completed",
+          "commandSha256": "155db1a613585fb476010fee3862289ab3eef7f339c6d46bb7c0899ea30a4abf"
+        },
+        {
+          "command": "/bin/zsh -lc 'for task_dir in / /private /private/var /private/var/folders <temporary-path> <temporary-path> <temporary-path> <direct-control> <direct-control>/project; do if [ -f \"$task_dir/AGENTS.md\" ]; then cat \"$task_dir/AGENTS.md\"; fi; done\ncat package.json server.cjs upstream-mocha.cjs'",
+          "exitCode": 0,
+          "status": "completed",
+          "commandSha256": "2d24146b15fdb36a8d99253e241555a06ec60ef74b4c66ed451a67f3a9207528"
+        },
+        {
+          "command": "/bin/zsh -lc \"node <<'NODE'\nconst assert = require('node:assert/strict');\nconst http = require('node:http');\nconst app = require('./app.cjs');\nconst cases = [\n  ['/api/users?api-key=wrong', 401, {error:'invalid api key', code:'INVALID_API_KEY'}],\n  ['/api/repos?api-key=wrong', 401, {error:'invalid api key', code:'INVALID_API_KEY'}],\n  ['/api/users', 400, {error:'api key required'}],\n  ['/api/users?api-key=foo', 200, [{name:'tobi'}, {name:'loki'}, {name:'jane'}]]\n];\nconst server = http.createServer(app);\nserver.listen(0, '127.0.0.1', async () => {\n  try {\n    for (const [path, status, expected] of cases) {\n      const response = await fetch(\"'`http://127.0.0.1:${server.address().port}${path}`);\n      assert.equal(response.status, status);\n      assert.match(response.headers.get('\"'content-type'), /\"'^application'\"\\\\/json\\\\b/);\n      assert.deepEqual(await response.json(), expected);\n      console.log(\"'`PASS ${path}`);\n    }\n  } catch (error) {\n    console.error(error);\n    process.exitCode = 1;\n  } finally {\n    server.close();\n    server.closeAllConnections();\n  }\n});\nNODE'",
+          "exitCode": 1,
+          "status": "failed",
+          "commandSha256": "9aef455fa457981e253d717693dea205ee54b70a194addf2139925d5d7777225"
+        },
+        {
+          "command": "/bin/zsh -lc 'node node_modules/mocha/bin/mocha.js upstream-mocha.cjs'",
+          "exitCode": 11,
+          "status": "failed",
+          "commandSha256": "a804aca84419d4088d10129a6b9903f8e5941d6c326cc34aa9eb465a727d0521"
+        }
+      ],
+      "sourceChanged": false,
+      "verificationStatus": "VERIFIED",
+      "verificationDurationMs": 5515,
+      "receiptHash": "71946a8f83e0b2d5aa29e753bbffe9d8ba411d72a4dd3fa4e30a4f3a500208fc",
+      "totalMs": 33034,
+      "completedCommandEvents": 5,
+      "nonzeroCommandEvents": 2,
+      "independentReceipt": {
+        "hash": "71946a8f83e0b2d5aa29e753bbffe9d8ba411d72a4dd3fa4e30a4f3a500208fc",
+        "status": "VERIFIED",
+        "durationMs": 5515,
+        "baselineHash": "e09a095e999c533f7894f5c330515dc32384e28c8e730e3f2b07c85947ccae90",
+        "candidateHash": "ce903c480146d2db8a1947a7e96c1cd911da6c4a0320e5afad87f5bf89f8c755",
+        "contractHash": "5f11c8f47894bcd591aca727857eb5dea144b084d8529eaf215946a1ed17ab00",
+        "approvedRequirementChecks": [
+          {
+            "id": "req:application-f69df4f7",
+            "status": "VERIFIED"
+          },
+          {
+            "id": "req:application-7c07e3f2",
+            "status": "VERIFIED"
+          },
+          {
+            "id": "req:application-b0e782f7",
+            "status": "VERIFIED"
+          },
+          {
+            "id": "req:application-751d920d",
+            "status": "VERIFIED"
+          }
+        ],
+        "testChecks": [
+          {
+            "id": "baseline-tests",
+            "status": "VERIFIED",
+            "detail": "11/11 ordinary tests passed; these do not establish the approved intent"
+          },
+          {
+            "id": "candidate-tests",
+            "status": "VERIFIED",
+            "detail": "11/11 ordinary tests passed; these do not establish the approved intent"
+          },
+          {
+            "id": "preserved-tests",
+            "status": "VERIFIED",
+            "detail": "11/11 ordinary tests passed; these do not establish the approved intent"
+          }
+        ],
+        "runtime": {
+          "node": "v26.12.0",
+          "platform": "darwin",
+          "arch": "arm64",
+          "verifierVersion": "1.0.0-rc.1",
+          "applicationProtocol": "1",
+          "applicationCommand": "Exact executed argv is recorded in the baseline and candidate server lifecycle command records.",
+          "applicationEnvironment": "PORT=fresh loopback port; HOST=127.0.0.1; HOME=temporary empty directory; inherited secret variables removed",
+          "browserNetworkPolicy": "same-origin HTTP; WebSockets and service workers blocked; server is not network-isolated",
+          "baselineApplicationOrigin": "http://127.0.0.1:55318",
+          "candidateApplicationOrigin": "http://127.0.0.1:55331",
+          "vitest": "5.0.5",
+          "workerSha256": "c16009148648f57d65398d7741a6d805170a278ea3329f781dc4d005bb2c85ad"
+        }
+      }
+    },
+    "summaryRefinement": "The first summary omitted prior agent-sandbox EPERM errors despite retaining all criteria/evidence. That run is retained separately; the final summary explicitly included those known limitations and was rerun on unchanged code. This is a transparent protocol refinement, not an independent additional task.",
+    "completedAt": "2026-11-01T19:46:21.980Z"
+  },
+  "rawControlMeasurementSha256": "65867ebb894a7cdbb018f0b62fb972053df8c2f7b5721c621fe824809f6fe39a",
+  "limitations": [
+    "One public task, one configured Codex CLI/model, sequential nonrandom trials; the model version was not separately pinned.",
+    "The SENTINEL path includes an intentionally interrupted continuation after its initial implementation had already passed. The direct summary controls start from completed verified code and do not simulate a second crash.",
+    "Command-event counts are coarse visible shell invocations; they are not atomic actions, assertion counts, tokens or developer effort.",
+    "Both paths received independent external evaluation. Agent self-reported tests and in-process checks are not counted as independent real HTTP evidence.",
+    "SENTINEL did not demonstrate a productivity advantage in this observation; the complete ordinary summary also succeeded.",
+    "No private model reasoning is represented or transferred. Full raw transcripts remain local; public records redact local paths."
+  ]
+}

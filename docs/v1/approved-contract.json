@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 3,
+  "objective": "Add the stable error code INVALID_API_KEY to invalid API-key responses while preserving missing-key errors and valid user responses.",
+  "approvedBy": "Developer via interactive terminal approval",
+  "requirements": [],
+  "application": {
+    "command": [
+      "node",
+      "server.cjs"
+    ],
+    "readyPath": "/health"
+  },
+  "scenarios": [
+    {
+      "id": "application-f69df4f7",
+      "kind": "must-change",
+      "description": "Return a stable error code for invalid API keys on users",
+      "type": "http",
+      "method": "GET",
+      "path": "/api/users?api-key=wrong",
+      "expected": {
+        "status": 401,
+        "bodyType": "json",
+        "body": {
+          "error": "invalid api key",
+          "code": "INVALID_API_KEY"
+        }
+      }
+    },
+    {
+      "id": "application-7c07e3f2",
+      "kind": "must-change",
+      "description": "Return the same stable invalid-key code for repositories",
+      "type": "http",
+      "method": "GET",
+      "path": "/api/repos?api-key=wrong",
+      "expected": {
+        "status": 401,
+        "bodyType": "json",
+        "body": {
+          "error": "invalid api key",
+          "code": "INVALID_API_KEY"
+        }
+      }
+    },
+    {
+      "id": "application-b0e782f7",
+      "kind": "must-preserve",
+      "description": "Preserve the missing-key validation response",
+      "type": "http",
+      "method": "GET",
+      "path": "/api/users",
+      "expected": {
+        "status": 400,
+        "bodyType": "json",
+        "body": {
+          "error": "api key required"
+        }
+      }
+    },
+    {
+      "id": "application-751d920d",
+      "kind": "must-preserve",
+      "description": "Preserve the existing valid user list",
+      "type": "http",
+      "method": "GET",
+      "path": "/api/users?api-key=foo",
+      "expected": {
+        "status": 200,
+        "bodyType": "json",
+        "body": [
+          {
+            "name": "tobi"
+          },
+          {
+            "name": "loki"
+          },
+          {
+            "name": "jane"
+          }
+        ]
+      }
+    }
+  ],
+  "coverage": {
+    "confirmed": true,
+    "aspects": [
+      {
+        "id": "objective",
+        "description": "Add the stable error code INVALID_API_KEY to invalid API-key responses while preserving missing-key errors and valid user responses.",
+        "requirementIds": [
+          "application-f69df4f7",
+          "application-7c07e3f2",
+          "application-b0e782f7",
+          "application-751d920d"
+        ]
+      }
+    ]
+  },
+  "allowedPaths": [
+    "app.cjs"
+  ],
+  "discoveryLimits": [
+    "Application results cover only the approved examples. Source route and selector hints are not expected-value evidence."
+  ],
+  "unresolved": [],
+  "approval": {
+    "method": "interactive",
+    "approvedAt": "2026-11-01T19:39:35.185Z",
+    "proposalHash": "91fcac4a03947b3bfba32f45a04e701abd4eee4ce0e4638343291ad55bef627b",
+    "baselineHash": "e09a095e999c533f7894f5c330515dc32384e28c8e730e3f2b07c85947ccae90",
+    "requirementIds": [
+      "application-f69df4f7",
+      "application-7c07e3f2",
+      "application-b0e782f7",
+      "application-751d920d"
+    ],
+    "resolvedQuestions": []
+  }
+}

@@ -198,6 +198,40 @@ async function checkAgentLease(store: string, id: string): Promise<void> {
   throw new Error(`Recorded agent process ${value.pid} is still alive. Stop or finish the previous agent before continuing. A reused PID may also cause this conservative refusal; no process was terminated.`);
 }
 
+export interface PriorExecutionLimitation {
+  agent: 'codex'; recordedAt: string; command: string; exitCode: number; diagnostic: string;
+}
+const environmentDiagnostic = /\b(?:EPERM|EACCES|ENOENT|ETIMEDOUT|EADDRINUSE|ECONNREFUSED|ENETUNREACH)\b|operation not permitted|permission denied|timed?\s*out|command not found|no such file or directory|cannot find (?:module|package)/i;
+/** Select diagnostic lines, not arbitrary tool output; this is best-effort redaction, not a secret scanner. */
+function safeLimitationText(text: string): string {
+  return text.replace(/\x1b\[[0-?]*[ -/]*[@-~]/g, '').replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g, '')
+    .replace(/(https?:\/\/)[^/@\s]+:[^/@\s]+@/g, '$1[redacted]@')
+    .replace(/\b(?:Bearer|Basic)\s+[A-Za-z0-9._~+\/-]+=*/gi, '[redacted authorization]')
+    .replace(/((?:--(?:token|api-key|password|secret)|(?:[A-Z][A-Z0-9_]*(?:TOKEN|SECRET|PASSWORD|API_KEY)|TOKEN|SECRET|PASSWORD|API_KEY))\s*(?:=|\s)\s*)(?:"[^"]*"|'[^']*'|[^\s;]+)/g, '$1[redacted]')
+    .replace(/(["'](?:token|secret|password|api[_-]?key)["']\s*:\s*)(["'])(.*?)\2/gi, '$1"[redacted]"')
+    .replace(/([?&](?:api[_-]?key|token|secret|password)=)[^&#\s'"]+/gi, '$1[redacted]')
+    .replace(/\b(?:sk-[A-Za-z0-9_-]{12,}|gh[opsu]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,})\b/g, '[redacted credential]');
+}
+/** Visible completed CLI tool events remain unverified observations, never acceptance evidence. */
+export function priorExecutionLimitations(runs: AgentRun[]): PriorExecutionLimitation[] {
+  const limitations: PriorExecutionLimitation[] = [];
+  // Eight retained transcripts bound discovery cost even for very long-lived sessions.
+  for (const run of runs.slice(-8).reverse()) {
+    if (run.agent !== 'codex' || !run.command) continue;
+    for (const line of run.command.stdout.slice(-1_000_000).split('\n').reverse()) {
+      let event: { type?: unknown; item?: { type?: unknown; exit_code?: unknown; command?: unknown; aggregated_output?: unknown } };
+      try { event = JSON.parse(line) as typeof event; } catch { continue; }
+      const item = event?.item;
+      if (event?.type !== 'item.completed' || item?.type !== 'command_execution' || !Number.isSafeInteger(item.exit_code) || item.exit_code === 0 || typeof item.command !== 'string' || typeof item.aggregated_output !== 'string') continue;
+      const diagnostic = item.aggregated_output.split('\n').filter(line => environmentDiagnostic.test(line)).map(safeLimitationText).join('\n').slice(0,2000);
+      if (!diagnostic) continue;
+      limitations.push({ agent: 'codex', recordedAt: run.completedAt, command: safeLimitationText(item.command).slice(0,800), exitCode: item.exit_code as number, diagnostic });
+      if (limitations.length === 3) return limitations;
+    }
+  }
+  return limitations;
+}
+
 /** Context is a bounded index into source/evidence, never an invented reconstruction of reasoning. */
 export async function continuationContext(store: string, checkpoint: Checkpoint): Promise<string> {
   const contract = await contractFor(store, checkpoint);
@@ -205,6 +239,7 @@ export async function continuationContext(store: string, checkpoint: Checkpoint)
   const receipt = lastHash ? JSON.parse((await getObject(store, lastHash)).toString()) as Receipt : null;
   const [baseline, candidate] = await Promise.all([readSnapshot(store, checkpoint.baselineHash), readSnapshot(store, checkpoint.candidateHash)]);
   const changedFiles = [...new Set([...Object.keys(baseline.files), ...Object.keys(candidate.files)])].filter(name => baseline.files[name]?.hash !== candidate.files[name]?.hash || baseline.files[name]?.mode !== candidate.files[name]?.mode).sort().map(path => ({path, baselineHash:baseline.files[path]?.hash ?? null, currentHash:candidate.files[path]?.hash ?? null}));
+  const executionLimitations = priorExecutionLimitations(checkpoint.agents);
   const dependencyFiles = Object.fromEntries(Object.entries(candidate.files).filter(([name]) => /(^|\/)(package(-lock)?\.json|pnpm-lock\.yaml|yarn\.lock|\.nvmrc|\.node-version)$/.test(name)).map(([name, entry]) => [name, entry.hash]));
   const heading = `SENTINEL CONTINUATION v1\nTask: ${checkpoint.objective.slice(0,2000)}\nWorkspace: ${checkpoint.workspace.slice(0,1000)}\nBaseline source: ${checkpoint.baselineHash}\nCurrent source: ${checkpoint.candidateHash}\nContract: ${checkpoint.contractHash ?? 'none approved'}\nComplete read-only contract: ${checkpoint.contractHash ? join(store, 'objects', checkpoint.contractHash) : 'none'}\n`;
   const acknowledgement = `Before editing, acknowledge the supplied source and contract with a visible line: SENTINEL_ACK ${checkpoint.candidateHash} ${checkpoint.contractHash ?? 'none'}. This acknowledgement records receipt of the package; it is not independent verification.\n`;
@@ -216,6 +251,7 @@ export async function continuationContext(store: string, checkpoint: Checkpoint)
   return (heading + acknowledgement + guidance
     + section('APPROVED SCOPE AND UNRESOLVED INTENT', contract ? {unresolvedCount:contract.unresolved?.length??0,scopeDecisionCount:contract.approval?.resolvedQuestions.length??0,unresolved:contract.unresolved??[],resolvedQuestions:contract.approval?.resolvedQuestions??[]} : 'No human-approved scope exists.',1000)
     + section('APPROVED REQUIREMENTS', contract ? {functions:[...contract.requirements].sort((a,b)=>(a.kind==='must-change'?0:1)-(b.kind==='must-change'?0:1)),application:Reflect.get(contract,'application'),scenarios:Reflect.get(contract,'scenarios'),allowedPaths:contract.allowedPaths} : 'No requirements were approved.', 3500)
+    + (executionLimitations.length ? section('PRIOR AGENT EXECUTION LIMITATIONS', {trust:'UNVERIFIED visible agent tool observations, not independent code evidence. These describe the prior agent environment; permissions and tools may differ after handoff. Reassess before repeating a failed command. Common credential forms are redacted.',failures:executionLimitations},3500) : '')
     + section('NEXT ACTIONS', checkpoint.nextActions, 1400)
     + section('SOURCE CHANGES', {git:candidate.git,changedFileCount:changedFiles.length,files:changedFiles}, 1500)
     + section('ENVIRONMENT AND DEPENDENCIES', {runner:checkpoint.runner??{kind:'local'},node:process.version,dependencyFiles,priorVerificationRuntime:receipt?.runtime,installation:'Dependencies are not captured. Reuse only reviewed installed dependencies; ask before introducing new execution or network requirements.'},1000)

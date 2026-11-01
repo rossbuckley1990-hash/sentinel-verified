@@ -1,3 +1,4 @@
+import { VERSION } from './version.js';
 import { chmod, mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -9,7 +10,7 @@ import { verify } from './verifier.js';
 import type { Receipt, VerificationOptions } from './types.js';
 
 export type RunnerChoice = { kind: 'local' } | { kind: 'docker'; image: string };
-export const DEFAULT_RUNNER_IMAGE = 'sentinel-runner:0.2.0';
+export const DEFAULT_RUNNER_IMAGE = `sentinel-runner:${VERSION}`;
 export interface ContainerRequest { schemaVersion: 1; baselineHash: string; candidateHash: string; contractHash: string | null; timeoutMs: number }
 const imagePattern = /^[a-zA-Z0-9][a-zA-Z0-9_.:/@-]{0,255}$/;
 const imageIdPattern = /^sha256:[a-f0-9]{64}$/;

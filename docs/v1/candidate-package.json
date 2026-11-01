@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-01T19:45:44.360Z",
+  "archive": "sentinel-verified-1.0.0-rc.1.tgz",
+  "version": "SENTINEL 1.0.0-rc.1",
+  "node": "v26.12.0",
+  "platform": "darwin",
+  "arch": "arm64",
+  "emptyNpmCache": true,
+  "freshInstallPrefix": true,
+  "lifecycleScriptsDisabled": true,
+  "preinstalled": [
+    "Node.js",
+    "npm",
+    "Git",
+    "Compatible installed browser"
+  ],
+  "firstMeaningfulMs": 37428,
+  "totalMs": 53135,
+  "under90Seconds": true,
+  "steps": [
+    {
+      "command": [
+        "npm",
+        "install",
+        "--prefix",
+        "<fresh-prefix>/install",
+        "--ignore-scripts",
+        "--no-audit",
+        "--no-fund",
+        "sentinel-verified-1.0.0-rc.1.tgz"
+      ],
+      "exitCode": 0,
+      "durationMs": 9420
+    },
+    {
+      "command": [
+        "node",
+        "<fresh-prefix>/install/node_modules/sentinel-verified/dist/cli.js",
+        "--version"
+      ],
+      "exitCode": 0,
+      "durationMs": 2502
+    },
+    {
+      "command": [
+        "node",
+        "<fresh-prefix>/install/node_modules/sentinel-verified/dist/cli.js",
+        "demo",
+        "--store",
+        "<fresh-prefix>/evidence"
+      ],
+      "exitCode": 0,
+      "durationMs": 41212
+    }
+  ]
+}

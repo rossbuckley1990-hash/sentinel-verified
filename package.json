@@ -1,6 +1,6 @@
 {
   "name": "sentinel-verified",
-  "version": "1.0.0-rc.1",
+  "version": "1.0.0",
   "description": "Evidence-backed verification and continuity for AI coding agents",
   "type": "module",
   "license": "MIT",

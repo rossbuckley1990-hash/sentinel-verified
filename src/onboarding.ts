@@ -133,6 +133,7 @@ export async function prepareRun(options:PrepareOptions){
   contractPath=(app&&!explicitFunction?await approveApplicationPlan(plan,baseline,store,io,app,options.proposeWith):await approvePlan(plan,store,baseline,io)).contractPath;
  }
  else {const contract=parseContract(JSON.parse(await readLimitedText(path.resolve(contractPath),1000000)));if(contract.objective!==options.objective)throw new Error('Task objective differs from the supplied reviewed contract.');io.write(`  CONTRACT · Using supplied reviewed contract (${contract.requirements.length} requirements).`);}
+ if(options.runner.kind==='docker'){const approved=parseContract(JSON.parse(await readLimitedText(contractPath,1000000)));if(approved.application)throw new Error('Docker application verification is unsupported. No agent or application ran and no local fallback was attempted. Review the local execution boundary before choosing --runner local.');}
  const agent=await chooseAgent(store,plan.repo,io,options.agent);
  await consentToExecution(io,options.runner,options.localConsent,options.isolatedConsent);
  return {repo:plan.repo,objective:options.objective,contractPath,agent,store,localConsent:options.runner.kind==='local',isolatedConsent:options.runner.kind==='docker',runner:options.runner};

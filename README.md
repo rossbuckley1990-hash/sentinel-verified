@@ -19,16 +19,25 @@ sentinel run "Fix the bug"
 
 SENTINEL proposes a verification plan, asks for the missing expected outcomes, obtains approval, launches your existing agent, checks its changes and feeds reproducible failures into a bounded repair attempt. You finish with a clear result, a reviewable Git patch and resumable work.
 
-**v1 release candidate.** The published stable baseline is [v0.2.0](https://github.com/rossbuckley1990-hash/sentinel-verified/releases/tag/v0.2.0). v1 is being validated against the [release gates](docs/V1-ENGINEERING.md); this branch is not a claim of completed publication.
+**v1.0** extends the original deterministic function verifier to supported Node APIs and React applications. [Release artifacts](https://github.com/rossbuckley1990-hash/sentinel-verified/releases/tag/v1.0.0) · [Executed validation and limitations](docs/V1-VALIDATION.md).
 
 ## See it work
 
 Requires **Node.js 22.12+, 24.x or 26+, npm and Git**. macOS and Linux are supported. The browser demonstration also needs an installed Chrome/Chromium/Edge or an explicitly installed Playwright Chromium. SENTINEL does not download a browser behind your back.
 
 ```sh
+npm install --global --ignore-scripts https://github.com/rossbuckley1990-hash/sentinel-verified/releases/download/v1.0.0/sentinel-verified-1.0.0.tgz
+sentinel demo
+```
+
+This installs the GitHub release archive. npm-registry authentication was unavailable; `npm install -g sentinel-verified` is **not** advertised as a published registry package.
+
+Or build from source:
+
+```sh
 git clone https://github.com/rossbuckley1990-hash/sentinel-verified.git
 cd sentinel-verified
-git checkout codex/v1-product
+git checkout v1.0.0
 npm ci
 npm run build
 npm link
@@ -55,7 +64,7 @@ An integrated Apple Silicon run showed the first contradiction in **24.09 second
 If a browser is missing, install Chrome or explicitly install the pinned test browser from the source checkout:
 
 ```sh
-npx playwright-core install chromium
+npx --yes playwright-core@1.64.1 install chromium
 ```
 
 You can also set `SENTINEL_BROWSER_EXECUTABLE` to a reviewed installed browser. Browser failure stays an environment failure; it is not replaced with a fake screenshot or successful check.
@@ -168,7 +177,7 @@ Receipts bind source snapshots, contracts, argv, outputs and artifact hashes. Ch
 ```sh
 npm ci
 npm run build
-npx playwright-core install chromium
+npx --yes playwright-core@1.64.1 install chromium
 SENTINEL_TEST_BROWSER=1 npm test
 npm run benchmark
 npm run benchmark:public
@@ -178,7 +187,7 @@ npm run benchmark:web
 
 The original synthetic and historical public-project corpora remain. The new application evaluation uses pinned Express and React TodoMVC source, predeclared labels, development/held-out cases, exact provenance, correct repairs, regressions, an inadequate-contract miss and environment failures. Adapted tests are identified; they are not presented as an upstream project's complete test suite. [Methodology](benchmarks/web/README.md) · [v1 validation](docs/V1-VALIDATION.md).
 
-No broad superiority or agent-productivity claim is made. Existing project tests and trustbut remain useful for covered regressions; Stryker measures mutation sensitivity. The previous informative-summary control removed the apparent handoff advantage. A well-written ordinary summary is a valid baseline.
+No broad superiority or agent-productivity claim is made. Existing project tests and trustbut remain useful for covered regressions; Stryker measures mutation sensitivity. A real direct-Codex control and a complete ordinary-summary handoff also passed the same approved application outcomes. [Measured comparison](docs/V1-AGENT-COMPARISON.md). No handoff productivity advantage was established.
 
 ## Contribute
 
