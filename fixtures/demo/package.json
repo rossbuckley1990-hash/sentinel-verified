@@ -1,0 +1,1 @@
+{"name":"sentinel-controlled-demo","private":true,"type":"module","sentinelFixture":"controlled-demo-v1","scripts":{"test":"vitest run"}}

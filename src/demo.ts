@@ -1,0 +1,47 @@
+import { promises as fs } from 'node:fs';
+import path from 'node:path';
+import os from 'node:os';
+import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
+import { runCommand } from './process.js';
+import { startSession, continueSession } from './session.js';
+import { getObject, atomicJson } from './store.js';
+import { writeReport } from './report.js';
+import { banner, progress, line, displayReceipt, displayCheckpoint } from './terminal.js';
+import type { Receipt, Contract } from './types.js';
+export async function demo(store:string){
+ const started=performance.now();banner();line('  CONTROLLED DEMONSTRATION · bundled code · no model or API key');
+ line('  A simulated agent claims success. SENTINEL checks the actual behaviour.');line();
+ const fixture=fileURLToPath(new URL('../fixtures/demo/',import.meta.url));
+ const root=await fs.mkdtemp(path.join(os.tmpdir(),'sentinel-demo-'));const repo=path.join(root,'project');
+ await fs.cp(fixture,repo,{recursive:true});
+ const contractPath=path.join(root,'approved-contract.json');await fs.rename(path.join(repo,'contract.json'),contractPath);
+ const contract=JSON.parse(await fs.readFile(contractPath,'utf8')) as Contract;
+ await fs.writeFile(path.join(repo,'.gitignore'),'node_modules/\n');
+ const require=createRequire(import.meta.url);await fs.symlink(path.resolve(path.dirname(require.resolve('vitest/package.json')),'..'),path.join(repo,'node_modules'),'dir');
+ for(const args of [['init','-b','main'],['add','--all'],['-c','user.name=SENTINEL','-c','user.email=sentinel@localhost','-c','commit.gpgsign=false','-c','core.hooksPath=/dev/null','commit','-m','Controlled demonstration baseline']]){
+  const cmd=await runCommand(['git',...args],repo);if(cmd.exitCode!==0)throw new Error(cmd.stderr);
+ }
+ progress('Task: reject malformed ages without breaking valid ages or greetings');
+ const broken=await startSession({repo,objective:contract.objective,contractPath,agent:'fixture-broken',store,localConsent:true,onProgress:progress});
+ const firstHash=broken.receipts.at(-1);if(!firstHash)throw new Error(`Demo verification produced no receipt: ${broken.openQuestions.join('; ')}`);
+ const bad=JSON.parse((await getObject(store,firstHash)).toString()) as Receipt;
+ displayReceipt(bad);
+ if(bad.checks.find(c=>c.id==='candidate-tests')?.status!=='VERIFIED'||!bad.checks.some(c=>c.status==='CONTRADICTED'))throw new Error('Demo failed its acceptance gate: expected green ordinary tests and an independent contradiction.');
+ const firstResultMs=Math.round(performance.now()-started);
+ const reportDir=path.join(store,'sessions',broken.id);await writeReport(path.join(reportDir,'false-success.html'),bad,broken);
+ line();progress('Simulating an interrupted adapter; implementation and evidence remain on disk');
+ const stopped=await continueSession({store,id:broken.id,agent:'fixture-interrupt',onProgress:progress});
+ if(stopped.state!=='interrupted')throw new Error('Interruption checkpoint was not preserved');
+ progress('A second deterministic adapter resumes from the same evidence checkpoint');
+ const fixed=await continueSession({store,id:broken.id,agent:'fixture-fix',onProgress:progress});
+ const finalHash=fixed.receipts.at(-1)!;const good=JSON.parse((await getObject(store,finalHash)).toString()) as Receipt;
+ displayReceipt(good);if(good.status!=='VERIFIED')throw new Error('Corrected demo did not pass the preserved acceptance checks.');
+ await writeReport(path.join(reportDir,'report.html'),good,fixed);
+ const metrics={schemaVersion:1,controlledDemo:true,node:process.version,platform:process.platform,arch:process.arch,firstResultMs,totalMs:Math.round(performance.now()-started),session:fixed.id,initialReceipt:firstHash,finalReceipt:finalHash};
+ await atomicJson(path.join(reportDir,'demo-metrics.json'),metrics);
+ line();displayCheckpoint(fixed);line(`  False success report  ${path.join(reportDir,'false-success.html')}`);line(`  Final report          ${path.join(reportDir,'report.html')}`);line(`  First result          ${(metrics.firstResultMs/1000).toFixed(2)}s from demo start (installation excluded)`);
+ line(`  Full demonstration    ${(metrics.totalMs/1000).toFixed(2)}s`);
+ line('  Continue this session: sentinel continue --agent codex');
+ return {checkpoint:fixed,metrics,bad,good};
+}

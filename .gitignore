@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.sentinel/
+coverage/
+*.tgz
+.DS_Store
+.env*
+benchmark-results/

@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "objective": "Reject malformed ages while preserving numeric eligibility and personalised greetings",
+  "approvedBy": "SENTINEL controlled demonstration specification",
+  "allowedPaths": ["src/access.ts"],
+  "requirements": [
+    {"id":"reject-strings","kind":"must-change","description":"String ages are invalid, including numeric-looking strings","module":"src/access.ts","export":"isAdult","cases":[{"args":["00018"],"expected":false}],"invariant":{"argument":0,"domain":"string","seeds":["00018","99","not-an-age",""],"args":[""],"expected":false}},
+    {"id":"valid-ages","kind":"must-preserve","description":"Accept adult integers; reject children and fractional ages","module":"src/access.ts","export":"isAdult","cases":[{"args":[18],"expected":true},{"args":[42],"expected":true},{"args":[17],"expected":false},{"args":[18.5],"expected":false},{"args":[null],"expected":false}]},
+    {"id":"greetings","kind":"must-preserve","description":"Keep personalised greetings","module":"src/access.ts","export":"greeting","cases":[{"args":["Ada"],"expected":"Hello, Ada!"},{"args":["Lin"],"expected":"Hello, Lin!"}]}
+  ],
+  "probes": [{"id":"other-greeting","module":"src/access.ts","export":"greeting","inputs":[["Grace"]]}]
+}
