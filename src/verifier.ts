@@ -19,7 +19,7 @@ type Observation={ok:true;value:Json}|{ok:false;kind:string;error:string};
 const isTest=(name:string)=>/(^|\/)(__tests__\/|.*\.(test|spec)\.[cm]?[jt]sx?$)/.test(name);
 const isControl=(name:string)=>isTest(name)||/(^|\/)(vitest|vite)\.config\./.test(name)||name.startsWith('.github/workflows/')||/^(package(-lock)?\.json|yarn\.lock|pnpm-lock\.yaml)$/.test(name);
 export function overallStatus(checks:Check[],changes:Change[]):Status {
- const relevant=checks.filter(c=>c.id!=='baseline-tests');
+ const relevant=checks.filter(c=>c.id!=='baseline-tests'||c.status==='ENVIRONMENT FAILURE');
  for(const status of ['ENVIRONMENT FAILURE','CONTRADICTED','REVIEW REQUIRED','UNVERIFIED'] as Status[]) if(relevant.some(c=>c.status===status)||changes.some(c=>c.classification===status))return status;
  return 'VERIFIED';
 }
@@ -42,13 +42,21 @@ async function testRun(dir:string,id:string,label:string,config:string,timeout:n
  const command=await runCommand([process.execPath,vitestCli,'run','--config',config,'--reporter=json','--outputFile',outputFile],dir,{timeoutMs:timeout,env:executionEnvironment()});
  if(command.timedOut||command.truncated||command.signal||command.exitCode===null)return {id,label,status:'ENVIRONMENT FAILURE',detail:'Test execution did not complete reliably',command};
  let result: {numTotalTests?:number;numPassedTests?:number;numPendingTests?:number;numTodoTests?:number;numFailedTests?:number;success?:boolean};
- try{const bytes=await fs.readFile(outputFile,'utf8');command.outputFiles={[outputFile]:bytes};result=JSON.parse(bytes);}catch{return {id,label,status:'ENVIRONMENT FAILURE',detail:'Vitest did not produce a valid test report',command};}
+ try{if((await fs.stat(outputFile)).size>5_000_000)throw new Error('Vitest JSON output exceeds 5 MB');const bytes=await fs.readFile(outputFile,'utf8');command.outputFiles={[outputFile]:bytes};result=JSON.parse(bytes);}catch{return {id,label,status:'ENVIRONMENT FAILURE',detail:'Vitest did not produce a valid test report',command};}
  const total=result.numTotalTests??0;
  if(total===0)return {id,label,status:'UNVERIFIED',detail:'No tests executed; an empty suite is not verification',command};
  if((result.numPendingTests??0)+(result.numTodoTests??0)>0)return {id,label,status:'REVIEW REQUIRED',detail:`${total} tests; ${(result.numPendingTests??0)+(result.numTodoTests??0)} skipped or todo`,command};
  if(command.exitCode!==0||result.success!==true)return {id,label,status:(result.numFailedTests??0)>0?'CONTRADICTED':'ENVIRONMENT FAILURE',detail:`${result.numPassedTests??0}/${total} tests passed`,command};
  return {id,label,status:'VERIFIED',detail:`${result.numPassedTests}/${total} ordinary tests passed; these do not establish the approved intent`,command};
 }
+
+async function checkExecutionCopy(dir:string,snapshot:Snapshot,checks:Check[],phase:string){
+ for(const [name,entry] of Object.entries(snapshot.files)){
+  try{const file=path.join(dir,name);const stat=await fs.lstat(file);if(!stat.isFile()||digest(await fs.readFile(file))!==entry.hash)throw new Error('changed');}
+  catch{checks.push({id:`execution-integrity:${phase}`,label:'Execution source integrity',status:'ENVIRONMENT FAILURE',detail:`${phase} execution modified or removed snapshot input ${name}; its result cannot be accepted as evidence for the original source.`});return;}
+ }
+}
+
 async function inspectChanges(options:VerificationOptions):Promise<Change[]>{
  const {baseline,candidate,contract,store}=options;const changes:Change[]=[];
  for(const name of [...new Set([...Object.keys(baseline.files),...Object.keys(candidate.files)])].sort()){
@@ -74,25 +82,26 @@ function observation(value:Observation|undefined):Json{return value?.ok===true?v
 async function shrink(root:string,req:Requirement,original:Json[],timeout:number){
  const rule=req.invariant;if(!rule)return undefined;
  const input=original[rule.argument];if(rule.domain==='array'?!Array.isArray(input):typeof input!==rule.domain)return undefined;
- let args=structuredClone(original);let attempts=0;let changed=true;
+ let args=structuredClone(original);let attempts=0;let inconclusive=false;let changed=true;
  while(changed&&attempts<30){
   changed=false;const value=args[rule.argument]!;let candidates:Json[]=[];
-  if(typeof value==='string')candidates=Array.from({length:value.length},(_,i)=>value.slice(0,i)+value.slice(i+1));
-  else if(Array.isArray(value))candidates=value.map((_,i)=>value.filter((_,j)=>i!==j));
+  if(typeof value==='string')candidates=Array.from({length:Math.min(value.length,31-attempts)},(_,i)=>value.slice(0,i)+value.slice(i+1));
+  else if(Array.isArray(value))candidates=value.slice(0,31-attempts).map((_,i)=>value.filter((_,j)=>i!==j));
   else if(typeof value==='number'&&value!==0)candidates=[0,Math.trunc(value/2)].filter(v=>Math.abs(v)<Math.abs(value));
   for(const candidate of candidates){if(attempts++>=30)break;const next=structuredClone(args);next[rule.argument]=candidate;const result=await probe(root,[{module:req.module,export:req.export,args:next}],timeout);
-   if(result.error)continue;const v=result.values[0];if(v?.ok&&!matches(v,rule.expected)){args=next;changed=true;break;}
+   if(result.error){inconclusive=true;continue;}const v=result.values[0];if(!v?.ok)inconclusive=true;if(v?.ok&&!matches(v,rule.expected)){args=next;changed=true;break;}
   }
  }
- return {original,minimal:args,attempts,guarantee:attempts>=30?'Budget-limited reduction; not guaranteed minimal':rule.domain==='number'?'Locally minimal under zero/halving reductions':'1-minimal under single-element deletion for the approved constant-output invariant'};
+ return {original,minimal:args,attempts,guarantee:inconclusive?'Reduction incomplete: one or more candidate executions failed':attempts>=30?'Budget-limited reduction; not guaranteed minimal':rule.domain==='number'?'Locally minimal under zero/halving reductions':'1-minimal under single-element deletion for the approved constant-output invariant'};
 }
 export async function verify(options:VerificationOptions):Promise<Receipt>{
  const start=performance.now();const {store,baseline,candidate,contractHash}=options;const contract=options.contract?parseContract(options.contract):null;
- await readSnapshot(store,baseline.hash);await readSnapshot(store,candidate.hash);
+ const canonicalBaseline=await readSnapshot(store,baseline.hash),canonicalCandidate=await readSnapshot(store,candidate.hash);
+ if(!isDeepStrictEqual(canonicalBaseline,baseline)||!isDeepStrictEqual(canonicalCandidate,candidate))throw new Error('Snapshot manifest does not match its content hash');
  if(contractHash){const stored=parseContract(JSON.parse((await getObject(store,contractHash)).toString()));if(!isDeepStrictEqual(stored,contract))throw new Error('Approved contract content does not match its hash');}
  else if(contract)throw new Error('Approved contract requires a content hash');
  const scratch=await fs.mkdtemp(path.join(await fs.realpath(store),'execution-'));
- const baseDir=path.join(scratch,'baseline'),candidateDir=path.join(scratch,'candidate'),preservedDir=path.join(scratch,'preserved');
+ let baseDir=path.join(scratch,'baseline'),candidateDir=path.join(scratch,'candidate');const preservedDir=path.join(scratch,'preserved');
  const checks:Check[]=[];const timeout=options.timeoutMs??15000;
  const changes=await inspectChanges({...options,contract});
  const progress=options.onProgress??(()=>{});
@@ -106,20 +115,26 @@ export async function verify(options:VerificationOptions):Promise<Receipt>{
   progress('Checking clean baseline tests');checks.push(await testRun(baseDir,'baseline-tests','Baseline tests',config,timeout));
   progress('Running candidate ordinary tests');checks.push(await testRun(candidateDir,'candidate-tests','Candidate ordinary tests',config,timeout));
   progress('Re-running preserved baseline tests against candidate source');checks.push(await testRun(preservedDir,'preserved-tests','Preserved baseline tests',config,timeout));
+  await checkExecutionCopy(baseDir,baseline,checks,'baseline');await checkExecutionCopy(candidateDir,candidate,checks,'candidate');
+  baseDir=path.join(scratch,'behaviour-baseline');candidateDir=path.join(scratch,'behaviour-candidate');
+  for(const [snapshot,dir] of [[baseline,baseDir],[candidate,candidateDir]] as const){await materializeSnapshot(store,snapshot,dir);await attachDependencies(dir,options.dependencies);}
   if(!contract||contract.requirements.length===0)checks.push({id:'intent',label:'Approved intent',status:'UNVERIFIED',detail:'No approved requirements. Passing available tests cannot establish the task objective.'});
   for(const req of contract?.requirements??[]){
    progress(`Checking ${req.kind}: ${req.description}`);const cases=examples(req);const calls=cases.map(c=>({module:req.module,export:req.export,args:c.args}));
    const base=await probe(baseDir,calls,timeout),after=await probe(candidateDir,[...calls,...calls],timeout);
    if(base.error||after.error){checks.push({id:`req:${req.id}`,requirementId:req.id,label:req.description,status:'ENVIRONMENT FAILURE',detail:base.error??after.error!,command:base.error?base.command:after.command});continue;}
+   const baselineError=base.values.find(v=>!v.ok&&(v.kind==='import'||v.kind==='serialization'));
+   if(baselineError&&!baselineError.ok)checks.push({id:`baseline-error:${req.id}`,label:`Baseline observation unavailable: ${req.id}`,status:'ENVIRONMENT FAILURE',detail:baselineError.error,command:base.command});
    const badImport=after.values.find(v=>!v.ok&&(v.kind==='import'||v.kind==='serialization'));
    if(badImport&&!badImport.ok){checks.push({id:`req:${req.id}`,requirementId:req.id,label:req.description,status:'ENVIRONMENT FAILURE',detail:badImport.error,command:after.command});continue;}
    if(!isDeepStrictEqual(after.values.slice(0,calls.length),after.values.slice(calls.length))){checks.push({id:`req:${req.id}`,requirementId:req.id,label:req.description,status:'UNVERIFIED',detail:'Repeated calls produced different results; deterministic support requirement was not satisfied',command:after.command});continue;}
    let failing=cases.findIndex((c,i)=>!matches(after.values[i],c.expected));const example=cases[failing<0?0:failing]!;
-   const status:Status=failing<0?'VERIFIED':'CONTRADICTED';
-   const check:Check={id:`req:${req.id}`,requirementId:req.id,label:req.description,status,detail:failing<0?`${cases.length} approved examples passed twice. Baseline met ${cases.filter((c,i)=>matches(base.values[i],c.expected)).length}/${cases.length}.`:`Approved ${req.kind} requirement conflicts with the observed result.`,args:example.args,expected:example.expected,observed:observation(after.values[failing<0?0:failing]),baseline:observation(base.values[failing<0?0:failing]),command:after.command};
+   const preserveMismatch=req.kind==='must-preserve'&&cases.some((c,i)=>!matches(base.values[i],c.expected));
+   const status:Status=failing>=0?'CONTRADICTED':preserveMismatch?'REVIEW REQUIRED':'VERIFIED';
+   const check:Check={id:`req:${req.id}`,requirementId:req.id,label:req.description,status,detail:preserveMismatch&&failing<0?'Candidate matches the approved expectations, but the baseline did not. Review the inconsistent must-preserve contract.':failing<0?`${cases.length} approved examples passed twice. Baseline met ${cases.filter((c,i)=>matches(base.values[i],c.expected)).length}/${cases.length}.`:`Approved ${req.kind} requirement conflicts with the observed result.`,args:example.args,expected:example.expected,observed:observation(after.values[failing<0?0:failing]),baseline:observation(base.values[failing<0?0:failing]),command:after.command};
    if(failing>=0&&req.invariant&&isDeepStrictEqual(example.expected,req.invariant.expected))check.counterexample=await shrink(candidateDir,req,example.args,timeout);
    checks.push(check);
-   checks.push({id:`baseline:${req.id}`,label:`Baseline observation: ${req.id}`,status:'VERIFIED',detail:'Historical observations only; not a claim that baseline meets the requirement',command:base.command});
+   checks.push({id:`baseline:${req.id}`,label:`Baseline observation: ${req.id}`,status:baselineError?'ENVIRONMENT FAILURE':'VERIFIED',detail:baselineError?'Baseline observation could not complete':'Historical observations only; not a claim that baseline meets the requirement',command:base.command});
   }
   for(const p of contract?.probes??[]){
    const calls=p.inputs.map(args=>({module:p.module,export:p.export,args}));const a=await probe(baseDir,calls,timeout),b=await probe(candidateDir,calls,timeout);
@@ -134,10 +149,11 @@ export async function verify(options:VerificationOptions):Promise<Receipt>{
   for(const req of (contract?.requirements??[]).slice(0,10)){
    const first=examples(req)[0];if(!first)continue;const file=path.join(candidateDir,req.module),original=await fs.readFile(file);
    const wrong:Json=first.expected===null?true:null;
-   try{await fs.writeFile(file,`export function ${req.export}(){return ${JSON.stringify(wrong)}}\n`);const result=await probe(candidateDir,[{module:req.module,export:req.export,args:first.args}],timeout);
+   try{await fs.writeFile(file,`function sentinelNegative(){return ${JSON.stringify(wrong)}}\nexport { sentinelNegative as ${req.export} };\n`);const result=await probe(candidateDir,[{module:req.module,export:req.export,args:first.args}],timeout);
     checks.push({id:`mutation:${req.id}`,label:`Negative control: ${req.id}`,status:result.error||!result.values[0]?.ok?'ENVIRONMENT FAILURE':matches(result.values[0],first.expected)?'UNVERIFIED':'VERIFIED',detail:'Deliberately wrong constant export '+(result.error?'could not execute':'was checked against the approved example')+(result.error?`: ${result.error}`:''),command:result.command});
    }finally{await fs.writeFile(file,original);}
   }
+  await checkExecutionCopy(baseDir,baseline,checks,'baseline-behaviour');await checkExecutionCopy(candidateDir,candidate,checks,'candidate-behaviour');
  }catch(error){checks.push({id:'execution',label:'Verification infrastructure',status:'ENVIRONMENT FAILURE',detail:String(error)});}
  finally{await fs.rm(scratch,{recursive:true,force:true});}
  // Re-read content-addressed inputs after executing advisory code to detect ordinary tampering.

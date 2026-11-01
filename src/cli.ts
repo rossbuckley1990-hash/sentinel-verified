@@ -4,6 +4,7 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { demo } from './demo.js';
+import { exportSession, importSession } from './portable.js';
 import { startSession,continueSession,loadCheckpoint } from './session.js';
 import { detectAgents } from './agents.js';
 import { captureSnapshot,captureRevision,readSnapshot,putObject,getObject,atomicJson } from './store.js';
@@ -21,6 +22,8 @@ const help=`SENTINEL · evidence-backed verification and continuity
   sentinel inspect                       Inspect the current checkpoint
   sentinel report                        Write the current local HTML report
   sentinel replay RECEIPT_HASH           Re-run a stored verification snapshot
+  sentinel export --out task.sentinel.json  Export portable source + evidence
+  sentinel import task.sentinel.json     Restore a checkpoint into a new store
   sentinel doctor                        Detect installed agent CLI capabilities
 
   --repo PATH          Input Git repository (default: current directory)
@@ -36,7 +39,7 @@ Local checks are advisory. Use a disposable isolated machine for untrusted code.
 Exit: 0 scoped checks passed; 1 contradiction/review/unknown; 2 usage/infrastructure error.
 `;
 async function main(){
- const {positionals,values}=parseArgs({allowPositionals:true,strict:true,options:{repo:{type:'string'},contract:{type:'string'},agent:{type:'string'},store:{type:'string'},session:{type:'string'},baseline:{type:'string'},'allow-local':{type:'boolean'},'adopt-changes':{type:'boolean'},timeout:{type:'string'},help:{type:'boolean',short:'h'},version:{type:'boolean',short:'v'}}});
+ const {positionals,values}=parseArgs({allowPositionals:true,strict:true,options:{repo:{type:'string'},contract:{type:'string'},agent:{type:'string'},store:{type:'string'},session:{type:'string'},baseline:{type:'string'},'allow-local':{type:'boolean'},'adopt-changes':{type:'boolean'},timeout:{type:'string'},out:{type:'string'},help:{type:'boolean',short:'h'},version:{type:'boolean',short:'v'}}});
  if(values.version){line('SENTINEL 0.1.0');return;}
  const command=positionals[0];if(values.help||!command){line(help);return;}
  const store=path.resolve(values.store??process.env.SENTINEL_HOME??path.join(os.homedir(),'.sentinel'));
@@ -46,7 +49,7 @@ async function main(){
  const agent=values.agent as AgentName|undefined;
  if(agent&&!['codex','claude','fixture-broken','fixture-fix','fixture-interrupt'].includes(agent))throw new Error('Unknown adapter. Use codex or claude.');
  const abort=new AbortController();const interrupt=()=>{progress('Interrupt requested; preserving the checkpoint');abort.abort();};
- const sessionReport=async(cp:Checkpoint)=>{if(cp.receipts.at(-1)){const receipt=JSON.parse((await getObject(store,cp.receipts.at(-1)!)).toString()) as Receipt;displayReceipt(receipt);const file=path.join(store,'sessions',cp.id,'report.html');await writeReport(file,receipt,cp);line(`  Report      ${file}`);}displayCheckpoint(cp);if(cp.state!=='verified')process.exitCode=1;};
+ const sessionReport=async(cp:Checkpoint)=>{if(cp.receipts.at(-1)){const receipt=JSON.parse((await getObject(store,cp.receipts.at(-1)!)).toString()) as Receipt;if(receipt.candidateHash!==cp.candidateHash)line('  HISTORICAL EVIDENCE: this receipt covers an earlier source snapshot. Current code is UNVERIFIED.');displayReceipt(receipt);const file=path.join(store,'sessions',cp.id,'report.html');await writeReport(file,receipt,cp);line(`  Report      ${file}`);}displayCheckpoint(cp);if(cp.state!=='verified')process.exitCode=1;};
  const requireConsent=()=>{if(!consent)throw new Error('Project code runs under your OS account without isolation. Review it, then pass --allow-local to consent. For untrusted code run SENTINEL inside a disposable isolated machine.');};
  switch(command){
   case 'demo':await demo(store);break;
@@ -59,6 +62,8 @@ async function main(){
    if(!agent)throw new Error('Select the receiving adapter with --agent codex or --agent claude');banner();process.on('SIGINT',interrupt);process.on('SIGTERM',interrupt);
    try{await sessionReport(await continueSession({id:values.session,store,agent,localConsent:consent?true:undefined,adoptChanges:values['adopt-changes'],onProgress:progress,agentTimeoutMs:timeout,signal:abort.signal}));}finally{process.off('SIGINT',interrupt);process.off('SIGTERM',interrupt);}break;
   }
+  case 'export':{if(!values.out)throw new Error('Supply --out FILE.sentinel.json');const result=await exportSession(store,values.session,values.out);line(`  Exported ${result.path}\n  SHA-256  ${result.hash}\n  Contains source and logs. Review before sharing.`);break;}
+  case 'import':{if(!positionals[1])throw new Error('Supply a checkpoint bundle file');const cp=await importSession(store,positionals[1]);displayCheckpoint(cp);line('  Imported evidence is historical. Continue with --allow-local to verify this environment.');break;}
   case 'inspect':{const cp=await loadCheckpoint(store,values.session);line(JSON.stringify(cp,null,2));break;}
   case 'report':{banner();await sessionReport(await loadCheckpoint(store,values.session));break;}
   case 'verify':{

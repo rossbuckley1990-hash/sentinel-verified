@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-01T13:45:31.874Z",
+  "scope": "One controlled age-validation Git repository; a real authenticated Codex CLI edited its managed workspace. No claim about arbitrary projects or model reliability.",
+  "codex": {
+    "version": "0.163.0",
+    "outcome": "completed",
+    "exitCode": 0,
+    "agentDurationMs": 22067,
+    "verificationStatus": "VERIFIED",
+    "verificationDurationMs": 2231,
+    "receiptHash": "aa4d29e7edbe9608c8a40c51230bf5bc3d00098f70681de3e4947cc9939c3caf"
+  },
+  "claude": {
+    "version": "2.1.301",
+    "installed": true,
+    "authenticated": false,
+    "liveExecution": "not tested",
+    "validated": "Installed help capabilities and fake-executable argv/stdin protocol tests"
+  },
+  "externalSideEffects": "No remote code changes; original controlled project unchanged."
+}

@@ -18,7 +18,11 @@ export async function atomicJson(file: string, value: unknown): Promise<void> {
 export async function putObject(store: string, value: string | Buffer): Promise<string> {
   const hash = digest(value); const dir = path.join(store, 'objects'); await fs.mkdir(dir, { recursive: true });
   const file = path.join(dir, hash);
-  try { await fs.writeFile(file, value, { flag: 'wx', mode: 0o444 }); } catch (e) { if ((e as NodeJS.ErrnoException).code !== 'EEXIST') throw e; await getObject(store, hash); }
+  const temp=path.join(dir,`.${hash}.${randomUUID()}.tmp`);
+  try {
+    const handle=await fs.open(temp,'wx',0o444);try{await handle.writeFile(value);await handle.sync();}finally{await handle.close();}
+    try{await fs.link(temp,file);}catch(e){if((e as NodeJS.ErrnoException).code!=='EEXIST')throw e;await getObject(store,hash);}
+  }finally{await fs.rm(temp,{force:true});}
   return hash;
 }
 export async function getObject(store: string, hash: string): Promise<Buffer> {
@@ -44,7 +48,7 @@ export async function readSnapshot(store: string, hash: string): Promise<Snapsho
 export async function captureSnapshot(root: string, store: string): Promise<Snapshot> {
   const identity = await gitIdentity(root);
   const listing = (await exec('git',['-C',root,'ls-files','--cached','--others','--exclude-standard','-z'],{maxBuffer:32*1024*1024})).stdout;
-  const files: Record<string,FileEntry> = {}; let total = 0;
+  const files: Record<string,FileEntry> = Object.create(null); let total = 0;
   for (const name of [...new Set(listing.split('\0').filter(Boolean))].sort()) {
     if (!safeRelative(name)) throw new Error(`Unsafe path: ${name}`);
     if (name.split('/').some(x=>x==='node_modules'||x==='.sentinel')) continue;
@@ -61,7 +65,7 @@ export async function captureRevision(root: string, ref: string, store: string):
   const commit = await git(root,['rev-parse','--verify',`${ref}^{commit}`]);
   const identity = { ...(await gitIdentity(root)), head: commit, dirty: false };
   const listing = (await exec('git',['-C',root,'ls-tree','-rz','--full-tree',commit],{maxBuffer:32*1024*1024})).stdout;
-  const files: Record<string,FileEntry> = {}; let total=0;
+  const files: Record<string,FileEntry> = Object.create(null); let total=0;
   for(const item of listing.split('\0').filter(Boolean)) {
     const tab=item.indexOf('\t'); const name=item.slice(tab+1); const [mode,type,oid]=item.slice(0,tab).split(' ');
     if(!safeRelative(name) || type!=='blob' || mode==='120000') throw new Error(`Unsupported baseline file: ${name}`);
@@ -73,9 +77,10 @@ export async function captureRevision(root: string, ref: string, store: string):
   return saveSnapshot(store, files, identity);
 }
 export async function materializeSnapshot(store: string, snapshot: Snapshot, dest: string): Promise<void> {
-  await readSnapshot(store,snapshot.hash);
+  const canonical=await readSnapshot(store,snapshot.hash);
+  if(JSON.stringify(canonical)!==JSON.stringify(snapshot))throw new Error('Snapshot manifest does not match its content hash');
   await fs.mkdir(dest,{recursive:true});
   if ((await fs.readdir(dest)).length) throw new Error('Snapshot destination must be empty');
-  for(const [name,entry] of Object.entries(snapshot.files)) { if(!safeRelative(name)) throw new Error('Invalid path'); const target=path.join(dest,name); await fs.mkdir(path.dirname(target),{recursive:true}); await fs.writeFile(target,await getObject(store,entry.hash),{mode:entry.mode}); }
+  for(const [name,entry] of Object.entries(snapshot.files)) { if(!safeRelative(name)) throw new Error('Invalid path'); const target=path.join(dest,name); await fs.mkdir(path.dirname(target),{recursive:true}); await fs.writeFile(target,await getObject(store,entry.hash),{mode:entry.mode});await fs.chmod(target,entry.mode); }
 }
 export async function sameFiles(a: Snapshot,b: Snapshot): Promise<boolean> { return JSON.stringify(a.files)===JSON.stringify(b.files); }

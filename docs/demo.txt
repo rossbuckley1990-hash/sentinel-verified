@@ -1,0 +1,79 @@
+
+  SENTINEL  /  verified progress survives
+
+  CONTROLLED DEMONSTRATION · bundled code · no model or API key
+  A simulated agent claims success. SENTINEL checks the actual behaviour.
+
+  · Task: reject malformed ages without breaking valid ages or greetings
+  · Controlled fixture adapter fixture-broken completed.
+  · Agent finished. Checking the source independently.
+  · Checking clean baseline tests
+  · Running candidate ordinary tests
+  · Re-running preserved baseline tests against candidate source
+  · Checking must-change: String ages are invalid, including numeric-looking strings
+  · Checking must-change: Reject fractional and missing ages
+  · Checking must-preserve: Preserve adult and child integer eligibility
+  · Checking must-preserve: Keep personalised greetings
+  TASK → AGENT → CHANGES → VERIFICATION → EVIDENCE → CONTINUATION
+
+  Reject malformed ages while preserving numeric eligibility and personalised greetings
+
+  ✓ VERIFIED             Baseline tests
+  ✓ VERIFIED             Candidate ordinary tests
+    3/3 ordinary tests passed; these do not establish the approved intent
+  ✓ VERIFIED             Preserved baseline tests
+  ✕ CONTRADICTED         String ages are invalid, including numeric-looking strings
+    Approved must-change requirement conflicts with the observed result.
+    Input     ["00018"]
+    Expected  false
+    Observed  true
+    Reduced   ["00018"] → ["18"] (5 attempts)
+  ✕ CONTRADICTED         Reject fractional and missing ages
+    Approved must-change requirement conflicts with the observed result.
+    Input     [18.5]
+    Expected  false
+    Observed  true
+  ✓ VERIFIED             Preserve adult and child integer eligibility
+  ✓ VERIFIED             Keep personalised greetings
+  ✓ VERIFIED             Observed behaviour: other-greeting
+
+  CONTRADICTED · 2.85s · local advisory verification
+  Results cover the executed checks. They do not prove arbitrary correctness.
+
+  · Simulating an interrupted adapter; implementation and evidence remain on disk
+  · Controlled fixture agent interrupted; source changes preserved.
+  · A second deterministic adapter resumes from the same evidence checkpoint
+  · Controlled fixture adapter fixture-fix completed.
+  · Agent finished. Checking the source independently.
+  · Checking clean baseline tests
+  · Running candidate ordinary tests
+  · Re-running preserved baseline tests against candidate source
+  · Checking must-change: String ages are invalid, including numeric-looking strings
+  · Checking must-change: Reject fractional and missing ages
+  · Checking must-preserve: Preserve adult and child integer eligibility
+  · Checking must-preserve: Keep personalised greetings
+  TASK → AGENT → CHANGES → VERIFICATION → EVIDENCE → CONTINUATION
+
+  Reject malformed ages while preserving numeric eligibility and personalised greetings
+
+  ✓ VERIFIED             Baseline tests
+  ✓ VERIFIED             Candidate ordinary tests
+    3/3 ordinary tests passed; these do not establish the approved intent
+  ✓ VERIFIED             Preserved baseline tests
+  ✓ VERIFIED             String ages are invalid, including numeric-looking strings
+  ✓ VERIFIED             Reject fractional and missing ages
+  ✓ VERIFIED             Preserve adult and child integer eligibility
+  ✓ VERIFIED             Keep personalised greetings
+  ✓ VERIFIED             Observed behaviour: other-greeting
+
+  VERIFIED · 2.50s · local advisory verification
+  Results cover the executed checks. They do not prove arbitrary correctness.
+
+  Session     s-mvxvzycy-780b26b7 · verified
+  Workspace   <store>/workspaces/s-mvxvzycy-780b26b7
+  Evidence    b034e2bb3c3a4c29ad86dcad9c5084d39bfcf9c4fb0b21cf34bb4b84c707f06a
+  False success report  <store>/sessions/s-mvxvzycy-780b26b7/false-success.html
+  Final report          <store>/sessions/s-mvxvzycy-780b26b7/report.html
+  First result          3.21s from demo start (installation excluded)
+  Full demonstration    6.00s
+  Continue this session: sentinel continue --agent codex

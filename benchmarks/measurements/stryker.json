@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-11-01T13:43:54.089Z",
+  "environment": {
+    "node": "v26.12.0",
+    "platform": "darwin",
+    "arch": "arm64"
+  },
+  "versions": {
+    "stryker": "10.1.1",
+    "vitest": "5.0.5"
+  },
+  "config": {
+    "mutate": [
+      "src/access.js"
+    ],
+    "testRunner": "command",
+    "commandRunner": {
+      "command": "node node_modules/vitest/vitest.mjs run --maxWorkers=1 --no-file-parallelism"
+    },
+    "concurrency": 1,
+    "reporters": [
+      "clear-text",
+      "json"
+    ],
+    "jsonReporter": {
+      "fileName": "mutation.json"
+    },
+    "coverageAnalysis": "off",
+    "timeoutMS": 10000,
+    "timeoutFactor": 2,
+    "cleanTempDir": true
+  },
+  "ordinary": {
+    "exitCode": 0,
+    "durationMs": 553
+  },
+  "stryker": {
+    "exitCode": 0,
+    "durationMs": 2203,
+    "mutantStatuses": {
+      "Killed": 5
+    },
+    "mutationScore": 100
+  },
+  "independentObservation": {
+    "input": "18",
+    "observed": true,
+    "expected": false
+  },
+  "scope": "One deliberately coercive age-validation fixture. Stryker measures visible test strength; SENTINEL checks separately specified intent. No overall tool ranking or causal claim follows."
+}

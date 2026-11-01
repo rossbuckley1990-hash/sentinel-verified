@@ -60,6 +60,15 @@ describe('static evidence report', () => {
     expect(html).toContain('No continuation checkpoint accompanies this receipt.');
   });
 
+  it('marks results as historical when the checkpoint now identifies different source', () => {
+    const previous = { ...receipt, status: 'VERIFIED' as const };
+    const current = { ...checkpoint, candidateHash: 'f'.repeat(64), state: 'interrupted' as const };
+    const html = renderReport(previous, current);
+    expect(html).toContain('Historical receipt: these checks apply to candidate');
+    expect(html).toContain('Its current implementation is unverified until checked again.');
+    expect(html).toContain('<span class="badge unknown">UNVERIFIED</span>');
+  });
+
   it('writes a complete standalone document without leftover temporary files', async () => {
     const directory = await mkdtemp(join(tmpdir(), 'sentinel-report-'));
     try {

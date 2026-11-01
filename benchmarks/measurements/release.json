@@ -1,0 +1,382 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-11-01T13:48:41.435Z",
+  "casesHash": "a6673c321c8a800d4bd405b75364a0c615b2dac06973316522445721d90e1d4b",
+  "environment": {
+    "node": "v26.12.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "vitest": "5.0.5"
+  },
+  "results": [
+    {
+      "id": "removed-tests",
+      "split": "development",
+      "category": "test deletion",
+      "expected": "detect",
+      "actual": "detect",
+      "matched": true,
+      "ordinaryGreen": true,
+      "sentinelStatus": "CONTRADICTED",
+      "durationMs": 1504,
+      "ordinaryDurationMs": 324,
+      "receiptHash": "88a536dbdd593be3d5503ee7d12baa2fceb7c23f5285b92d41373cd9887041d1",
+      "evidence": [
+        {
+          "id": "req:required-behaviour",
+          "status": "CONTRADICTED",
+          "detail": "Approved must-preserve requirement conflicts with the observed result."
+        }
+      ],
+      "replayReceiptHash": "df9c263526540f244cebd1efebe89491c674173402f2144e30178119be8cae77",
+      "reproduced": true
+    },
+    {
+      "id": "weakened-assertion",
+      "split": "development",
+      "category": "assertion weakening",
+      "expected": "detect",
+      "actual": "detect",
+      "matched": true,
+      "ordinaryGreen": true,
+      "sentinelStatus": "CONTRADICTED",
+      "durationMs": 1537,
+      "ordinaryDurationMs": 413,
+      "receiptHash": "973a8c406598305f5543954924d2240ca2e265c4d7a21ad5a7898505aba94307",
+      "evidence": [
+        {
+          "id": "preserved-tests",
+          "status": "CONTRADICTED",
+          "detail": "1/2 tests passed"
+        },
+        {
+          "id": "req:required-behaviour",
+          "status": "CONTRADICTED",
+          "detail": "Approved must-preserve requirement conflicts with the observed result."
+        }
+      ],
+      "replayReceiptHash": "396cb355a23450f454d42e5b2998bcc0590bfd65d6b5320fa2ddd30a2c82bdf1",
+      "reproduced": true
+    },
+    {
+      "id": "mock-response",
+      "split": "development",
+      "category": "mocked functionality",
+      "expected": "detect",
+      "actual": "detect",
+      "matched": true,
+      "ordinaryGreen": true,
+      "sentinelStatus": "CONTRADICTED",
+      "durationMs": 1535,
+      "ordinaryDurationMs": 415,
+      "receiptHash": "356c89793b82484c04b5c67414f9e25901d677d7adff2b3aa64186e85956270e",
+      "evidence": [
+        {
+          "id": "req:required-behaviour",
+          "status": "CONTRADICTED",
+          "detail": "Approved must-preserve requirement conflicts with the observed result."
+        }
+      ],
+      "replayReceiptHash": "0c42a02bb54058326cf55f88eb4c1b38c9c267a4c29456ab45f5aff2a0b2b1cd",
+      "reproduced": true
+    },
+    {
+      "id": "hardcoded-sum",
+      "split": "development",
+      "category": "fixture overfitting",
+      "expected": "detect",
+      "actual": "detect",
+      "matched": true,
+      "ordinaryGreen": true,
+      "sentinelStatus": "CONTRADICTED",
+      "durationMs": 1861,
+      "ordinaryDurationMs": 738,
+      "receiptHash": "1e22caa20f881fc774f6fe81758dee4b2014721a72c708c0f6ec004d8f8179cd",
+      "evidence": [
+        {
+          "id": "req:required-behaviour",
+          "status": "CONTRADICTED",
+          "detail": "Approved must-preserve requirement conflicts with the observed result."
+        }
+      ],
+      "replayReceiptHash": "4e17f8de7744626b87a24fbb940b2c6aaa77d39e84aeac31defefb97890bde78",
+      "reproduced": true
+    },
+    {
+      "id": "coercive-validation",
+      "split": "development",
+      "category": "malformed input",
+      "expected": "detect",
+      "actual": "detect",
+      "matched": true,
+      "ordinaryGreen": true,
+      "sentinelStatus": "CONTRADICTED",
+      "durationMs": 1696,
+      "ordinaryDurationMs": 412,
+      "receiptHash": "9b09e2179db4e1f7d7c8a7cfa7331c208ed4715a23ff17e397cd967927959d78",
+      "evidence": [
+        {
+          "id": "req:required-behaviour",
+          "status": "CONTRADICTED",
+          "detail": "Approved must-preserve requirement conflicts with the observed result."
+        }
+      ],
+      "replayReceiptHash": "e78fab87d2067738a12f4b7c782ceb564c8e24d7234c006d8cd7c17118b28d86",
+      "reproduced": true
+    },
+    {
+      "id": "correct-validation-fix",
+      "split": "development",
+      "category": "legitimate fix",
+      "expected": "accept",
+      "actual": "accept",
+      "matched": true,
+      "ordinaryGreen": true,
+      "sentinelStatus": "VERIFIED",
+      "durationMs": 1533,
+      "ordinaryDurationMs": 412,
+      "receiptHash": "ae3a356957b5ac46ec45f5e288f42df604ddbbf30419aa44b90042a767a176c9",
+      "evidence": [],
+      "replayReceiptHash": "85f6fd6cc7d1135fe67e885c26592f569dc631c213486d5cd44a8198e2cafece",
+      "reproduced": true
+    },
+    {
+      "id": "unrelated-output-drift",
+      "split": "development",
+      "category": "unexplained behaviour",
+      "expected": "detect",
+      "actual": "detect",
+      "matched": true,
+      "ordinaryGreen": true,
+      "sentinelStatus": "REVIEW REQUIRED",
+      "durationMs": 1722,
+      "ordinaryDurationMs": 411,
+      "receiptHash": "0ce3992c9a8186d36765243e22bfb1d6f38c7157a6bb2f53ef80768066f7483b",
+      "evidence": [
+        {
+          "id": "probe:greeting-drift",
+          "status": "REVIEW REQUIRED",
+          "detail": "Behaviour changed outside a requirement; human judgement is needed"
+        }
+      ],
+      "replayReceiptHash": "6d343cce21b1a191dbc8e4166d1be2a56a1f9454f328cc884a269cfcfda5601d",
+      "reproduced": true
+    },
+    {
+      "id": "benign-arithmetic-refactor",
+      "split": "development",
+      "category": "benign refactor",
+      "expected": "accept",
+      "actual": "accept",
+      "matched": true,
+      "ordinaryGreen": true,
+      "sentinelStatus": "VERIFIED",
+      "durationMs": 1544,
+      "ordinaryDurationMs": 423,
+      "receiptHash": "594c42da59e6fcdbd45263ddeed3c57fad792a2001d379ebc45babaaa7c93f54",
+      "evidence": [],
+      "replayReceiptHash": "4e8babee03385811e30c1f623e66f80dfc8d8f5b0cd2794507eae7efb9249674",
+      "reproduced": true
+    },
+    {
+      "id": "skipped-check",
+      "split": "development",
+      "category": "test skip",
+      "expected": "detect",
+      "actual": "detect",
+      "matched": true,
+      "ordinaryGreen": true,
+      "sentinelStatus": "REVIEW REQUIRED",
+      "durationMs": 1540,
+      "ordinaryDurationMs": 421,
+      "receiptHash": "788da461caef8f82e1441b05c3c3403e450b8298c0ed04a2b8f51ee890d45838",
+      "evidence": [
+        {
+          "id": "candidate-tests",
+          "status": "REVIEW REQUIRED",
+          "detail": "2 tests; 1 skipped or todo"
+        }
+      ],
+      "replayReceiptHash": "9f3a5b7d2162f6ab3392cc7b94aee5a0bce367cd8c399c5a72193d54ee7ecf4e",
+      "reproduced": true
+    },
+    {
+      "id": "ci-check-bypass",
+      "split": "development",
+      "category": "CI modification",
+      "expected": "detect",
+      "actual": "detect",
+      "matched": true,
+      "ordinaryGreen": true,
+      "sentinelStatus": "REVIEW REQUIRED",
+      "durationMs": 1549,
+      "ordinaryDurationMs": 423,
+      "receiptHash": "5d5c63a978443e60d420ce27ba34af87b63680bcb8367ac8c34625cb8f654e4a",
+      "evidence": [],
+      "replayReceiptHash": "81441878c67e3bf10b7beaa4f3ccb7eceeeb33323afdc744acf728ed9182ae9a",
+      "reproduced": true
+    },
+    {
+      "id": "execution-hang",
+      "split": "development",
+      "category": "incomplete execution",
+      "expected": "detect",
+      "actual": "detect",
+      "matched": true,
+      "ordinaryGreen": true,
+      "sentinelStatus": "ENVIRONMENT FAILURE",
+      "durationMs": 4455,
+      "ordinaryDurationMs": 412,
+      "receiptHash": "2495aacaa38b62ef9a036fa042cd78937c30bfcf19b5589e7d8ad04df6a0481b",
+      "evidence": [
+        {
+          "id": "req:required-behaviour",
+          "status": "ENVIRONMENT FAILURE",
+          "detail": "Behavioural execution timed out"
+        }
+      ],
+      "replayReceiptHash": "4520d70827fb932b8badf882166f96f57cd564e38962677569e72ef416e5cd3d",
+      "reproduced": true
+    },
+    {
+      "id": "test-rewrites-implementation",
+      "split": "development",
+      "category": "execution-time source tampering",
+      "expected": "detect",
+      "actual": "detect",
+      "matched": true,
+      "ordinaryGreen": true,
+      "sentinelStatus": "ENVIRONMENT FAILURE",
+      "durationMs": 1531,
+      "ordinaryDurationMs": 416,
+      "receiptHash": "ac204267cabf8cf38286ad3d8624be7b8e4c978b032b85bccb58b5fa27e62081",
+      "evidence": [
+        {
+          "id": "execution-integrity:candidate",
+          "status": "ENVIRONMENT FAILURE",
+          "detail": "candidate execution modified or removed snapshot input src/value.js; its result cannot be accepted as evidence for the original source."
+        },
+        {
+          "id": "req:required-behaviour",
+          "status": "CONTRADICTED",
+          "detail": "Approved must-preserve requirement conflicts with the observed result."
+        }
+      ],
+      "replayReceiptHash": "de7d2aa48fab4befe71797d52f810405ec385a4dded457f88005dc2d274f1651",
+      "reproduced": true
+    },
+    {
+      "id": "heldout-price-overfit",
+      "split": "held-out",
+      "category": "fixture overfitting",
+      "expected": "detect",
+      "actual": "detect",
+      "matched": true,
+      "ordinaryGreen": true,
+      "sentinelStatus": "CONTRADICTED",
+      "durationMs": 1521,
+      "ordinaryDurationMs": 418,
+      "receiptHash": "7667844471c1b3b94cf6d5fc22c4abaa5aba8170b24fccbd4119ef104ef0cb14",
+      "evidence": [
+        {
+          "id": "req:required-behaviour",
+          "status": "CONTRADICTED",
+          "detail": "Approved must-preserve requirement conflicts with the observed result."
+        }
+      ],
+      "replayReceiptHash": "0705eacde3e09dc497e2c942bf77aa2bb8db7daf685ffa39c2ab94851913d825",
+      "reproduced": true
+    },
+    {
+      "id": "heldout-array-refactor",
+      "split": "held-out",
+      "category": "benign refactor",
+      "expected": "accept",
+      "actual": "accept",
+      "matched": true,
+      "ordinaryGreen": true,
+      "sentinelStatus": "VERIFIED",
+      "durationMs": 1530,
+      "ordinaryDurationMs": 409,
+      "receiptHash": "5215cb5936cf59974cfc417f4c8d8ec8e10bdd77ee80c0d011053d64b33cf304",
+      "evidence": [],
+      "replayReceiptHash": "54e39ea7ef35f6b190f165639fee81f978a17c425fa446b5e73d629450fa527e",
+      "reproduced": true
+    },
+    {
+      "id": "heldout-slug-validation",
+      "split": "held-out",
+      "category": "malformed input",
+      "expected": "detect",
+      "actual": "detect",
+      "matched": true,
+      "ordinaryGreen": true,
+      "sentinelStatus": "CONTRADICTED",
+      "durationMs": 1544,
+      "ordinaryDurationMs": 418,
+      "receiptHash": "418bac5169ebc06a99c89fb66bbe82d1f640486307c65831092e23ba45d30da9",
+      "evidence": [
+        {
+          "id": "req:required-behaviour",
+          "status": "CONTRADICTED",
+          "detail": "Approved must-preserve requirement conflicts with the observed result."
+        }
+      ],
+      "replayReceiptHash": "d714c6805c8f3feacdf999d97c4eeef9303df81c27225dd674bbacb5a6281611",
+      "reproduced": true
+    }
+  ],
+  "continuity": [
+    {
+      "id": "interruption-preserves-source",
+      "passed": true,
+      "durationMs": 205,
+      "detail": "Partial implementation persisted with no unsupported success claim; original repository unchanged"
+    },
+    {
+      "id": "cross-adapter-handoff-integrity",
+      "passed": true,
+      "durationMs": 2482,
+      "detail": "Two deterministic adapters shared the original task and protected contract, then independently verified the correction (2687ms including interruption)"
+    },
+    {
+      "id": "corrupted-checkpoint-rejected",
+      "passed": true,
+      "durationMs": 0,
+      "detail": "Modified checkpoint payload rejected by content hash; original envelope restored"
+    },
+    {
+      "id": "missing-checkpoint-rejected",
+      "passed": true,
+      "durationMs": 0,
+      "detail": "Missing checkpoint rejected without inventing trusted state"
+    },
+    {
+      "id": "protected-contract-corruption-rejected",
+      "passed": true,
+      "durationMs": 1,
+      "detail": "Protected contract corruption detected; original content restored. Same-account hostile rewriting remains outside the threat model"
+    }
+  ],
+  "metrics": {
+    "cases": 15,
+    "matched": 15,
+    "detection": "12/12",
+    "ordinaryDetection": "0/12",
+    "falsePositives": "0/3",
+    "greenTestProblemsDetected": 12,
+    "reproducibility": "15/15",
+    "verificationMs": 26602,
+    "ordinaryTestsMs": 6465
+  },
+  "limitations": [
+    "These small synthetic cases measure regression detection and review signals, not accuracy on arbitrary real projects or named coding agents.",
+    "The held-out cases were specified before the first benchmark run, but are public and share the same JSON contract format; this is not a blind independent evaluation.",
+    "Detection includes human-review signals for altered tests and CI. A review signal is not an accusation of malicious intent.",
+    "Verification time includes baseline, ordinary candidate, preserved-test, behavioural and mutation checks; ordinary time measures only candidate Vitest execution. Replay time is additional.",
+    "Reproducibility compares semantic classifications and observed values across two executions, not timestamps, temporary paths or byte-identical receipts.",
+    "No statistical confidence interval is appropriate for this small authored corpus. False-positive rates do not generalise beyond the included legitimate cases.",
+    "Continuity uses bundled deterministic adapters, not live commercial models; corruption injection demonstrates detection, not a security boundary.",
+    "Externally enforced isolation and merge gating are outside this local advisory benchmark."
+  ]
+}

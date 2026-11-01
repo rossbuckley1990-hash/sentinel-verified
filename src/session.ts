@@ -13,12 +13,36 @@ const hash = z.string().regex(/^[a-f0-9]{64}$/);
 const sessionId = z.string().regex(/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,100}$/);
 const agentSchema = z.enum(['codex', 'claude', 'fixture-broken', 'fixture-fix', 'fixture-interrupt']);
 const checkpointSchema = z.object({
-  schemaVersion: z.literal(1), id: sessionId, objective: z.string(), createdAt: z.string(), updatedAt: z.string(),
-  repo: z.string(), workspace: z.string(), baselineHash: hash, candidateHash: hash, contractHash: hash.nullable(),
-  state: z.enum(['ready', 'running', 'interrupted', 'verified', 'needs-work']), receipts: z.array(hash),
-  agents: z.array(z.object({ agent: agentSchema, startedAt: z.string(), completedAt: z.string(), outcome: z.enum(['completed', 'interrupted', 'failed']), statement: z.string(), command: z.unknown().optional() }).passthrough()),
-  nextActions: z.array(z.string()), openQuestions: z.array(z.string()), unverifiedStatements: z.array(z.string()), localConsent: z.boolean(),
+  schemaVersion: z.literal(1), id: sessionId, objective: z.string().max(5000), createdAt: z.string().max(100), updatedAt: z.string().max(100),
+  repo: z.string().max(8192), workspace: z.string().max(8192), baselineHash: hash, candidateHash: hash, contractHash: hash.nullable(),
+  state: z.enum(['ready', 'running', 'interrupted', 'verified', 'needs-work']), receipts: z.array(hash).max(1000),
+  agents: z.array(z.object({ agent: agentSchema, startedAt: z.string().max(100), completedAt: z.string().max(100), outcome: z.enum(['completed', 'interrupted', 'failed']), statement: z.string().max(20000), command: z.unknown().optional() }).passthrough()).max(1000),
+  nextActions: z.array(z.string().max(10000)).max(1000), openQuestions: z.array(z.string().max(10000)).max(1000), unverifiedStatements: z.array(z.string().max(20000)).max(1000), localConsent: z.boolean(),
 }).strict();
+
+/** Read a regular text file without allocating more than the stated bound. */
+export async function readLimitedText(file: string, maxBytes: number): Promise<string> {
+  const handle = await open(file, 'r');
+  try {
+    const info = await handle.stat();
+    if (!info.isFile() || info.size > maxBytes) throw new Error(`Input must be a regular file of at most ${maxBytes} bytes.`);
+    const bytes = Buffer.alloc(info.size + 1);
+    let length = 0;
+    while (length < bytes.length) {
+      const result = await handle.read(bytes, length, bytes.length - length, length);
+      if (result.bytesRead === 0) break;
+      length += result.bytesRead;
+    }
+    if (length > info.size || length > maxBytes) throw new Error('Input grew while it was being read; retry with a stable file.');
+    return bytes.subarray(0, length).toString('utf8');
+  } finally { await handle.close(); }
+}
+
+export function parseCheckpoint(value: unknown): Checkpoint {
+  const parsed = checkpointSchema.safeParse(value);
+  if (!parsed.success) throw new Error(`Invalid or unsupported checkpoint schema: ${parsed.error.message}`);
+  return parsed.data as Checkpoint;
+}
 
 export interface StartSessionOptions {
   repo: string; objective: string; contractPath?: string; agent?: AgentName; store: string; localConsent: boolean;
@@ -63,15 +87,13 @@ export async function loadCheckpoint(store: string, id?: string): Promise<Checkp
   store = await realpath(resolve(store));
   const selected = await resolveId(store, id);
   let envelope: { schemaVersion: number; hash: string; checkpoint: unknown };
-  try { envelope = JSON.parse(await readFile(join(store, 'sessions', selected, 'checkpoint.json'), 'utf8')) as typeof envelope; }
+  try { envelope = JSON.parse(await readLimitedText(join(store, 'sessions', selected, 'checkpoint.json'), 25_000_000)) as typeof envelope; }
   catch { throw new Error(`Checkpoint for ${selected} is missing or unreadable. Historical content objects remain in the store; no state was guessed.`); }
   if (envelope.schemaVersion !== 1) throw new Error('Unsupported checkpoint envelope version; migration is required.');
   if (!hash.safeParse(envelope.hash).success || digest(JSON.stringify(envelope.checkpoint)) !== envelope.hash) throw new Error('Checkpoint integrity failure: envelope content does not match its hash.');
   const stored = await getObject(store, envelope.hash);
   if (stored.toString() !== JSON.stringify(envelope.checkpoint)) throw new Error('Checkpoint integrity failure: historical object differs.');
-  const parsed = checkpointSchema.safeParse(envelope.checkpoint);
-  if (!parsed.success) throw new Error(`Invalid or unsupported checkpoint schema: ${parsed.error.message}`);
-  const checkpoint = parsed.data as Checkpoint;
+  const checkpoint = parseCheckpoint(envelope.checkpoint);
   if (checkpoint.id !== selected) throw new Error('Checkpoint session identity mismatch.');
   const expectedWorkspace = resolve(store, 'workspaces', selected);
   if (resolve(checkpoint.workspace) !== expectedWorkspace) throw new Error('Checkpoint workspace is outside its managed location.');
@@ -87,7 +109,7 @@ export async function loadCheckpoint(store: string, id?: string): Promise<Checkp
 }
 
 /** One writer per session. Dead-process locks can be recovered, live locks cannot. */
-async function acquireLock(store: string, id: string): Promise<() => Promise<void>> {
+export async function acquireSessionLock(store: string, id: string): Promise<() => Promise<void>> {
   const directory = join(store, 'sessions', sessionId.parse(id));
   await mkdir(directory, { recursive: true, mode: 0o700 });
   const path = join(directory, 'writer.lock');
@@ -102,12 +124,29 @@ async function acquireLock(store: string, id: string): Promise<() => Promise<voi
       };
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error;
-      let owner: { pid: number };
-      try { owner = JSON.parse(await readFile(path, 'utf8')) as { pid: number }; } catch { throw new Error('Malformed session lock; inspect it before removing it.'); }
-      if (!Number.isSafeInteger(owner.pid) || owner.pid <= 0) throw new Error('Invalid session lock owner.');
-      try { process.kill(owner.pid, 0); throw new Error(`Session is already running in process ${owner.pid}.`); }
-      catch (check) { if ((check as NodeJS.ErrnoException).code !== 'ESRCH') throw check; }
-      await rm(path);
+      // Serialise stale-lock recovery too. Without this guard, two recoverers could
+      // accidentally delete a freshly acquired replacement lock.
+      const recoveryPath = join(directory, 'recovery.lock');
+      let recovery;
+      try { recovery = await open(recoveryPath, 'wx', 0o600); }
+      catch (recoveryError) {
+        if ((recoveryError as NodeJS.ErrnoException).code === 'EEXIST') throw new Error('Session lock recovery is already in progress. If its process stopped, inspect recovery.lock before removing it.');
+        throw recoveryError;
+      }
+      try {
+        await recovery.writeFile(JSON.stringify({ pid: process.pid, nonce }));
+        let owner: { pid: number };
+        try { owner = JSON.parse(await readFile(path, 'utf8')) as { pid: number }; }
+        catch (readError) {
+          if ((readError as NodeJS.ErrnoException).code === 'ENOENT') continue;
+          throw new Error('Malformed session lock; inspect it before removing it.');
+        }
+        if (!Number.isSafeInteger(owner.pid) || owner.pid <= 0) throw new Error('Invalid session lock owner.');
+        try { process.kill(owner.pid, 0); throw new Error(`Session is already running in process ${owner.pid}.`); }
+        catch (check) { if ((check as NodeJS.ErrnoException).code !== 'ESRCH') throw check; }
+        await rm(path);
+      } finally { await recovery.close(); await rm(recoveryPath, { force: true }); }
+
     }
   }
   throw new Error('Could not acquire session lock.');
@@ -163,9 +202,12 @@ async function execute(store: string, checkpoint: Checkpoint, agent: AgentName, 
     const receipt = await verify({ store, baseline: await readSnapshot(store, checkpoint.baselineHash), candidate, contract: await contractFor(store, checkpoint), contractHash: checkpoint.contractHash, dependencies, onProgress: options.onProgress });
     const receiptHash = await putObject(store, JSON.stringify(receipt));
     checkpoint.receipts.push(receiptHash);
-    checkpoint.state = receipt.status === 'VERIFIED' ? 'verified' : 'needs-work';
-    checkpoint.nextActions = receipt.nextActions;
-    checkpoint.openQuestions = receipt.limitations;
+    const currentSource = await captureSnapshot(checkpoint.workspace, store);
+    checkpoint.candidateHash = currentSource.hash;
+    const unchanged = currentSource.hash === candidate.hash;
+    checkpoint.state = unchanged && receipt.status === 'VERIFIED' ? 'verified' : 'needs-work';
+    checkpoint.nextActions = unchanged ? receipt.nextActions : ['Source changed during verification. The receipt is historical; rerun verification before accepting the current source.'];
+    checkpoint.openQuestions = [...receipt.limitations, ...(unchanged ? [] : ['Workspace changed while independent checks were running; current source is unverified.'])];
   } catch (error) {
     checkpoint.state = 'needs-work';
     checkpoint.nextActions = ['Resolve the verification environment failure and continue; no successful result was established.'];
@@ -179,13 +221,13 @@ export async function startSession(options: StartSessionOptions): Promise<Checkp
   requireConsent(options.localConsent);
   const paths = await requireOutside(options.repo, options.store);
   const id = `s-${Date.now().toString(36)}-${randomUUID().slice(0,8)}`;
-  const release = await acquireLock(paths.store, id);
+  const release = await acquireSessionLock(paths.store, id);
   try {
     let contract: Contract | null = null;
     if (options.contractPath) {
       const contractPath = await realpath(resolve(options.contractPath));
       if (within(paths.repo, contractPath)) throw new Error('Approved contract must be outside the agent input repository. Copy and review it externally before passing --contract.');
-      contract = parseContract(JSON.parse(await readFile(contractPath, 'utf8')));
+      contract = parseContract(JSON.parse(await readLimitedText(contractPath, 1_000_000)));
       if (contract.objective !== options.objective) throw new Error('Task objective differs from the approved contract objective. Use the exact approved objective or approve a new contract.');
     }
     const contractHash = contract ? await putObject(paths.store, JSON.stringify(contract)) : null;
@@ -216,10 +258,11 @@ export async function startSession(options: StartSessionOptions): Promise<Checkp
 export async function continueSession(options: ContinueSessionOptions): Promise<Checkpoint> {
   const store = await realpath(resolve(options.store));
   const id = await resolveId(store, options.id);
-  const release = await acquireLock(store, id);
+  const release = await acquireSessionLock(store, id);
   try {
     const checkpoint = await loadCheckpoint(store, id);
     requireConsent(options.localConsent ?? checkpoint.localConsent);
+    checkpoint.localConsent = options.localConsent ?? checkpoint.localConsent;
     const actualWorkspace = await realpath(checkpoint.workspace);
     if (actualWorkspace !== resolve(store, 'workspaces', id)) throw new Error('Managed workspace path was replaced or redirected.');
     const candidate = await captureSnapshot(actualWorkspace, store);

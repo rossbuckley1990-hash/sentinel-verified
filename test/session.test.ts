@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { mkdtemp, mkdir, writeFile, readFile, rm, cp, chmod } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { startSession, continueSession, loadCheckpoint, saveCheckpoint, continuationContext } from '../src/session.js';
@@ -55,6 +56,26 @@ describe('durable sessions and handoffs', () => {
     expect(receipt.status).toBe('VERIFIED');
     expect(await continuationContext(p.store, finished)).toContain('UNVERIFIED');
     expect(await readFile(join(p.repo, 'src/access.ts'), 'utf8')).toBe(original);
+  });
+
+  it('marks a green receipt historical if the workspace changes during verification', async () => {
+    const p = await project();
+    let changed = false;
+    const checkpoint = await startSession({ ...p, agent: 'fixture-fix', localConsent: true, onProgress(message) {
+      if (!changed && message.includes('Running candidate ordinary tests')) {
+        const latest = JSON.parse(readFileSync(join(p.store, 'latest.json'), 'utf8'));
+        const envelope = JSON.parse(readFileSync(join(p.store, 'sessions', latest.id, 'checkpoint.json'), 'utf8'));
+        writeFileSync(join(envelope.checkpoint.workspace, 'src/access.ts'), 'export function isAdult(){return true}\nexport function greeting(name){return `Hello, ${name}!`}\n');
+        changed = true;
+      }
+    } });
+    expect(changed).toBe(true);
+    expect(checkpoint.state).toBe('needs-work');
+    const receipt = JSON.parse((await getObject(p.store, checkpoint.receipts.at(-1)!)).toString()) as Receipt;
+    expect(receipt.status).toBe('VERIFIED');
+    expect(receipt.candidateHash).not.toBe(checkpoint.candidateHash);
+    expect(checkpoint.nextActions.join(' ')).toContain('Source changed during verification');
+    expect(await continuationContext(p.store, checkpoint)).toContain('Historical evidence only');
   });
 
   it('rejects source drift until explicitly adopted', async () => {

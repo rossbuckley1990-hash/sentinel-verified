@@ -26,6 +26,6 @@ describe('trust and storage boundaries',()=>{
 describe('controlled subprocesses',()=>{
  it('does not treat a missing executable as success',async()=>{const r=await runCommand(['sentinel-no-such-executable'],os.tmpdir());expect(r.exitCode).toBeNull();expect(r.stderr).toContain('ENOENT');});
  it('times out synchronous hangs',async()=>{const r=await runCommand([process.execPath,'-e','while(true){}'],os.tmpdir(),{timeoutMs:100});expect(r.timedOut).toBe(true);expect(r.exitCode).not.toBe(0);expect(r.durationMs).toBeLessThan(3000);});
- it('caps runaway output',async()=>{const r=await runCommand([process.execPath,'-e','while(true)process.stdout.write("x".repeat(100000))'],os.tmpdir(),{timeoutMs:5000});expect(r.truncated).toBe(true);expect(r.stdout.length).toBeLessThanOrEqual(1000000);});
+ it('caps runaway output',async()=>{const r=await runCommand([process.execPath,'-e','const fs=require("node:fs");while(true)fs.writeSync(1,"x".repeat(100000))'],os.tmpdir(),{timeoutMs:5000});expect(r.truncated).toBe(true);expect(r.stdout.length).toBeLessThanOrEqual(1000000);});
  it('records actual command, stdin and exit code',async()=>{const r=await runCommand([process.execPath,'-e','process.stdin.pipe(process.stdout)'],os.tmpdir(),{input:'literal $(no shell)'});expect(r.exitCode).toBe(0);expect(r.input).toBe(r.stdout);});
 });

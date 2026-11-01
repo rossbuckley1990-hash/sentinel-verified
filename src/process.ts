@@ -16,11 +16,12 @@ export async function runCommand(command: string[], cwd: string, options: RunOpt
     options.signal?.addEventListener('abort', abort, { once: true });
     if (options.signal?.aborted) abort();
     const append = (key: 'stdout' | 'stderr', bytes: Buffer) => {
-      const text = bytes.toString('utf8');
       const remaining = 1_000_000 - Buffer.byteLength(record.stdout) - Buffer.byteLength(record.stderr);
       if (remaining <= 0) { record.truncated = true; stop(); return; }
-      record[key] += text.slice(0, remaining);
-      try { options.onOutput?.(text.slice(0, remaining)); } catch { /* UI must not lose evidence */ }
+      const accepted=bytes.subarray(0,Math.max(0,remaining)).toString('utf8');
+      record[key] += accepted;
+      if(bytes.length>remaining){record.truncated=true;stop();}
+      try { options.onOutput?.(accepted); } catch { /* UI must not lose evidence */ }
     };
     child.stdout.on('data', data => append('stdout', data)); child.stderr.on('data', data => append('stderr', data));
     child.stdin.on('error', () => {});
