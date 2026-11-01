@@ -65,7 +65,7 @@ export async function executeVerification(options: VerificationOptions, runner: 
     await chmod(staging, 0o755);
     const objects = join(staging, 'objects');
     await mkdir(objects, { mode: 0o755 });
-    const hashes = new Set([baseline.hash, candidate.hash, ...Object.values(baseline.files).map(f => f.hash), ...Object.values(candidate.files).map(f => f.hash), ...(options.contractHash ? [options.contractHash] : [])]);
+    const hashes = new Set([baseline.hash, candidate.hash, ...Object.values(baseline.files).map(f => f.hash), ...Object.values(candidate.files).map(f => f.hash), ...(options.contractHash ? [options.contractHash] : []), ...(options.contract?.approval ? [options.contract.approval.proposalHash] : [])]);
     for (const hash of hashes) await writeFile(join(objects, hash), await getObject(options.store, hash), { flag: 'wx', mode: 0o444 });
     const request: ContainerRequest = { schemaVersion: 1, baselineHash: baseline.hash, candidateHash: candidate.hash, contractHash: options.contractHash, timeoutMs: Math.min(options.timeoutMs ?? 15000, 30000) };
     await writeFile(join(staging, 'request.json'), JSON.stringify(request), { mode: 0o444, flag: 'wx' });
@@ -82,7 +82,7 @@ export async function executeVerification(options: VerificationOptions, runner: 
     if (receipt.schemaVersion !== 1 || receipt.baselineHash !== baseline.hash || receipt.candidateHash !== candidate.hash || receipt.contractHash !== options.contractHash || !Array.isArray(receipt.checks) || !Array.isArray(receipt.limitations)) throw new Error('Container receipt does not match the requested source and contract.');
     // Docker contains source execution; neither the image nor the evidence is cryptographically authenticated.
     receipt.runner = 'container-isolated';
-    receipt.runtime = { ...receipt.runtime, containerImageId: readiness.imageId, containerNetwork: 'none', containerMemory: '1g', containerCpus: '2' };
+    receipt.runtime = { ...receipt.runtime, containerImageId: readiness.imageId, containerNetwork: 'none', containerMemory: '1g', containerCpus: '2', containerCheckTimeoutMs: String(request.timeoutMs), containerTotalTimeoutMs: '180000' };
     receipt.limitations = [
       'Verification executed inside the configured Docker image with network disabled, a read-only root filesystem and only selected read-only input objects mounted. The agent itself still uses its own permission controls.',
       'Docker, its daemon, the host kernel/VM and this reviewed runner image remain trusted. This is not a proof against container escapes or falsification inside an adversarially replaced image.',

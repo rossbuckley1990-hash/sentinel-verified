@@ -95,7 +95,7 @@ describe('v0.2 report continuity', () => {
   });
   it('creates a pending page without inventing a replayable evidence receipt',async()=>{
     const directory=await mkdtemp(join(tmpdir(),'sentinel-pending-'));
-    try{const file=join(directory,'report.html');await writePendingReport(file,{...checkpoint,receipts:[],state:'interrupted'});const html=await readFile(file,'utf8');expect(html).toContain('not an executed verification receipt');expect(html).not.toContain('sentinel replay');}finally{await rm(directory,{recursive:true,force:true});}
+    try{const file=join(directory,'report.html');await writePendingReport(file,{...checkpoint,receipts:[],state:'interrupted'});const html=await readFile(file,'utf8');expect(html).toContain('not an executed verification receipt');expect(html).not.toContain('sentinel replay');expect(html).toContain('Source changes were not established');expect(html).not.toContain('No source differences');}finally{await rm(directory,{recursive:true,force:true});}
   });
   it('opens paths as one argument without shell interpolation',()=>{
     const file='/tmp/report $(touch bad).html';expect(reportOpenCommand(file,'darwin')).toEqual(['open',file]);expect(reportOpenCommand(file,'linux')).toEqual(['xdg-open',file]);expect(()=>reportOpenCommand(file,'win32')).toThrow('supported');

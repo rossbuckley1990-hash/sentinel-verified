@@ -10,7 +10,7 @@ import { detectAgents } from './agents.js';
 import { captureSnapshot,captureRevision,readSnapshot,putObject,getObject,atomicJson } from './store.js';
 import { parseContract } from './schema.js';
 import { executeVerification, DEFAULT_RUNNER_IMAGE, inspectDocker, type RunnerChoice } from './isolation.js';
-import { prepareRun, terminalPrompt, chooseAgent, consentToExecution, rememberSession, repositorySession } from './onboarding.js';
+import { prepareRun, terminalPrompt, chooseAgent, consentToExecution, rememberSession, repositorySession, selectRepositorySession } from './onboarding.js';
 import { openReport } from './report-open.js';
 import { writeReport, writePendingReport } from './report.js';
 import { banner,line,progress,displayReceipt,displayCheckpoint,SessionView } from './terminal.js';
@@ -74,17 +74,17 @@ async function main(){
    try{await sessionReport(await startSession({...prepared,onProgress:view.progress,onCheck:view.check,agentTimeoutMs:timeout,verificationTimeoutMs:checkTimeout,signal:abort.signal}));}finally{view.clear();process.off('SIGINT',interrupt);process.off('SIGTERM',interrupt);}break;
   }
   case 'continue':{
-   banner();const id=values.session??await repositorySession(store,repo);if(!id)throw new Error('No session is recorded for this repository. Start with sentinel run, or select an explicit --session ID.');const previous=await loadCheckpoint(store,id);const io=terminalPrompt();
+   banner();const id=await selectRepositorySession(store,repo,values.session);const previous=await loadCheckpoint(store,id);const io=terminalPrompt();
    let receiving:AgentName;const runner=requestedRunner??previous.runner??{kind:'local'};
    const sameRunner=JSON.stringify(runner)===JSON.stringify(previous.runner??{kind:'local'});
    try{receiving=agent??previous.agents.at(-1)?.agent??await chooseAgent(store,previous.workspace,io);await consentToExecution(io,runner,consent||(sameRunner&&previous.localConsent),isolatedConsent||(sameRunner&&previous.isolatedConsent===true));}finally{io.close();}
    view.describe(previous.objective,previous.workspace,receiving);process.on('SIGINT',interrupt);process.on('SIGTERM',interrupt);
    try{await sessionReport(await continueSession({id:previous.id,store,agent:receiving,localConsent:runner.kind==='local',isolatedConsent:runner.kind==='docker',runner,adoptChanges:values['adopt-changes'],onProgress:view.progress,onCheck:view.check,agentTimeoutMs:timeout,verificationTimeoutMs:checkTimeout,signal:abort.signal}));}finally{view.clear();process.off('SIGINT',interrupt);process.off('SIGTERM',interrupt);}break;
   }
-  case 'export':{if(!values.out)throw new Error('Supply --out FILE.sentinel.json');const result=await exportSession(store,values.session,values.out);line(`  Exported ${result.path}\n  SHA-256  ${result.hash}\n  Contains source and logs. Review before sharing.`);break;}
-  case 'import':{if(!positionals[1])throw new Error('Supply a checkpoint bundle file');const cp=await importSession(store,positionals[1]);displayCheckpoint(cp);line('  Imported evidence is historical. Continue with --allow-local to verify this environment.');break;}
-  case 'inspect':{const cp=await loadCheckpoint(store,values.session);line(JSON.stringify(cp,null,2));break;}
-  case 'report':{banner();await sessionReport(await loadCheckpoint(store,values.session??await repositorySession(store,repo)));break;}
+  case 'export':{if(!values.out)throw new Error('Supply --out FILE.sentinel.json');const result=await exportSession(store,await selectRepositorySession(store,repo,values.session),values.out);line(`  Exported ${result.path}\n  SHA-256  ${result.hash}\n  Contains source and logs. Review before sharing.`);break;}
+  case 'import':{if(!positionals[1])throw new Error('Supply a checkpoint bundle file');const cp=await importSession(store,positionals[1]);await rememberSession(store,cp);displayCheckpoint(cp);line('  Imported evidence is historical. Continue with --allow-local to verify this environment.');break;}
+  case 'inspect':{const cp=await loadCheckpoint(store,await selectRepositorySession(store,repo,values.session));line(JSON.stringify(cp,null,2));break;}
+  case 'report':{banner();await sessionReport(await loadCheckpoint(store,await selectRepositorySession(store,repo,values.session)));break;}
   case 'verify':{
    {const io=terminalPrompt();try{await consentToExecution(io,requestedRunner??{kind:'local'},consent,isolatedConsent,false);}finally{io.close();}}banner();await fs.mkdir(store,{recursive:true});
    const realRepo=await fs.realpath(repo),realStore=await fs.realpath(store);

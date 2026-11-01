@@ -1,0 +1,1062 @@
+{
+  "schemaVersion": 1,
+  "experiment": "Controlled continuation information-retention comparison",
+  "createdAt": "2026-11-01T14:51:37.799Z",
+  "environment": {
+    "node": "v26.12.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "loadAverages": [
+      180.41357421875,
+      187.88916015625,
+      154.64306640625
+    ]
+  },
+  "protocol": {
+    "caseId": "is-number-historical-nonfix",
+    "upstreamCommit": "204c885659b8ee1946534c61db91603b9a16d661",
+    "trialCount": 3,
+    "implementationHash": "97f5d8e848039aec1247155bc34636665b9ee953102cf8041aab49953f2aa5b9",
+    "searchOrderHash": "19e4d45ee17ad3cbe8a35c0dd91ceb9d48b3056f0478529075346083fbcf2911",
+    "repositoryExecutionUnit": "One fresh Node process invoking the historical exported function once",
+    "inputSelection": "Fixed preserved-example-first order; receivers do not interpret natural-language summaries",
+    "ordinarySuiteReruns": 0,
+    "dependencies": {
+      "dependencies/kind-of/index.js": "d0387c144a14241e091e9e76cb4ea78ed0820835511968e7b273938be17f4d10",
+      "dependencies/kind-of/package.json": "a951f2b5903f57e72cdf2305460a87057431bd03a1bfca81e7f2cf73d7a22e55",
+      "dependencies/kind-of/LICENSE": "daca23d50b0f54d36d6da1b16c82dfea6461e2ae20de0e869957e44cc6d34781",
+      "dependencies/is-buffer/index.js": "1586b3e7b873a07da02630b4d173d131c0798995d85fcc37199507ad3ef4e603",
+      "dependencies/is-buffer/package.json": "c3f4ad9709465baf192e2ee4ae1a113addc1843e044eee520c71eb5fd3c9ec85",
+      "dependencies/is-buffer/LICENSE": "c7cc929b57080f4b9d0c6cf57669f0463fc5b39906344dfc8d3bc43426b30eac"
+    }
+  },
+  "evidence": {
+    "receiptHash": "918e45616612c3d06eca619c9baeaf1625f2b0799d35130ac290f9114baa9f2a",
+    "baselineHash": "16dd936d036bb5740c5fd2af8612b56bf93b6a487e927457d9e96bfc3b7d6038",
+    "candidateHash": "1fa7dda84c43c1d27c8be8af1972ef61eee79ba3ae6ebf13aed6d4440c03481a",
+    "contractHash": "17272c2f8fb2e083dcac7df8e8e9fd14b5f20b1a0a8eb4a5bd66f7996ee09ae0",
+    "sourceFileHash": "d5ba0cd9397c822cb1d98555ddf008be6ce2179a5e56f79a094f74a13c22cb88",
+    "upstreamSourceFileHash": "1b572fa10d2a238af614189c499ceff034ab2549f4795cffaa85e5976a3f87a6",
+    "checkId": "req:whitespace",
+    "args": [
+      " "
+    ],
+    "expected": false,
+    "observed": true,
+    "baselineObserved": true,
+    "ordinaryStatus": "VERIFIED",
+    "status": "CONTRADICTED"
+  },
+  "approvedContract": {
+    "schemaVersion": 1,
+    "objective": "The purported fix leaves issue #3 unchanged; the old ordinary suite lacks whitespace-only examples.",
+    "approvedBy": "Predeclared public-project evaluation specification; see provenance.json",
+    "requirements": [
+      {
+        "id": "whitespace",
+        "kind": "must-change",
+        "description": "Issue #3: whitespace-only strings are not numbers",
+        "module": "index.js",
+        "export": "default",
+        "cases": [
+          {
+            "args": [
+              " "
+            ],
+            "expected": false
+          },
+          {
+            "args": [
+              "   "
+            ],
+            "expected": false
+          },
+          {
+            "args": [
+              "\r\n\t"
+            ],
+            "expected": false
+          }
+        ]
+      },
+      {
+        "id": "valid-values",
+        "kind": "must-preserve",
+        "description": "Numeric values and numeric strings remain recognised",
+        "module": "index.js",
+        "export": "default",
+        "cases": [
+          {
+            "args": [
+              0
+            ],
+            "expected": true
+          },
+          {
+            "args": [
+              37
+            ],
+            "expected": true
+          },
+          {
+            "args": [
+              "5e3"
+            ],
+            "expected": true
+          },
+          {
+            "args": [
+              "   56\r\n  "
+            ],
+            "expected": true
+          },
+          {
+            "args": [
+              "3a"
+            ],
+            "expected": false
+          },
+          {
+            "args": [
+              ""
+            ],
+            "expected": false
+          },
+          {
+            "args": [
+              null
+            ],
+            "expected": false
+          }
+        ]
+      }
+    ],
+    "allowedPaths": [
+      "index.js"
+    ]
+  },
+  "approvedContractObjectBytes": "{\"schemaVersion\":1,\"objective\":\"The purported fix leaves issue #3 unchanged; the old ordinary suite lacks whitespace-only examples.\",\"approvedBy\":\"Predeclared public-project evaluation specification; see provenance.json\",\"allowedPaths\":[\"index.js\"],\"requirements\":[{\"id\":\"whitespace\",\"kind\":\"must-change\",\"description\":\"Issue #3: whitespace-only strings are not numbers\",\"module\":\"index.js\",\"export\":\"default\",\"cases\":[{\"args\":[\" \"],\"expected\":false},{\"args\":[\"   \"],\"expected\":false},{\"args\":[\"\\r\\n\\t\"],\"expected\":false}]},{\"id\":\"valid-values\",\"kind\":\"must-preserve\",\"description\":\"Numeric values and numeric strings remain recognised\",\"module\":\"index.js\",\"export\":\"default\",\"cases\":[{\"args\":[0],\"expected\":true},{\"args\":[37],\"expected\":true},{\"args\":[\"5e3\"],\"expected\":true},{\"args\":[\"   56\\r\\n  \"],\"expected\":true},{\"args\":[\"3a\"],\"expected\":false},{\"args\":[\"\"],\"expected\":false},{\"args\":[null],\"expected\":false}]}]}",
+  "ordinarySummary": "The task is incomplete. Ordinary tests passed, but an independent behavioural check failed. Continue checking the approved examples.",
+  "informedSummary": "The task is incomplete. Ordinary tests passed, but an independent behavioural check failed. Continue checking the approved examples.\nCounterexample JSON: {\"args\":[\" \"],\"expected\":false}",
+  "searchCases": [
+    {
+      "args": [
+        0
+      ],
+      "expected": true
+    },
+    {
+      "args": [
+        37
+      ],
+      "expected": true
+    },
+    {
+      "args": [
+        "5e3"
+      ],
+      "expected": true
+    },
+    {
+      "args": [
+        "   56\r\n  "
+      ],
+      "expected": true
+    },
+    {
+      "args": [
+        "3a"
+      ],
+      "expected": false
+    },
+    {
+      "args": [
+        ""
+      ],
+      "expected": false
+    },
+    {
+      "args": [
+        null
+      ],
+      "expected": false
+    },
+    {
+      "args": [
+        " "
+      ],
+      "expected": false
+    }
+  ],
+  "trials": [
+    {
+      "trial": 1,
+      "arms": [
+        {
+          "name": "saved-evidence",
+          "repositoryExecutions": 1,
+          "repeatedExplorationExecutions": 0,
+          "durationMs": 739,
+          "counterexample": {
+            "args": [
+              " "
+            ],
+            "expected": false,
+            "observed": true
+          },
+          "steps": [
+            {
+              "observed": true,
+              "durationMs": 739,
+              "command": [
+                "<node>",
+                "--input-type=commonjs",
+                "-e",
+                "const fs=require('node:fs');const args=JSON.parse(fs.readFileSync(0,'utf8'));const fn=require('./index.js');process.stdout.write(JSON.stringify({observed:fn(...args)}));"
+              ],
+              "input": "[\" \"]",
+              "stdout": "{\"observed\":true}",
+              "stdoutHash": "517fe0410b426ee5d4402666fdd520487e953669b789ed308b60b962c9968cd5",
+              "exitCode": 0,
+              "args": [
+                " "
+              ],
+              "expected": false,
+              "matches": false,
+              "previouslyVerified": false
+            }
+          ]
+        },
+        {
+          "name": "summary-omits-counterexample",
+          "repositoryExecutions": 8,
+          "repeatedExplorationExecutions": 7,
+          "durationMs": 4780,
+          "counterexample": {
+            "args": [
+              " "
+            ],
+            "expected": false,
+            "observed": true
+          },
+          "steps": [
+            {
+              "observed": true,
+              "durationMs": 485,
+              "command": [
+                "<node>",
+                "--input-type=commonjs",
+                "-e",
+                "const fs=require('node:fs');const args=JSON.parse(fs.readFileSync(0,'utf8'));const fn=require('./index.js');process.stdout.write(JSON.stringify({observed:fn(...args)}));"
+              ],
+              "input": "[0]",
+              "stdout": "{\"observed\":true}",
+              "stdoutHash": "517fe0410b426ee5d4402666fdd520487e953669b789ed308b60b962c9968cd5",
+              "exitCode": 0,
+              "args": [
+                0
+              ],
+              "expected": true,
+              "matches": true,
+              "previouslyVerified": true
+            },
+            {
+              "observed": true,
+              "durationMs": 546,
+              "command": [
+                "<node>",
+                "--input-type=commonjs",
+                "-e",
+                "const fs=require('node:fs');const args=JSON.parse(fs.readFileSync(0,'utf8'));const fn=require('./index.js');process.stdout.write(JSON.stringify({observed:fn(...args)}));"
+              ],
+              "input": "[37]",
+              "stdout": "{\"observed\":true}",
+              "stdoutHash": "517fe0410b426ee5d4402666fdd520487e953669b789ed308b60b962c9968cd5",
+              "exitCode": 0,
+              "args": [
+                37
+              ],
+              "expected": true,
+              "matches": true,
+              "previouslyVerified": true
+            },
+            {
+              "observed": true,
+              "durationMs": 618,
+              "command": [
+                "<node>",
+                "--input-type=commonjs",
+                "-e",
+                "const fs=require('node:fs');const args=JSON.parse(fs.readFileSync(0,'utf8'));const fn=require('./index.js');process.stdout.write(JSON.stringify({observed:fn(...args)}));"
+              ],
+              "input": "[\"5e3\"]",
+              "stdout": "{\"observed\":true}",
+              "stdoutHash": "517fe0410b426ee5d4402666fdd520487e953669b789ed308b60b962c9968cd5",
+              "exitCode": 0,
+              "args": [
+                "5e3"
+              ],
+              "expected": true,
+              "matches": true,
+              "previouslyVerified": true
+            },
+            {
+              "observed": true,
+              "durationMs": 926,
+              "command": [
+                "<node>",
+                "--input-type=commonjs",
+                "-e",
+                "const fs=require('node:fs');const args=JSON.parse(fs.readFileSync(0,'utf8'));const fn=require('./index.js');process.stdout.write(JSON.stringify({observed:fn(...args)}));"
+              ],
+              "input": "[\"   56\\r\\n  \"]",
+              "stdout": "{\"observed\":true}",
+              "stdoutHash": "517fe0410b426ee5d4402666fdd520487e953669b789ed308b60b962c9968cd5",
+              "exitCode": 0,
+              "args": [
+                "   56\r\n  "
+              ],
+              "expected": true,
+              "matches": true,
+              "previouslyVerified": true
+            },
+            {
+              "observed": false,
+              "durationMs": 548,
+              "command": [
+                "<node>",
+                "--input-type=commonjs",
+                "-e",
+                "const fs=require('node:fs');const args=JSON.parse(fs.readFileSync(0,'utf8'));const fn=require('./index.js');process.stdout.write(JSON.stringify({observed:fn(...args)}));"
+              ],
+              "input": "[\"3a\"]",
+              "stdout": "{\"observed\":false}",
+              "stdoutHash": "893e6fb17f5792bc332d070cd914f0dfe2e3b991edb88fa30045afebd36bbbac",
+              "exitCode": 0,
+              "args": [
+                "3a"
+              ],
+              "expected": false,
+              "matches": true,
+              "previouslyVerified": true
+            },
+            {
+              "observed": false,
+              "durationMs": 525,
+              "command": [
+                "<node>",
+                "--input-type=commonjs",
+                "-e",
+                "const fs=require('node:fs');const args=JSON.parse(fs.readFileSync(0,'utf8'));const fn=require('./index.js');process.stdout.write(JSON.stringify({observed:fn(...args)}));"
+              ],
+              "input": "[\"\"]",
+              "stdout": "{\"observed\":false}",
+              "stdoutHash": "893e6fb17f5792bc332d070cd914f0dfe2e3b991edb88fa30045afebd36bbbac",
+              "exitCode": 0,
+              "args": [
+                ""
+              ],
+              "expected": false,
+              "matches": true,
+              "previouslyVerified": true
+            },
+            {
+              "observed": false,
+              "durationMs": 678,
+              "command": [
+                "<node>",
+                "--input-type=commonjs",
+                "-e",
+                "const fs=require('node:fs');const args=JSON.parse(fs.readFileSync(0,'utf8'));const fn=require('./index.js');process.stdout.write(JSON.stringify({observed:fn(...args)}));"
+              ],
+              "input": "[null]",
+              "stdout": "{\"observed\":false}",
+              "stdoutHash": "893e6fb17f5792bc332d070cd914f0dfe2e3b991edb88fa30045afebd36bbbac",
+              "exitCode": 0,
+              "args": [
+                null
+              ],
+              "expected": false,
+              "matches": true,
+              "previouslyVerified": true
+            },
+            {
+              "observed": true,
+              "durationMs": 454,
+              "command": [
+                "<node>",
+                "--input-type=commonjs",
+                "-e",
+                "const fs=require('node:fs');const args=JSON.parse(fs.readFileSync(0,'utf8'));const fn=require('./index.js');process.stdout.write(JSON.stringify({observed:fn(...args)}));"
+              ],
+              "input": "[\" \"]",
+              "stdout": "{\"observed\":true}",
+              "stdoutHash": "517fe0410b426ee5d4402666fdd520487e953669b789ed308b60b962c9968cd5",
+              "exitCode": 0,
+              "args": [
+                " "
+              ],
+              "expected": false,
+              "matches": false,
+              "previouslyVerified": false
+            }
+          ]
+        },
+        {
+          "name": "summary-includes-counterexample",
+          "repositoryExecutions": 1,
+          "repeatedExplorationExecutions": 0,
+          "durationMs": 584,
+          "counterexample": {
+            "args": [
+              " "
+            ],
+            "expected": false,
+            "observed": true
+          },
+          "steps": [
+            {
+              "observed": true,
+              "durationMs": 584,
+              "command": [
+                "<node>",
+                "--input-type=commonjs",
+                "-e",
+                "const fs=require('node:fs');const args=JSON.parse(fs.readFileSync(0,'utf8'));const fn=require('./index.js');process.stdout.write(JSON.stringify({observed:fn(...args)}));"
+              ],
+              "input": "[\" \"]",
+              "stdout": "{\"observed\":true}",
+              "stdoutHash": "517fe0410b426ee5d4402666fdd520487e953669b789ed308b60b962c9968cd5",
+              "exitCode": 0,
+              "args": [
+                " "
+              ],
+              "expected": false,
+              "matches": false,
+              "previouslyVerified": false
+            }
+          ]
+        },
+        {
+          "name": "summary-reversed-search",
+          "repositoryExecutions": 1,
+          "repeatedExplorationExecutions": 0,
+          "durationMs": 684,
+          "counterexample": {
+            "args": [
+              " "
+            ],
+            "expected": false,
+            "observed": true
+          },
+          "steps": [
+            {
+              "observed": true,
+              "durationMs": 684,
+              "command": [
+                "<node>",
+                "--input-type=commonjs",
+                "-e",
+                "const fs=require('node:fs');const args=JSON.parse(fs.readFileSync(0,'utf8'));const fn=require('./index.js');process.stdout.write(JSON.stringify({observed:fn(...args)}));"
+              ],
+              "input": "[\" \"]",
+              "stdout": "{\"observed\":true}",
+              "stdoutHash": "517fe0410b426ee5d4402666fdd520487e953669b789ed308b60b962c9968cd5",
+              "exitCode": 0,
+              "args": [
+                " "
+              ],
+              "expected": false,
+              "matches": false,
+              "previouslyVerified": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "trial": 2,
+      "arms": [
+        {
+          "name": "saved-evidence",
+          "repositoryExecutions": 1,
+          "repeatedExplorationExecutions": 0,
+          "durationMs": 402,
+          "counterexample": {
+            "args": [
+              " "
+            ],
+            "expected": false,
+            "observed": true
+          },
+          "steps": [
+            {
+              "observed": true,
+              "durationMs": 402,
+              "command": [
+                "<node>",
+                "--input-type=commonjs",
+                "-e",
+                "const fs=require('node:fs');const args=JSON.parse(fs.readFileSync(0,'utf8'));const fn=require('./index.js');process.stdout.write(JSON.stringify({observed:fn(...args)}));"
+              ],
+              "input": "[\" \"]",
+              "stdout": "{\"observed\":true}",
+              "stdoutHash": "517fe0410b426ee5d4402666fdd520487e953669b789ed308b60b962c9968cd5",
+              "exitCode": 0,
+              "args": [
+                " "
+              ],
+              "expected": false,
+              "matches": false,
+              "previouslyVerified": false
+            }
+          ]
+        },
+        {
+          "name": "summary-omits-counterexample",
+          "repositoryExecutions": 8,
+          "repeatedExplorationExecutions": 7,
+          "durationMs": 5886,
+          "counterexample": {
+            "args": [
+              " "
+            ],
+            "expected": false,
+            "observed": true
+          },
+          "steps": [
+            {
+              "observed": true,
+              "durationMs": 588,
+              "command": [
+                "<node>",
+                "--input-type=commonjs",
+                "-e",
+                "const fs=require('node:fs');const args=JSON.parse(fs.readFileSync(0,'utf8'));const fn=require('./index.js');process.stdout.write(JSON.stringify({observed:fn(...args)}));"
+              ],
+              "input": "[0]",
+              "stdout": "{\"observed\":true}",
+              "stdoutHash": "517fe0410b426ee5d4402666fdd520487e953669b789ed308b60b962c9968cd5",
+              "exitCode": 0,
+              "args": [
+                0
+              ],
+              "expected": true,
+              "matches": true,
+              "previouslyVerified": true
+            },
+            {
+              "observed": true,
+              "durationMs": 827,
+              "command": [
+                "<node>",
+                "--input-type=commonjs",
+                "-e",
+                "const fs=require('node:fs');const args=JSON.parse(fs.readFileSync(0,'utf8'));const fn=require('./index.js');process.stdout.write(JSON.stringify({observed:fn(...args)}));"
+              ],
+              "input": "[37]",
+              "stdout": "{\"observed\":true}",
+              "stdoutHash": "517fe0410b426ee5d4402666fdd520487e953669b789ed308b60b962c9968cd5",
+              "exitCode": 0,
+              "args": [
+                37
+              ],
+              "expected": true,
+              "matches": true,
+              "previouslyVerified": true
+            },
+            {
+              "observed": true,
+              "durationMs": 983,
+              "command": [
+                "<node>",
+                "--input-type=commonjs",
+                "-e",
+                "const fs=require('node:fs');const args=JSON.parse(fs.readFileSync(0,'utf8'));const fn=require('./index.js');process.stdout.write(JSON.stringify({observed:fn(...args)}));"
+              ],
+              "input": "[\"5e3\"]",
+              "stdout": "{\"observed\":true}",
+              "stdoutHash": "517fe0410b426ee5d4402666fdd520487e953669b789ed308b60b962c9968cd5",
+              "exitCode": 0,
+              "args": [
+                "5e3"
+              ],
+              "expected": true,
+              "matches": true,
+              "previouslyVerified": true
+            },
+            {
+              "observed": true,
+              "durationMs": 645,
+              "command": [
+                "<node>",
+                "--input-type=commonjs",
+                "-e",
+                "const fs=require('node:fs');const args=JSON.parse(fs.readFileSync(0,'utf8'));const fn=require('./index.js');process.stdout.write(JSON.stringify({observed:fn(...args)}));"
+              ],
+              "input": "[\"   56\\r\\n  \"]",
+              "stdout": "{\"observed\":true}",
+              "stdoutHash": "517fe0410b426ee5d4402666fdd520487e953669b789ed308b60b962c9968cd5",
+              "exitCode": 0,
+              "args": [
+                "   56\r\n  "
+              ],
+              "expected": true,
+              "matches": true,
+              "previouslyVerified": true
+            },
+            {
+              "observed": false,
+              "durationMs": 801,
+              "command": [
+                "<node>",
+                "--input-type=commonjs",
+                "-e",
+                "const fs=require('node:fs');const args=JSON.parse(fs.readFileSync(0,'utf8'));const fn=require('./index.js');process.stdout.write(JSON.stringify({observed:fn(...args)}));"
+              ],
+              "input": "[\"3a\"]",
+              "stdout": "{\"observed\":false}",
+              "stdoutHash": "893e6fb17f5792bc332d070cd914f0dfe2e3b991edb88fa30045afebd36bbbac",
+              "exitCode": 0,
+              "args": [
+                "3a"
+              ],
+              "expected": false,
+              "matches": true,
+              "previouslyVerified": true
+            },
+            {
+              "observed": false,
+              "durationMs": 663,
+              "command": [
+                "<node>",
+                "--input-type=commonjs",
+                "-e",
+                "const fs=require('node:fs');const args=JSON.parse(fs.readFileSync(0,'utf8'));const fn=require('./index.js');process.stdout.write(JSON.stringify({observed:fn(...args)}));"
+              ],
+              "input": "[\"\"]",
+              "stdout": "{\"observed\":false}",
+              "stdoutHash": "893e6fb17f5792bc332d070cd914f0dfe2e3b991edb88fa30045afebd36bbbac",
+              "exitCode": 0,
+              "args": [
+                ""
+              ],
+              "expected": false,
+              "matches": true,
+              "previouslyVerified": true
+            },
+            {
+              "observed": false,
+              "durationMs": 774,
+              "command": [
+                "<node>",
+                "--input-type=commonjs",
+                "-e",
+                "const fs=require('node:fs');const args=JSON.parse(fs.readFileSync(0,'utf8'));const fn=require('./index.js');process.stdout.write(JSON.stringify({observed:fn(...args)}));"
+              ],
+              "input": "[null]",
+              "stdout": "{\"observed\":false}",
+              "stdoutHash": "893e6fb17f5792bc332d070cd914f0dfe2e3b991edb88fa30045afebd36bbbac",
+              "exitCode": 0,
+              "args": [
+                null
+              ],
+              "expected": false,
+              "matches": true,
+              "previouslyVerified": true
+            },
+            {
+              "observed": true,
+              "durationMs": 605,
+              "command": [
+                "<node>",
+                "--input-type=commonjs",
+                "-e",
+                "const fs=require('node:fs');const args=JSON.parse(fs.readFileSync(0,'utf8'));const fn=require('./index.js');process.stdout.write(JSON.stringify({observed:fn(...args)}));"
+              ],
+              "input": "[\" \"]",
+              "stdout": "{\"observed\":true}",
+              "stdoutHash": "517fe0410b426ee5d4402666fdd520487e953669b789ed308b60b962c9968cd5",
+              "exitCode": 0,
+              "args": [
+                " "
+              ],
+              "expected": false,
+              "matches": false,
+              "previouslyVerified": false
+            }
+          ]
+        },
+        {
+          "name": "summary-includes-counterexample",
+          "repositoryExecutions": 1,
+          "repeatedExplorationExecutions": 0,
+          "durationMs": 709,
+          "counterexample": {
+            "args": [
+              " "
+            ],
+            "expected": false,
+            "observed": true
+          },
+          "steps": [
+            {
+              "observed": true,
+              "durationMs": 709,
+              "command": [
+                "<node>",
+                "--input-type=commonjs",
+                "-e",
+                "const fs=require('node:fs');const args=JSON.parse(fs.readFileSync(0,'utf8'));const fn=require('./index.js');process.stdout.write(JSON.stringify({observed:fn(...args)}));"
+              ],
+              "input": "[\" \"]",
+              "stdout": "{\"observed\":true}",
+              "stdoutHash": "517fe0410b426ee5d4402666fdd520487e953669b789ed308b60b962c9968cd5",
+              "exitCode": 0,
+              "args": [
+                " "
+              ],
+              "expected": false,
+              "matches": false,
+              "previouslyVerified": false
+            }
+          ]
+        },
+        {
+          "name": "summary-reversed-search",
+          "repositoryExecutions": 1,
+          "repeatedExplorationExecutions": 0,
+          "durationMs": 643,
+          "counterexample": {
+            "args": [
+              " "
+            ],
+            "expected": false,
+            "observed": true
+          },
+          "steps": [
+            {
+              "observed": true,
+              "durationMs": 643,
+              "command": [
+                "<node>",
+                "--input-type=commonjs",
+                "-e",
+                "const fs=require('node:fs');const args=JSON.parse(fs.readFileSync(0,'utf8'));const fn=require('./index.js');process.stdout.write(JSON.stringify({observed:fn(...args)}));"
+              ],
+              "input": "[\" \"]",
+              "stdout": "{\"observed\":true}",
+              "stdoutHash": "517fe0410b426ee5d4402666fdd520487e953669b789ed308b60b962c9968cd5",
+              "exitCode": 0,
+              "args": [
+                " "
+              ],
+              "expected": false,
+              "matches": false,
+              "previouslyVerified": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "trial": 3,
+      "arms": [
+        {
+          "name": "saved-evidence",
+          "repositoryExecutions": 1,
+          "repeatedExplorationExecutions": 0,
+          "durationMs": 771,
+          "counterexample": {
+            "args": [
+              " "
+            ],
+            "expected": false,
+            "observed": true
+          },
+          "steps": [
+            {
+              "observed": true,
+              "durationMs": 771,
+              "command": [
+                "<node>",
+                "--input-type=commonjs",
+                "-e",
+                "const fs=require('node:fs');const args=JSON.parse(fs.readFileSync(0,'utf8'));const fn=require('./index.js');process.stdout.write(JSON.stringify({observed:fn(...args)}));"
+              ],
+              "input": "[\" \"]",
+              "stdout": "{\"observed\":true}",
+              "stdoutHash": "517fe0410b426ee5d4402666fdd520487e953669b789ed308b60b962c9968cd5",
+              "exitCode": 0,
+              "args": [
+                " "
+              ],
+              "expected": false,
+              "matches": false,
+              "previouslyVerified": false
+            }
+          ]
+        },
+        {
+          "name": "summary-omits-counterexample",
+          "repositoryExecutions": 8,
+          "repeatedExplorationExecutions": 7,
+          "durationMs": 5080,
+          "counterexample": {
+            "args": [
+              " "
+            ],
+            "expected": false,
+            "observed": true
+          },
+          "steps": [
+            {
+              "observed": true,
+              "durationMs": 661,
+              "command": [
+                "<node>",
+                "--input-type=commonjs",
+                "-e",
+                "const fs=require('node:fs');const args=JSON.parse(fs.readFileSync(0,'utf8'));const fn=require('./index.js');process.stdout.write(JSON.stringify({observed:fn(...args)}));"
+              ],
+              "input": "[0]",
+              "stdout": "{\"observed\":true}",
+              "stdoutHash": "517fe0410b426ee5d4402666fdd520487e953669b789ed308b60b962c9968cd5",
+              "exitCode": 0,
+              "args": [
+                0
+              ],
+              "expected": true,
+              "matches": true,
+              "previouslyVerified": true
+            },
+            {
+              "observed": true,
+              "durationMs": 604,
+              "command": [
+                "<node>",
+                "--input-type=commonjs",
+                "-e",
+                "const fs=require('node:fs');const args=JSON.parse(fs.readFileSync(0,'utf8'));const fn=require('./index.js');process.stdout.write(JSON.stringify({observed:fn(...args)}));"
+              ],
+              "input": "[37]",
+              "stdout": "{\"observed\":true}",
+              "stdoutHash": "517fe0410b426ee5d4402666fdd520487e953669b789ed308b60b962c9968cd5",
+              "exitCode": 0,
+              "args": [
+                37
+              ],
+              "expected": true,
+              "matches": true,
+              "previouslyVerified": true
+            },
+            {
+              "observed": true,
+              "durationMs": 668,
+              "command": [
+                "<node>",
+                "--input-type=commonjs",
+                "-e",
+                "const fs=require('node:fs');const args=JSON.parse(fs.readFileSync(0,'utf8'));const fn=require('./index.js');process.stdout.write(JSON.stringify({observed:fn(...args)}));"
+              ],
+              "input": "[\"5e3\"]",
+              "stdout": "{\"observed\":true}",
+              "stdoutHash": "517fe0410b426ee5d4402666fdd520487e953669b789ed308b60b962c9968cd5",
+              "exitCode": 0,
+              "args": [
+                "5e3"
+              ],
+              "expected": true,
+              "matches": true,
+              "previouslyVerified": true
+            },
+            {
+              "observed": true,
+              "durationMs": 632,
+              "command": [
+                "<node>",
+                "--input-type=commonjs",
+                "-e",
+                "const fs=require('node:fs');const args=JSON.parse(fs.readFileSync(0,'utf8'));const fn=require('./index.js');process.stdout.write(JSON.stringify({observed:fn(...args)}));"
+              ],
+              "input": "[\"   56\\r\\n  \"]",
+              "stdout": "{\"observed\":true}",
+              "stdoutHash": "517fe0410b426ee5d4402666fdd520487e953669b789ed308b60b962c9968cd5",
+              "exitCode": 0,
+              "args": [
+                "   56\r\n  "
+              ],
+              "expected": true,
+              "matches": true,
+              "previouslyVerified": true
+            },
+            {
+              "observed": false,
+              "durationMs": 653,
+              "command": [
+                "<node>",
+                "--input-type=commonjs",
+                "-e",
+                "const fs=require('node:fs');const args=JSON.parse(fs.readFileSync(0,'utf8'));const fn=require('./index.js');process.stdout.write(JSON.stringify({observed:fn(...args)}));"
+              ],
+              "input": "[\"3a\"]",
+              "stdout": "{\"observed\":false}",
+              "stdoutHash": "893e6fb17f5792bc332d070cd914f0dfe2e3b991edb88fa30045afebd36bbbac",
+              "exitCode": 0,
+              "args": [
+                "3a"
+              ],
+              "expected": false,
+              "matches": true,
+              "previouslyVerified": true
+            },
+            {
+              "observed": false,
+              "durationMs": 630,
+              "command": [
+                "<node>",
+                "--input-type=commonjs",
+                "-e",
+                "const fs=require('node:fs');const args=JSON.parse(fs.readFileSync(0,'utf8'));const fn=require('./index.js');process.stdout.write(JSON.stringify({observed:fn(...args)}));"
+              ],
+              "input": "[\"\"]",
+              "stdout": "{\"observed\":false}",
+              "stdoutHash": "893e6fb17f5792bc332d070cd914f0dfe2e3b991edb88fa30045afebd36bbbac",
+              "exitCode": 0,
+              "args": [
+                ""
+              ],
+              "expected": false,
+              "matches": true,
+              "previouslyVerified": true
+            },
+            {
+              "observed": false,
+              "durationMs": 610,
+              "command": [
+                "<node>",
+                "--input-type=commonjs",
+                "-e",
+                "const fs=require('node:fs');const args=JSON.parse(fs.readFileSync(0,'utf8'));const fn=require('./index.js');process.stdout.write(JSON.stringify({observed:fn(...args)}));"
+              ],
+              "input": "[null]",
+              "stdout": "{\"observed\":false}",
+              "stdoutHash": "893e6fb17f5792bc332d070cd914f0dfe2e3b991edb88fa30045afebd36bbbac",
+              "exitCode": 0,
+              "args": [
+                null
+              ],
+              "expected": false,
+              "matches": true,
+              "previouslyVerified": true
+            },
+            {
+              "observed": true,
+              "durationMs": 622,
+              "command": [
+                "<node>",
+                "--input-type=commonjs",
+                "-e",
+                "const fs=require('node:fs');const args=JSON.parse(fs.readFileSync(0,'utf8'));const fn=require('./index.js');process.stdout.write(JSON.stringify({observed:fn(...args)}));"
+              ],
+              "input": "[\" \"]",
+              "stdout": "{\"observed\":true}",
+              "stdoutHash": "517fe0410b426ee5d4402666fdd520487e953669b789ed308b60b962c9968cd5",
+              "exitCode": 0,
+              "args": [
+                " "
+              ],
+              "expected": false,
+              "matches": false,
+              "previouslyVerified": false
+            }
+          ]
+        },
+        {
+          "name": "summary-includes-counterexample",
+          "repositoryExecutions": 1,
+          "repeatedExplorationExecutions": 0,
+          "durationMs": 644,
+          "counterexample": {
+            "args": [
+              " "
+            ],
+            "expected": false,
+            "observed": true
+          },
+          "steps": [
+            {
+              "observed": true,
+              "durationMs": 644,
+              "command": [
+                "<node>",
+                "--input-type=commonjs",
+                "-e",
+                "const fs=require('node:fs');const args=JSON.parse(fs.readFileSync(0,'utf8'));const fn=require('./index.js');process.stdout.write(JSON.stringify({observed:fn(...args)}));"
+              ],
+              "input": "[\" \"]",
+              "stdout": "{\"observed\":true}",
+              "stdoutHash": "517fe0410b426ee5d4402666fdd520487e953669b789ed308b60b962c9968cd5",
+              "exitCode": 0,
+              "args": [
+                " "
+              ],
+              "expected": false,
+              "matches": false,
+              "previouslyVerified": false
+            }
+          ]
+        },
+        {
+          "name": "summary-reversed-search",
+          "repositoryExecutions": 1,
+          "repeatedExplorationExecutions": 0,
+          "durationMs": 531,
+          "counterexample": {
+            "args": [
+              " "
+            ],
+            "expected": false,
+            "observed": true
+          },
+          "steps": [
+            {
+              "observed": true,
+              "durationMs": 531,
+              "command": [
+                "<node>",
+                "--input-type=commonjs",
+                "-e",
+                "const fs=require('node:fs');const args=JSON.parse(fs.readFileSync(0,'utf8'));const fn=require('./index.js');process.stdout.write(JSON.stringify({observed:fn(...args)}));"
+              ],
+              "input": "[\" \"]",
+              "stdout": "{\"observed\":true}",
+              "stdoutHash": "517fe0410b426ee5d4402666fdd520487e953669b789ed308b60b962c9968cd5",
+              "exitCode": 0,
+              "args": [
+                " "
+              ],
+              "expected": false,
+              "matches": false,
+              "previouslyVerified": false
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "repositoryExecutions": 33,
+    "repeatedExplorationExecutions": 21
+  },
+  "limitations": [
+    "This measures retention of one known counterexample, not live model productivity, developer effort, or a causal benefit from SENTINEL.",
+    "The summary baseline deliberately omits the counterexample and follows a declared search order. The expected execution-count difference is a consequence of those information and ordering choices.",
+    "A summary retaining the same counterexample matches evidence replay; reversing this search order also reaches the failure immediately.",
+    "All arms have the same pinned source and approved expectations. The protocol receiver does not reason from the objective or infer input priorities.",
+    "One small historical project and three identical deterministic repetitions are not a statistical performance sample.",
+    "The prior verification cost is excluded. Repository executions count single function invocations in fresh Node processes, not full suites, tokens, or developer minutes.",
+    "The original receipt was validated in the local content store. Its hash is retained; local command paths are omitted from this publishable measurement.",
+    "The function and archived dependencies run under the local OS account; temporary directories are not a security boundary."
+  ]
+}

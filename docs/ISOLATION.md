@@ -21,7 +21,7 @@ The host resolves the configured image to its immutable image ID and records tha
 - All Linux capabilities dropped and `no-new-privileges` enabled.
 - A 2-CPU quota, 1 GiB memory/swap ceiling and 128-process limit.
 - Bounded temporary filesystems for scratch execution: 512 MiB for `/store`, 128 MiB for `/tmp`.
-- A 32 MiB per-file write limit and a 180-second total verification limit.
+- A 32 MiB per-file write limit, a 30-second maximum per-check budget, and a 180-second total verification limit. Larger requested check timeouts remain capped in this runner; the effective budget is recorded in the receipt.
 - One host mount, read-only, containing only the selected baseline/candidate content objects, approved contract and request metadata.
 
 There is no host workspace, `node_modules`, home directory, credential environment or Docker socket mount. Results leave the container through bounded standard output; there is no writable host mount. Timeouts also force-remove the exact generated container name, because terminating a Docker client alone need not stop its container.
@@ -40,7 +40,7 @@ SENTINEL_TEST_DOCKER=1 npx vitest run test/isolation.test.ts
 
 Treat a successful test as evidence for those concrete probes, not a universal sandbox proof. The release validation record states whether the live container path was executed in its environment.
 
-Local validation on 2026-11-01 used Docker Engine 29.9.2 on an Apple Silicon Mac, the Linux arm64 Node 24.22.2 runtime, and Vitest 5.0.5. All four tests passed in 48.54 seconds against image `sha256:ce6f49eaf6046229206994d7511b7a261b53337fc20a3086c42b6f7759fc3e28`. The executed probes observed `rootWritable: false`, `inputWritable: false`, `secret: null`, and `network: false`. That image was built locally from the development source; it is not a separately authenticated release image. The first attempt exposed Vitest's default dependency-cache writes, and the corrected verifier disables those caches.
+Final local validation on 2026-11-01 used Docker Engine 29.9.2 on an Apple Silicon Mac, the Linux arm64 Node 24.22.2 runtime, and Vitest 5.0.5. All four tests passed in 12.50 seconds against image `sha256:a1e20d838d649a48318aed7d4b73aea4aed155eb99053d4d14cb9ff0d335e16c`. The schema-2 test uses a controlled approval fixture, not live human approval: its protected proposal authorises replacing an empty function with actual boundary observations. The test confirms the baseline returns `null`, the candidate passes, and the receipt retains the exact contract and proposal identities. Executed probes observed `rootWritable: false`, `inputWritable: false`, `secret: null`, and `network: false`. That image was built locally from the reviewed source; it is not a separately authenticated release image. The first development attempt exposed Vitest's default dependency-cache writes, and the corrected verifier disables those caches.
 
 ## Interrupted agents
 

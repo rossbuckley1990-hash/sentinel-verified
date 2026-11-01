@@ -1,0 +1,462 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-11-01T14:36:25.000Z",
+  "environment": {
+    "node": "v26.12.0",
+    "platform": "darwin",
+    "arch": "arm64"
+  },
+  "versions": {
+    "trustbut": "0.7.0",
+    "mocha": "11.7.5"
+  },
+  "commands": {
+    "ordinary": "node <tools>/mocha/bin/mocha.js test.js --reporter json",
+    "trustbut": "node <tools>/trustbut/dist/cli.js verify --base <baseline> --head <candidate> --runner mocha --config <external-config> --json --receipt-json <receipt>"
+  },
+  "config": {
+    "runner": "mocha",
+    "args": [
+      "test.js"
+    ],
+    "timeoutSec": 30
+  },
+  "results": [
+    {
+      "id": "is-number-historical-nonfix",
+      "classification": "defect",
+      "origin": "historical-bug",
+      "sourceHash": "d5ba0cd9397c822cb1d98555ddf008be6ce2179a5e56f79a094f74a13c22cb88",
+      "ordinary": {
+        "exitCode": 0,
+        "durationMs": 871,
+        "tests": 138,
+        "passes": 138,
+        "failures": 0
+      },
+      "trustbut": {
+        "exitCode": 0,
+        "durationMs": 3007,
+        "verdict": "warn",
+        "tests": {
+          "passed": 77,
+          "failed": 0,
+          "errored": 0,
+          "skipped": 0,
+          "scope": "full"
+        },
+        "findings": [
+          {
+            "id": "deps-not-installed",
+            "severity": "warn",
+            "title": "Declared dependencies aren't installed: benchmarked; results use your installed dependencies; run your package manager's install"
+          }
+        ],
+        "proofs": [],
+        "risks": []
+      }
+    },
+    {
+      "id": "is-number-upstream-fix",
+      "classification": "correct",
+      "origin": "historical-fix",
+      "sourceHash": "76f4e8f626040311330e6ee10f2f428d350217d668082dce81c2ab0e0768212f",
+      "ordinary": {
+        "exitCode": 0,
+        "durationMs": 838,
+        "tests": 138,
+        "passes": 138,
+        "failures": 0
+      },
+      "trustbut": {
+        "exitCode": 0,
+        "durationMs": 4860,
+        "verdict": "warn",
+        "tests": {
+          "passed": 77,
+          "failed": 0,
+          "errored": 0,
+          "skipped": 0,
+          "scope": "full"
+        },
+        "findings": [
+          {
+            "id": "change-not-proven",
+            "severity": "warn",
+            "title": "Nothing proves the change",
+            "detail": "no test added or changed"
+          },
+          {
+            "id": "deps-not-installed",
+            "severity": "warn",
+            "title": "Declared dependencies aren't installed: benchmarked; results use your installed dependencies; run your package manager's install"
+          }
+        ],
+        "proofs": [],
+        "risks": []
+      }
+    },
+    {
+      "id": "is-number-incomplete-repair",
+      "classification": "defect",
+      "origin": "seeded-repair",
+      "sourceHash": "59c59d97afc7dd5a8dc78a176f8a83776d943b2f359d67d81ed5f556082f24f3",
+      "ordinary": {
+        "exitCode": 0,
+        "durationMs": 1187,
+        "tests": 138,
+        "passes": 138,
+        "failures": 0
+      },
+      "trustbut": {
+        "exitCode": 0,
+        "durationMs": 2081,
+        "verdict": "warn",
+        "tests": {
+          "passed": 77,
+          "failed": 0,
+          "errored": 0,
+          "skipped": 0,
+          "scope": "full"
+        },
+        "findings": [
+          {
+            "id": "change-not-proven",
+            "severity": "warn",
+            "title": "Nothing proves the change",
+            "detail": "no test added or changed"
+          },
+          {
+            "id": "deps-not-installed",
+            "severity": "warn",
+            "title": "Declared dependencies aren't installed: benchmarked; results use your installed dependencies; run your package manager's install"
+          }
+        ],
+        "proofs": [],
+        "risks": []
+      }
+    },
+    {
+      "id": "is-number-narrow-contract-miss",
+      "classification": "known-miss",
+      "origin": "specification-gap",
+      "sourceHash": "d5ba0cd9397c822cb1d98555ddf008be6ce2179a5e56f79a094f74a13c22cb88",
+      "ordinary": {
+        "exitCode": 0,
+        "durationMs": 748,
+        "tests": 138,
+        "passes": 138,
+        "failures": 0
+      },
+      "trustbut": {
+        "exitCode": 0,
+        "durationMs": 3258,
+        "verdict": "warn",
+        "tests": {
+          "passed": 77,
+          "failed": 0,
+          "errored": 0,
+          "skipped": 0,
+          "scope": "full"
+        },
+        "findings": [
+          {
+            "id": "deps-not-installed",
+            "severity": "warn",
+            "title": "Declared dependencies aren't installed: benchmarked; results use your installed dependencies; run your package manager's install"
+          }
+        ],
+        "proofs": [],
+        "risks": []
+      }
+    },
+    {
+      "id": "normalize-path-benign-refactor",
+      "classification": "correct",
+      "origin": "seeded-refactor",
+      "sourceHash": "119fac64e8a2fa5ee2b71b3d1955b59e1c40bdb7e658b292c01a7408a601b77e",
+      "ordinary": {
+        "exitCode": 0,
+        "durationMs": 698,
+        "tests": 34,
+        "passes": 34,
+        "failures": 0
+      },
+      "trustbut": {
+        "exitCode": 0,
+        "durationMs": 5159,
+        "verdict": "warn",
+        "tests": {
+          "passed": 34,
+          "failed": 0,
+          "errored": 0,
+          "skipped": 0,
+          "scope": "full"
+        },
+        "findings": [
+          {
+            "id": "change-not-proven",
+            "severity": "warn",
+            "title": "Nothing proves the change",
+            "detail": "no test added or changed"
+          },
+          {
+            "id": "deps-not-installed",
+            "severity": "warn",
+            "title": "Declared dependencies aren't installed: gulp-format-md; results use your installed dependencies; run your package manager's install"
+          }
+        ],
+        "proofs": [],
+        "risks": []
+      }
+    },
+    {
+      "id": "normalize-path-trailing-regression",
+      "classification": "defect",
+      "origin": "seeded-regression",
+      "sourceHash": "79fdc3a7bf6f14ac1f384806beeffc98fb11eb5515b8868f286ff51fe6e26da4",
+      "ordinary": {
+        "exitCode": 5,
+        "durationMs": 2058,
+        "tests": 34,
+        "passes": 29,
+        "failures": 5
+      },
+      "trustbut": {
+        "exitCode": 1,
+        "durationMs": 11188,
+        "verdict": "fail",
+        "tests": {
+          "passed": 29,
+          "failed": 5,
+          "errored": 0,
+          "skipped": 0,
+          "scope": "full"
+        },
+        "findings": [
+          {
+            "id": "change-not-proven",
+            "severity": "warn",
+            "title": "Nothing proves the change",
+            "detail": "no test added or changed"
+          },
+          {
+            "id": "deps-not-installed",
+            "severity": "warn",
+            "title": "Declared dependencies aren't installed: gulp-format-md; results use your installed dependencies; run your package manager's install"
+          },
+          {
+            "id": "suite-failing",
+            "severity": "fail",
+            "title": "Test suite fails at head (clean checkout)",
+            "detail": "exit code 5"
+          },
+          {
+            "id": "test-regressed",
+            "severity": "fail",
+            "title": "Test passes at base and fails at head",
+            "file": "test.js",
+            "detail": "normalize-path keep trailing slashes should normalize foo\\bar\\baz\\"
+          },
+          {
+            "id": "test-regressed",
+            "severity": "fail",
+            "title": "Test passes at base and fails at head",
+            "file": "test.js",
+            "detail": "normalize-path keep trailing slashes should normalize foo\\\\bar\\\\baz\\\\"
+          },
+          {
+            "id": "test-regressed",
+            "severity": "fail",
+            "title": "Test passes at base and fails at head",
+            "file": "test.js",
+            "detail": "normalize-path keep trailing slashes should normalize foo//bar//baz//"
+          },
+          {
+            "id": "test-regressed",
+            "severity": "fail",
+            "title": "Test passes at base and fails at head",
+            "file": "test.js",
+            "detail": "normalize-path keep trailing slashes should normalize foo/bar/baz/"
+          },
+          {
+            "id": "test-regressed",
+            "severity": "fail",
+            "title": "Test passes at base and fails at head",
+            "file": "test.js",
+            "detail": "normalize-path keep trailing slashes should normalize ./foo/bar/baz/"
+          }
+        ],
+        "proofs": [],
+        "risks": []
+      }
+    },
+    {
+      "id": "normalize-path-weakened-tests",
+      "classification": "defect",
+      "origin": "seeded-test-weakening",
+      "sourceHash": "79fdc3a7bf6f14ac1f384806beeffc98fb11eb5515b8868f286ff51fe6e26da4",
+      "ordinary": {
+        "exitCode": 0,
+        "durationMs": 1908,
+        "tests": 28,
+        "passes": 28,
+        "failures": 0
+      },
+      "trustbut": {
+        "exitCode": 0,
+        "durationMs": 11449,
+        "verdict": "warn",
+        "tests": {
+          "passed": 28,
+          "failed": 0,
+          "errored": 0,
+          "skipped": 0,
+          "scope": "full"
+        },
+        "findings": [
+          {
+            "id": "tests-removed",
+            "severity": "warn",
+            "title": "1 test removed",
+            "file": "upstream-adapter.test.ts"
+          },
+          {
+            "id": "assertions-removed",
+            "severity": "warn",
+            "title": "1 assertion removed",
+            "file": "upstream-adapter.test.ts"
+          },
+          {
+            "id": "deps-not-installed",
+            "severity": "warn",
+            "title": "Declared dependencies aren't installed: gulp-format-md; results use your installed dependencies; run your package manager's install"
+          },
+          {
+            "id": "proofs-unmatched",
+            "severity": "warn",
+            "title": "No test results matched the changed test files; fail-before/pass-after evidence unavailable"
+          }
+        ],
+        "proofs": [],
+        "risks": [
+          {
+            "file": "upstream-adapter.test.ts",
+            "score": 2,
+            "reasons": [
+              "has findings"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "normalize-path-unrelated-drift",
+      "classification": "defect",
+      "origin": "seeded-regression",
+      "sourceHash": "cc71ff3d676dc8ad724f091c04612c858c4dacdfe646e1e4fe7e1faf0c76315c",
+      "ordinary": {
+        "exitCode": 4,
+        "durationMs": 4497,
+        "tests": 34,
+        "passes": 30,
+        "failures": 4
+      },
+      "trustbut": {
+        "exitCode": 1,
+        "durationMs": 75833,
+        "verdict": "fail",
+        "tests": {
+          "passed": 30,
+          "failed": 4,
+          "errored": 0,
+          "skipped": 0,
+          "scope": "full"
+        },
+        "findings": [
+          {
+            "id": "change-not-proven",
+            "severity": "warn",
+            "title": "Nothing proves the change",
+            "detail": "no test added or changed"
+          },
+          {
+            "id": "deps-not-installed",
+            "severity": "warn",
+            "title": "Declared dependencies aren't installed: gulp-format-md; results use your installed dependencies; run your package manager's install"
+          },
+          {
+            "id": "suite-failing",
+            "severity": "fail",
+            "title": "Test suite fails at head (clean checkout)",
+            "detail": "exit code 4"
+          },
+          {
+            "id": "test-regressed",
+            "severity": "fail",
+            "title": "Test passes at base and fails at head",
+            "file": "test.js",
+            "detail": "normalize-path strip trailing slashes should normalize \\\\.\\CdRomX"
+          },
+          {
+            "id": "test-regressed",
+            "severity": "fail",
+            "title": "Test passes at base and fails at head",
+            "file": "test.js",
+            "detail": "normalize-path strip trailing slashes should normalize \\\\.\\PhysicalDiskX"
+          },
+          {
+            "id": "test-regressed",
+            "severity": "fail",
+            "title": "Test passes at base and fails at head",
+            "file": "test.js",
+            "detail": "normalize-path strip trailing slashes should normalize \\\\?\\C:\\user\\docs\\Letter.txt"
+          },
+          {
+            "id": "test-regressed",
+            "severity": "fail",
+            "title": "Test passes at base and fails at head",
+            "file": "test.js",
+            "detail": "normalize-path strip trailing slashes should normalize \\\\?\\UNC\\Server01\\user\\docs\\Letter.txt"
+          }
+        ],
+        "proofs": [],
+        "risks": []
+      }
+    },
+    {
+      "id": "normalize-path-insufficient-intent",
+      "classification": "unknown",
+      "origin": "missing-contract",
+      "sourceHash": "8aa02f93af7a22e001b408f34a6d82413bc51a412e099ec3b0c063b07addab29",
+      "ordinary": {
+        "exitCode": 0,
+        "durationMs": 15625,
+        "tests": 34,
+        "passes": 34,
+        "failures": 0
+      },
+      "trustbut": {
+        "exitCode": 0,
+        "durationMs": 41746,
+        "verdict": "warn",
+        "tests": {
+          "passed": 34,
+          "failed": 0,
+          "errored": 0,
+          "skipped": 0,
+          "scope": "full"
+        },
+        "findings": [
+          {
+            "id": "deps-not-installed",
+            "severity": "warn",
+            "title": "Declared dependencies aren't installed: gulp-format-md; results use your installed dependencies; run your package manager's install"
+          }
+        ],
+        "proofs": [],
+        "risks": []
+      }
+    }
+  ]
+}

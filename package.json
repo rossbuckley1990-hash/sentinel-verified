@@ -25,7 +25,8 @@
     "demo": "node dist/cli.js demo",
     "benchmark": "node dist/benchmark.js",
     "prepack": "npm run build",
-    "benchmark:public": "node dist/public-benchmark.js"
+    "benchmark:public": "node dist/public-benchmark.js",
+    "benchmark:handoff": "node dist/handoff-benchmark.js --allow-local"
   },
   "dependencies": {
     "tsx": "4.23.15",

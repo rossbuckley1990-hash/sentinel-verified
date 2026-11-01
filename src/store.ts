@@ -30,9 +30,57 @@ export async function getObject(store: string, hash: string): Promise<Buffer> {
   const bytes = await fs.readFile(path.join(store, 'objects', hash));
   if (digest(bytes) !== hash) throw new Error(`Evidence integrity failure: ${hash}`); return bytes;
 }
-async function git(root: string, args: string[]): Promise<string> { return (await exec('git', ['--no-optional-locks','-c','core.fsmonitor=false','-c','core.hooksPath=/dev/null','-C',root,...args], { maxBuffer: 32 * 1024 * 1024 })).stdout.trimEnd(); }
+// Missing objects must fail locally, never launch a promisor remote helper or
+// credentials/network operation while reading untrusted repository metadata.
+const gitReadEnvironment=():NodeJS.ProcessEnv=>({...process.env,GIT_NO_LAZY_FETCH:'1',GIT_ALLOW_PROTOCOL:'',GIT_TERMINAL_PROMPT:'0'});
+async function git(root: string, args: string[]): Promise<string> { return (await exec('git', ['--no-optional-locks','-c','core.fsmonitor=false','-c','core.hooksPath=/dev/null','-C',root,...args], { maxBuffer: 32 * 1024 * 1024, timeout:30000, env:gitReadEnvironment() })).stdout.trimEnd(); }
+interface RawIndexEntry { mode: string; oid: string }
+/** git status/diff can execute repository clean/process filters while hashing.
+ * Compare raw Git objects and filesystem bytes without asking Git to convert
+ * worktree content. EOL/filter-normalised checkouts may conservatively be dirty.
+ */
+async function rawWorktreeDirty(root: string, head: string): Promise<boolean> {
+  const [tree, index, untracked] = await Promise.all([
+    git(root,['ls-tree','-rz','--full-tree',head]),
+    git(root,['ls-files','--stage','-z']),
+    git(root,['ls-files','--others','--exclude-standard','-z']),
+  ]);
+  if(untracked.length)return true;
+  const committed=new Map<string,RawIndexEntry>();
+  for(const item of tree.split('\0').filter(Boolean)){
+    const tab=item.indexOf('\t'),name=item.slice(tab+1);const [mode,,oid]=item.slice(0,tab).split(' ');
+    if(tab<0||!safeRelative(name)||!mode||!oid)throw new Error('Invalid raw Git tree entry');
+    committed.set(name,{mode,oid});
+  }
+  const staged=new Map<string,RawIndexEntry>();
+  for(const item of index.split('\0').filter(Boolean)){
+    const tab=item.indexOf('\t'),name=item.slice(tab+1);const [mode,oid,stage]=item.slice(0,tab).split(' ');
+    if(tab<0||!safeRelative(name)||!mode||!oid)throw new Error('Invalid raw Git index entry');
+    if(stage!=='0')return true;
+    staged.set(name,{mode,oid});
+  }
+  if(staged.size!==committed.size)return true;
+  for(const [name,entry] of staged){const before=committed.get(name);if(!before||before.mode!==entry.mode||before.oid!==entry.oid)return true;}
+  const algorithm=head.length===40?'sha1':head.length===64?'sha256':null;
+  if(!algorithm)throw new Error('Unsupported Git object format');
+  let total=0;
+  for(const [name,entry] of staged){
+    const file=path.join(root,name);let stat;
+    try{stat=await fs.lstat(file);}catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')return true;throw error;}
+    if(!stat.isFile())return true;
+    const real=await fs.realpath(file);if(!real.startsWith(root+path.sep))throw new Error(`Path escapes repository: ${name}`);
+    if(stat.size>20_000_000||total+stat.size>100_000_000)throw new Error('Snapshot exceeds 20 MB/file or 100 MB total limit');
+    const bytes=await fs.readFile(file);total+=bytes.length;
+    if(bytes.length>20_000_000||total>100_000_000)throw new Error('Snapshot exceeds 20 MB/file or 100 MB total limit');
+    const mode=(stat.mode&0o111)?'100755':'100644';
+    const oid=createHash(algorithm).update(`blob ${bytes.length}\0`).update(bytes).digest('hex');
+    if(mode!==entry.mode||oid!==entry.oid)return true;
+  }
+  return false;
+}
 export async function gitIdentity(root: string): Promise<GitIdentity> {
-  return { root: await fs.realpath(root), head: await git(root,['rev-parse','HEAD']), branch: await git(root,['branch','--show-current']), dirty: !!(await git(root,['status','--porcelain'])) };
+  const [canonical,head,branch]=await Promise.all([fs.realpath(root),git(root,['rev-parse','HEAD']),git(root,['branch','--show-current'])]);
+  return { root: canonical, head, branch, dirty: await rawWorktreeDirty(canonical,head) };
 }
 async function saveSnapshot(store: string, files: Record<string,FileEntry>, identity: GitIdentity): Promise<Snapshot> {
   const payload = { schemaVersion: 1 as const, files: Object.fromEntries(Object.entries(files).sort(([a],[b])=>a.localeCompare(b))), git: identity };
@@ -47,7 +95,7 @@ export async function readSnapshot(store: string, hash: string): Promise<Snapsho
 }
 export async function captureSnapshot(root: string, store: string): Promise<Snapshot> {
   const identity = await gitIdentity(root);
-  const listing = (await exec('git',['--no-optional-locks','-c','core.fsmonitor=false','-c','core.hooksPath=/dev/null','-C',root,'ls-files','--cached','--others','--exclude-standard','-z'],{maxBuffer:32*1024*1024})).stdout;
+  const listing = (await exec('git',['--no-optional-locks','-c','core.fsmonitor=false','-c','core.hooksPath=/dev/null','-C',root,'ls-files','--cached','--others','--exclude-standard','-z'],{maxBuffer:32*1024*1024,timeout:30000,env:gitReadEnvironment()})).stdout;
   const files: Record<string,FileEntry> = Object.create(null); let total = 0;
   for (const name of [...new Set(listing.split('\0').filter(Boolean))].sort()) {
     if (!safeRelative(name)) throw new Error(`Unsafe path: ${name}`);
@@ -63,14 +111,15 @@ export async function captureSnapshot(root: string, store: string): Promise<Snap
 }
 export async function captureRevision(root: string, ref: string, store: string): Promise<Snapshot> {
   const commit = await git(root,['rev-parse','--verify',`${ref}^{commit}`]);
-  const identity = { ...(await gitIdentity(root)), head: commit, dirty: false };
-  const listing = (await exec('git',['--no-optional-locks','-c','core.fsmonitor=false','-c','core.hooksPath=/dev/null','-C',root,'ls-tree','-rz','--full-tree',commit],{maxBuffer:32*1024*1024})).stdout;
+  const [canonical,branch]=await Promise.all([fs.realpath(root),git(root,['branch','--show-current'])]);
+  const identity = { root:canonical, branch, head: commit, dirty: false };
+  const listing = (await exec('git',['--no-optional-locks','-c','core.fsmonitor=false','-c','core.hooksPath=/dev/null','-C',root,'ls-tree','-rz','--full-tree',commit],{maxBuffer:32*1024*1024,timeout:30000,env:gitReadEnvironment()})).stdout;
   const files: Record<string,FileEntry> = Object.create(null); let total=0;
   for(const item of listing.split('\0').filter(Boolean)) {
     const tab=item.indexOf('\t'); const name=item.slice(tab+1); const [mode,type,oid]=item.slice(0,tab).split(' ');
     if(!safeRelative(name) || type!=='blob' || mode==='120000') throw new Error(`Unsupported baseline file: ${name}`);
     if(name.split('/').some(x=>x==='node_modules'||x==='.sentinel')) continue;
-    const {stdout: bytes} = await exec('git',['--no-optional-locks','-c','core.fsmonitor=false','-c','core.hooksPath=/dev/null','-C',root,'cat-file','blob',oid!],{encoding:'buffer',maxBuffer:20_000_001});
+    const {stdout: bytes} = await exec('git',['--no-optional-locks','-c','core.fsmonitor=false','-c','core.hooksPath=/dev/null','-C',root,'cat-file','blob',oid!],{encoding:'buffer',maxBuffer:20_000_001,timeout:30000,env:gitReadEnvironment()});
     total+=bytes.length; if(bytes.length>20_000_000||total>100_000_000) throw new Error('Snapshot size limit exceeded');
     files[name]={hash:await putObject(store,bytes),size:bytes.length,mode:parseInt(mode!,8)&0o777};
   }

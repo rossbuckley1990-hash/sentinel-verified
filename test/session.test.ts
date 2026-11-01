@@ -5,7 +5,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { execFileSync, spawn } from 'node:child_process';
 import { startSession, continueSession, loadCheckpoint, saveCheckpoint, continuationContext } from '../src/session.js';
-import { getObject } from '../src/store.js';
+import { captureSnapshot, getObject, putObject } from '../src/store.js';
 import { runAgent } from '../src/agents.js';
 import { runCommand } from '../src/process.js';
 import type { Receipt } from '../src/types.js';
@@ -142,6 +142,21 @@ describe('durable sessions and handoffs', () => {
 });
 
 describe('bounded continuation context', () => {
+  it('carries unresolved approved intent and explicit scope decisions before the first receipt', async () => {
+    const p=await project(),baseline=await captureSnapshot(p.repo,p.store);
+    const original=JSON.parse(await readFile(p.contractPath,'utf8'));
+    const unresolved='Which malformed ages should throw instead of returning false?';
+    const decision='Only the exported age validator and greeting are in the approved scope.';
+    delete original.probes;
+    const proposalHash=await putObject(p.store,JSON.stringify({schemaVersion:1,objective:original.objective,proposed:original.requirements.map((requirement:unknown)=>({selected:true,requirement})),uncertainties:[unresolved],resolvedQuestions:[{question:'Does this include the UI?',reason:decision}]}));
+    await writeFile(p.contractPath,JSON.stringify({...original,schemaVersion:2,unresolved:[unresolved],approval:{method:'interactive',approvedAt:new Date().toISOString(),proposalHash,baselineHash:baseline.hash,requirementIds:original.requirements.map((r:{id:string})=>r.id),resolvedQuestions:[{question:'Does this include the UI?',reason:decision}]}}));
+    const checkpoint=await startSession({...p,agent:'fixture-interrupt',localConsent:true});
+    expect(checkpoint.receipts).toEqual([]);expect(checkpoint.openQuestions).toContain(unresolved);
+    const context=await continuationContext(p.store,checkpoint);
+    expect(context).toContain(unresolved);expect(context).toContain(decision);
+    expect(context.indexOf('APPROVED SCOPE AND UNRESOLVED INTENT')).toBeLessThan(context.indexOf('APPROVED REQUIREMENTS'));
+    expect(context.length).toBeLessThanOrEqual(16000);
+  });
   it('retains a bounded evidence package and the previous actionable guidance', async () => {
     const p = await project();
     const checkpoint = await startSession({ ...p, agent: 'fixture-interrupt', localConsent: true });

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { mkdtemp, mkdir, writeFile, readFile, rm } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, readFile, rm, chmod } from 'node:fs/promises';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { join, resolve } from 'node:path';
@@ -35,6 +35,60 @@ async function fixture() {
 afterEach(async () => { await Promise.all(allocated.splice(0).map(directory => rm(directory, { recursive: true, force: true }))); });
 
 describe('source and verification evidence boundaries', () => {
+  it('fails on missing partial-clone objects without launching a remote helper', async () => {
+    const {root,repo,store}=await fixture(),bin=join(root,'bin'),marker=join(root,'remote-helper-invoked');await mkdir(bin);
+    await writeFile(join(bin,'git-remote-sentinel-probe'),'#!/bin/sh\nprintf invoked > "$SENTINEL_PROBE_MARKER"\nexit 1\n',{mode:0o755});
+    const oid=(await exec('git',['rev-parse','HEAD:src/access.js'],{cwd:repo})).stdout.trim();
+    await rm(join(repo,'.git','objects',oid.slice(0,2),oid.slice(2)));
+    for(const [key,value] of [['remote.origin.url','sentinel-probe::controlled'],['remote.origin.promisor','true'],['remote.origin.partialclonefilter','blob:none'],['protocol.sentinel-probe.allow','always']])await exec('git',['config',key!,value!],{cwd:repo});
+    const previousPath=process.env.PATH,previousMarker=process.env.SENTINEL_PROBE_MARKER;
+    process.env.PATH=bin+':'+previousPath;process.env.SENTINEL_PROBE_MARKER=marker;
+    try{
+      await expect(exec('git',['cat-file','blob',oid],{cwd:repo,timeout:5000,env:{...process.env,GIT_NO_LAZY_FETCH:'0',GIT_ALLOW_PROTOCOL:'sentinel-probe'}})).rejects.toThrow();
+      expect(await readFile(marker,'utf8')).toBe('invoked');await rm(marker);
+      // Transport denial is a second barrier for Git versions without the
+      // no-lazy-fetch switch; repository protocol.*.allow cannot override it.
+      await expect(exec('git',['cat-file','blob',oid],{cwd:repo,timeout:5000,env:{...process.env,GIT_NO_LAZY_FETCH:'0',GIT_ALLOW_PROTOCOL:''}})).rejects.toThrow();
+      await expect(readFile(marker)).rejects.toThrow();
+      await expect(captureRevision(repo,'HEAD',store)).rejects.toThrow();
+      await expect(readFile(marker)).rejects.toThrow();
+    }finally{process.env.PATH=previousPath;if(previousMarker===undefined)delete process.env.SENTINEL_PROBE_MARKER;else process.env.SENTINEL_PROBE_MARKER=previousMarker;}
+  });
+
+  it('never executes repository clean filters while capturing modified or staged source', async () => {
+    const {root,repo,store}=await fixture();const marker=join(root,'filter-invoked.txt');
+    await writeFile(join(repo,'.gitattributes'),'src/access.js filter=sentinel-probe\n');
+    await writeFile(join(repo,'filter.sh'),'#!/bin/sh\nprintf invoked > ../filter-invoked.txt\ncat\n',{mode:0o755});
+    await exec('git',['add','.gitattributes','filter.sh'],{cwd:repo});
+    await exec('git',['-c','user.name=SENTINEL','-c','user.email=sentinel@localhost','-c','commit.gpgsign=false','-c','core.hooksPath=/dev/null','commit','-m','Controlled filter fixture'],{cwd:repo});
+    await exec('git',['config','filter.sentinel-probe.clean','./filter.sh'],{cwd:repo});
+    expect((await captureSnapshot(repo,store)).git.dirty).toBe(false);
+    await expect(readFile(marker)).rejects.toThrow();
+    const original=await readFile(join(repo,'src/access.js'),'utf8');
+    const changed=original.replace('>= 18','>= 19');expect(changed.length).toBe(original.length);
+    await writeFile(join(repo,'src/access.js'),changed);
+    // Positive control: the formerly used Git operation really executes this
+    // controlled fixture even when fsmonitor and hooks are disabled.
+    await exec('git',['--no-optional-locks','-c','core.fsmonitor=false','-c','core.hooksPath=/dev/null','status','--porcelain'],{cwd:repo});
+    expect(await readFile(marker,'utf8')).toBe('invoked');await rm(marker);
+    expect((await captureSnapshot(repo,store)).git.dirty).toBe(true);
+    await expect(readFile(marker)).rejects.toThrow();
+    await exec('git',['add','src/access.js'],{cwd:repo});await rm(marker,{force:true});
+    // Staged state remains dirty even when worktree bytes are restored to HEAD.
+    await writeFile(join(repo,'src/access.js'),original);
+    expect((await captureSnapshot(repo,store)).git.dirty).toBe(true);
+    await expect(readFile(marker)).rejects.toThrow();
+  });
+
+  it('detects raw untracked, deleted and executable-mode changes without Git conversions', async () => {
+    const {repo,store}=await fixture();expect((await captureSnapshot(repo,store)).git.dirty).toBe(false);
+    await writeFile(join(repo,'new.txt'),'untracked');expect((await captureSnapshot(repo,store)).git.dirty).toBe(true);await rm(join(repo,'new.txt'));
+    const file=join(repo,'src/access.js'),original=await readFile(file);
+    await rm(file);expect((await captureSnapshot(repo,store)).git.dirty).toBe(true);await writeFile(file,original);
+    if(process.platform!=='win32'){await chmod(file,0o755);expect((await captureSnapshot(repo,store)).git.dirty).toBe(true);await chmod(file,0o644);}
+    expect((await captureSnapshot(repo,store)).git.dirty).toBe(false);
+  });
+
   it('rejects a caller-mutated snapshot manifest instead of executing bytes under an old hash', async () => {
     const { root, repo, store } = await fixture();
     const baseline = await captureSnapshot(repo, store);
@@ -86,4 +140,29 @@ it('classifies an unloadable test suite as environment failure, not empty covera
  const receipt=await verify({store,baseline,candidate,contract,contractHash,dependencies});
  expect(receipt.checks.find(c=>c.id==='candidate-tests')?.status).toBe('ENVIRONMENT FAILURE');
  expect(receipt.status).toBe('ENVIRONMENT FAILURE');
+});
+
+
+it('rejects reuse of an interactive approval against a different baseline before execution',async()=>{
+ const {repo,store}=await fixture();const baseline=await captureSnapshot(repo,store);
+ const approved:Contract={...contract,schemaVersion:2,approval:{method:'interactive',approvedAt:new Date().toISOString(),proposalHash:await putObject(store,JSON.stringify({schemaVersion:1,objective:contract.objective,proposed:contract.requirements.map(requirement=>({selected:true,requirement})),uncertainties:[],resolvedQuestions:[]})),baselineHash:baseline.hash,requirementIds:contract.requirements.map(r=>r.id),resolvedQuestions:[]}};
+ const contractHash=await putObject(store,JSON.stringify(approved));await writeFile(join(repo,'changed.txt'),'unreviewed baseline');const other=await captureSnapshot(repo,store);
+ await expect(verify({store,baseline:other,candidate:other,contract:approved,contractHash,dependencies})).rejects.toThrow('Approved baseline differs');
+});
+
+it('does not turn an explicitly limited approved plan into a verified objective',async()=>{
+ const {repo,store}=await fixture();const baseline=await captureSnapshot(repo,store);
+ await writeFile(join(repo,'src/access.js'), 'export function isAdult(age) { return typeof age === "number" && age >= 18; }\n');
+ const approved:Contract={...contract,schemaVersion:2,unresolved:['Should fractional ages be accepted?'],approval:{method:'interactive',approvedAt:new Date().toISOString(),proposalHash:await putObject(store,JSON.stringify({schemaVersion:1,objective:contract.objective,proposed:contract.requirements.map(requirement=>({selected:true,requirement})),uncertainties:['Should fractional ages be accepted?'],resolvedQuestions:[]})),baselineHash:baseline.hash,requirementIds:contract.requirements.map(r=>r.id),resolvedQuestions:[]}};
+ const contractHash=await putObject(store,JSON.stringify(approved));const candidate=await captureSnapshot(repo,store);const receipt=await verify({store,baseline,candidate,contract:approved,contractHash,dependencies});
+ expect(receipt.checks.find(c=>c.requirementId==='reject-string')?.status).toBe('VERIFIED');expect(receipt.checks.find(c=>c.id==='unresolved:0')?.status).toBe('UNVERIFIED');expect(receipt.status).toBe('UNVERIFIED');
+});
+
+
+it('rejects expected-value drift under an earlier interactive proposal identity',async()=>{
+ const {repo,store}=await fixture();const baseline=await captureSnapshot(repo,store);
+ const proposal={schemaVersion:1,objective:contract.objective,proposed:contract.requirements.map(requirement=>({selected:true,requirement})),uncertainties:[],resolvedQuestions:[]};
+ const changed=structuredClone(contract.requirements);changed[0]!.cases[0]!.expected=true;
+ const edited:Contract={...contract,schemaVersion:2,requirements:changed,unresolved:[],approval:{method:'interactive',approvedAt:new Date().toISOString(),proposalHash:await putObject(store,JSON.stringify(proposal)),baselineHash:baseline.hash,requirementIds:changed.map(r=>r.id),resolvedQuestions:[]}};
+ const contractHash=await putObject(store,JSON.stringify(edited));await expect(verify({store,baseline,candidate:baseline,contract:edited,contractHash,dependencies})).rejects.toThrow('differs from the reviewed proposal');
 });

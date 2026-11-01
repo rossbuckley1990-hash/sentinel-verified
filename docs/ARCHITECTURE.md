@@ -95,8 +95,10 @@ Local snapshots separate responsibilities and catch stale or altered inputs. The
 
 ## v0.2 approval and continuity details
 
-Read-only Git inspection explicitly disables fsmonitor and hooks: even a status/listing command must not execute repository-configured code before consent. Proposal inputs are checked against the reviewed baseline; source changes while the approval screen is open invalidate approval. Adding one explicit example resolves only the generic missing-example question, never an unrelated ambiguous objective.
+Read-only Git inspection disables fsmonitor, hooks and lazy fetching, and determines dirty state by comparing raw Git objects and filesystem bytes without status/filter conversion. Filter or EOL-normalised checkouts may conservatively appear dirty. These controls matter because even a status/listing command must not execute repository-configured code before consent. Proposal inputs are checked against the reviewed baseline; source changes while the approval screen is open invalidate approval. Adding one explicit example resolves only the generic missing-example question, never an unrelated ambiguous objective.
 
 The per-repository session pointer prevents `continue` from choosing a different repository's global latest task. Imported sessions require their explicit session ID. The preferred agent is the only stored onboarding preference; execution consent belongs to a session and runner and is reset on import.
 
 The exact bounded agent input is a content object. A visible `SENTINEL_ACK` line can acknowledge its source and contract identities. This is an agent statement, not independent evidence of comprehension. The next source is independently verified even when acknowledgement is absent. A new verification infrastructure failure receives its own failure receipt; an older green result cannot represent that failed attempt. Reports label incomplete or source-stale sessions accordingly.
+
+Version-2 contract loading also compares requirements and scope against the selected reviewed proposal. Editing a contract file while retaining an old approval/proposal identity invalidates it; use fresh interactive approval or the explicitly reviewed manual version-1 format. This detects local drift, not an attacker rewriting the entire evidence chain.

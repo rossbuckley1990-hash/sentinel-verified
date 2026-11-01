@@ -4,11 +4,11 @@ import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { discoverProject, type DiscoveryPlan, type ProposedRequirement } from './discovery.js';
 import { detectAgents } from './agents.js';
-import { atomicJson, captureSnapshot, digest, putObject, getObject } from './store.js';
+import { atomicJson, captureSnapshot, digest, putObject } from './store.js';
 import { parseContract } from './schema.js';
-import { loadCheckpoint, readLimitedText } from './session.js';
+import { parseSessionId, readLimitedText, loadCheckpoint } from './session.js';
 import { cleanTerminal } from './terminal.js';
-import { DEFAULT_RUNNER_IMAGE, inspectDocker, type RunnerChoice } from './isolation.js';
+import { inspectDocker, type RunnerChoice } from './isolation.js';
 import type { AgentName, Checkpoint, Contract, Json, Requirement, Snapshot } from './types.js';
 
 export interface PromptIO { interactive: boolean; write(message: string): void; ask(message: string): Promise<string>; close(): void }
@@ -23,11 +23,22 @@ export async function readPreferences(store:string):Promise<Preferences>{
   catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')return {schemaVersion:1};throw new Error(`Cannot read SENTINEL preferences: ${String(error)}`);}
 }
 export async function rememberAgent(store:string,agent:AgentName){if(agent==='codex'||agent==='claude')await atomicJson(path.join(store,'config.json'),{schemaVersion:1,preferredAgent:agent});}
-export async function rememberSession(store:string,cp:Checkpoint){await atomicJson(path.join(store,'repositories',digest(cp.repo),'latest.json'),{schemaVersion:1,id:cp.id});}
+export async function rememberSession(store:string,cp:Checkpoint){for(const repo of new Set([cp.repo,cp.workspace]))await atomicJson(path.join(store,'repositories',digest(repo),'latest.json'),{schemaVersion:1,id:parseSessionId(cp.id)});}
 export async function repositorySession(store:string,repo:string):Promise<string|undefined>{
-  try{const file=path.join(store,'repositories',digest(await fs.realpath(repo)),'latest.json');const pointer=JSON.parse(await readLimitedText(file,10000)) as {schemaVersion?:number;id?:unknown};if(pointer.schemaVersion!==1||typeof pointer.id!=='string'||!/^s-[a-z0-9]+-[a-f0-9]{8}$/.test(pointer.id))throw new Error('Malformed repository session pointer. Select an explicit --session after inspecting the store.');return pointer.id;}
+  try{const file=path.join(store,'repositories',digest(await fs.realpath(repo)),'latest.json');const pointer=JSON.parse(await readLimitedText(file,10000)) as {schemaVersion?:number;id?:unknown};if(!pointer||pointer.schemaVersion!==1||typeof pointer.id!=='string')throw new Error('Malformed repository session pointer. Select an explicit --session after inspecting the store.');return parseSessionId(pointer.id);}
   catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')return undefined;throw error;}
 }
+
+/** Resolve implicit commands only within this repository, including legacy v0.1 stores. */
+export async function selectRepositorySession(store:string,repo:string,explicit?:string):Promise<string>{
+ if(explicit)return parseSessionId(explicit);
+ const canonical=await fs.realpath(repo);let id=await repositorySession(store,canonical);
+ if(!id){try{const pointer=JSON.parse(await readLimitedText(path.join(store,'latest.json'),10000));if(pointer.schemaVersion!==1)throw new Error('Unsupported latest-session pointer');id=parseSessionId(pointer.id);}catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')throw new Error('No session is recorded for this repository. Start with sentinel run, or select an explicit --session ID.');throw error;}}
+ const cp=await loadCheckpoint(store,id);
+ if(cp.repo!==canonical&&cp.workspace!==canonical)throw new Error('The selected implicit checkpoint belongs to another repository. Use --session ID to select it explicitly.');
+ return cp.id;
+}
+
 export function displayPlan(io:PromptIO,plan:DiscoveryPlan,proposals=plan.proposed,unresolved=plan.uncertaintyDetails.filter(q=>q.blocksObjectiveVerification).map(q=>q.message)){
  io.write('\n  SENTINEL · Verification plan · PROPOSED, not approved');
  io.write(`  Task: ${plan.objective}`);io.write(`  Repository: ${plan.repo}`);io.write(`  Environment: ${plan.environment.packageManager} · ${plan.environment.testFramework}`);

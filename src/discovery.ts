@@ -210,11 +210,28 @@ function skippedContext(node: ts.Node): boolean {
   }
   return false;
 }
-function explicitExamples(text: string): { name: string; args: Json[]; expected: Json; start: number; raw: string }[] {
+// Stop at an explicit sentence/example boundary, outside strings and nested
+// literals. Parsing only the first TS initializer would silently accept the
+// first value in ambiguous prose such as "true or false".
+function expectedSegment(text: string): string {
+  let depth=0,quote='',escaped=false;
+  for(let i=0;i<text.length;i++){
+    const ch=text[i]!;
+    if(quote){if(escaped)escaped=false;else if(ch==='\\')escaped=true;else if(ch===quote)quote='';continue;}
+    if(ch==='"'||ch==="'"||ch==='`'){quote=ch;continue;}
+    if(ch==='('||ch==='['||ch==='{')depth++;
+    else if(ch===')'||ch===']'||ch==='}')depth--;
+    else if(depth===0&&(ch===';'||(ch==='.'&&(i+1===text.length||/\s/.test(text[i+1]!)))))return text.slice(0,i);
+  }
+  return text;
+}
+function explicitExamples(text: string, unresolved?: (name:string,start:number)=>void): { name: string; args: Json[]; expected: Json; start: number; raw: string }[] {
   const result: { name: string; args: Json[]; expected: Json; start: number; raw: string }[] = [];
   const pattern = /\b([A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)?)\s*\(/g;
+  let coveredUntil=-1,attempts=0;
   for (const match of text.matchAll(pattern)) {
-    const start = match.index!, open = start + match[0].lastIndexOf('('); let depth = 0, quote = '', escaped = false, close = -1;
+    const start = match.index!;if(start<coveredUntil)continue;
+    const open = start + match[0].lastIndexOf('('); let depth = 0, quote = '', escaped = false, close = -1;
     for (let i = open; i < Math.min(text.length, open + 20000); i++) {
       const ch = text[i]!;
       if (quote) { if (escaped) escaped = false; else if (ch === '\\') escaped = true; else if (ch === quote) quote = ''; continue; }
@@ -224,15 +241,18 @@ function explicitExamples(text: string): { name: string; args: Json[]; expected:
     if (close < 0) continue;
     const tail = text.slice(close + 1); const operator = /^\s*(?:(?:must|should)\s+return\b|returns?\b|===|=>|\/\/\s*(?:=>|returns?\b))\s*/i.exec(tail);
     if (!operator) continue;
-    const expectedText = tail.slice(operator[0].length).split(/\r?\n/,1)[0]!.slice(0, 20000);
+    if(++attempts>100)break;coveredUntil=close+1;
+    const reject=()=>unresolved?.(match[1]!,start);
+    const expectedText = expectedSegment(tail.slice(operator[0].length).split(/\r?\n/,1)[0]!.slice(0, 20000));
     const expectedAst = ts.createSourceFile('value.ts', `const value = ${expectedText}`, ts.ScriptTarget.Latest, true);
     const s = expectedAst.statements[0]; const initializer = s && ts.isVariableStatement(s) ? s.declarationList.declarations[0]?.initializer : undefined;
-    if (!initializer) continue; const literalInitializer=ts.isPropertyAccessExpression(initializer)&&initializer.name.text===''?initializer.expression:initializer; const literalSource=ts.createSourceFile('literal.ts',`const value = ${literalInitializer.getText(expectedAst)}`,ts.ScriptTarget.Latest,true);
-    if(syntaxErrors(literalSource))continue;const expected = staticJson(literalInitializer); if (!expected.ok) continue;
-    const callText = text.slice(start, close + 1); const ast = ts.createSourceFile('call.ts', `const call = ${callText}`, ts.ScriptTarget.Latest, true);if(syntaxErrors(ast))continue;
+    if (!initializer||syntaxErrors(expectedAst)||expectedAst.statements.length!==1) {reject();continue;}
+    let typedExpression=false;walk(initializer,node=>{if(ts.isAsExpression(node)||ts.isSatisfiesExpression(node)||ts.isTypeAssertionExpression(node)||ts.isNonNullExpression(node))typedExpression=true;});
+    const expected = staticJson(initializer); if (!expected.ok||typedExpression) {reject();continue;}
+    const callText = text.slice(start, close + 1); const ast = ts.createSourceFile('call.ts', `const call = ${callText}`, ts.ScriptTarget.Latest, true);if(syntaxErrors(ast)){reject();continue;}
     const statement = ast.statements[0]; const call = statement && ts.isVariableStatement(statement) ? statement.declarationList.declarations[0]?.initializer : undefined;
-    if (!call || !ts.isCallExpression(call)) continue; const args = literalArguments(call); if (!args) continue;
-    const end = close + 1 + operator[0].length + (initializer.end - 'const value = '.length);
+    if (!call || !ts.isCallExpression(call)) {reject();continue;} const args = literalArguments(call); if (!args) {reject();continue;}
+    const end = close + 1 + operator[0].length + expectedText.length;coveredUntil=end;
     result.push({ name: match[1]!, args, expected: expected.value, start, raw: text.slice(start, end) });
     if (result.length >= 100) break;
   }
@@ -344,11 +364,11 @@ export async function discoverProject(repository: string, objective: string): Pr
     if (matching.length === 1) return matching[0]!;
     uncertainties.push(`${location}: ${name} could not be mapped to one supported exported function (${matching.length} matches).`); return null;
   };
-  for (const example of explicitExamples(objective)) {
+  for (const example of explicitExamples(objective,(name,start)=>uncertainties.push(`Objective: ${name} at character ${start+1} has an ambiguous or unsupported call/return example. Supply one literal expected result, separated from other text by a semicolon, period or newline.`))) {
     const target = matchTarget(example.name, 'Objective'); if (!target) continue;
     add(target, { args: example.args, expected: example.expected }, { ...objectiveEvidence, excerpt: example.raw.slice(0, 500) }, 'explicit-objective', true, 'must-change');
   }
-  for (const file of files.values()) if (docPattern.test(file.name)) for (const example of explicitExamples(file.text)) {
+  for (const file of files.values()) if (docPattern.test(file.name)) for (const example of explicitExamples(file.text,(name,start)=>uncertainties.push(`${file.name}:${file.text.slice(0,start).split('\n').length}: ${name} has an ambiguous or unsupported documentation example; no expected result was inferred.`))) {
     const matching = [...targets.values()].filter(t => t.names.has(example.name) || t.export === example.name);
     if (matching.length !== 1) continue;
     const line = file.text.slice(0, example.start).split('\n').length;

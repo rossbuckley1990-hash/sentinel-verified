@@ -1,4 +1,6 @@
-# Release validation
+# v0.1 release validation
+
+These historical measurements remain unchanged. See [v0.2 validation](V0.2-VALIDATION.md) for the current release candidate.
 
 Measured on 1 November 2026. These are observed results, with their scope stated explicitly.
 

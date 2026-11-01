@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { isDeepStrictEqual } from 'node:util';
 import { safeRelative } from './store.js';
 import type { Contract, Json } from './types.js';
 const json: z.ZodType<Json> = z.lazy(()=>z.union([z.null(),z.boolean(),z.number().finite(),z.string().max(100000),z.array(json).max(1000),z.record(z.string(), json)]));
@@ -15,3 +16,14 @@ export const contractSchema=z.object({schemaVersion:z.union([z.literal(1),z.lite
   const ids=x.requirements.map(r=>r.id);if(new Set(ids).size!==ids.length)ctx.addIssue({code:'custom',message:'Requirement IDs must be unique'});
 });
 export function parseContract(value: unknown): Contract {return contractSchema.parse(value) as Contract;}
+
+
+/** Detect single-file contract drift without pretending the whole local store is authenticated. */
+export function validateApprovalProposal(contract:Contract,proposal:unknown):void {
+ if(contract.schemaVersion!==2)return;
+ if(!proposal||typeof proposal!=='object')throw new Error('Approved proposal is malformed; review a fresh plan.');
+ const p=proposal as {schemaVersion?:number;objective?:unknown;proposed?:{selected?:unknown;requirement?:unknown}[];uncertainties?:unknown;resolvedQuestions?:unknown};
+ if(p.schemaVersion!==1||!Array.isArray(p.proposed)||p.proposed.some(item=>!item||typeof item.selected!=='boolean'))throw new Error('Approved proposal is malformed; review a fresh plan.');
+ const requirements=p.proposed.filter(item=>item.selected).map(item=>item.requirement);
+ if(p.objective!==contract.objective||!isDeepStrictEqual(requirements,contract.requirements)||!isDeepStrictEqual(p.uncertainties,contract.unresolved??[])||!isDeepStrictEqual(p.resolvedQuestions,contract.approval?.resolvedQuestions)||!isDeepStrictEqual([...new Set(contract.requirements.map(r=>r.module))],contract.allowedPaths)||contract.probes?.length)throw new Error('Contract differs from the reviewed proposal. Review and approve a fresh plan.');
+}

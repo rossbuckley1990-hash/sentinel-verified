@@ -5,13 +5,14 @@ import { closeSync, fsyncSync, openSync, renameSync, writeFileSync } from 'node:
 import { z } from 'zod';
 import { detectAgents, runAgent } from './agents.js';
 import { atomicJson, captureSnapshot, digest, getObject, materializeSnapshot, putObject, readSnapshot } from './store.js';
-import { parseContract } from './schema.js';
+import { parseContract, validateApprovalProposal } from './schema.js';
 import { runCommand } from './process.js';
 import { executeVerification, type RunnerChoice } from './isolation.js';
 import type { AgentName, AgentRun, Checkpoint, Contract, Receipt, Check } from './types.js';
 
 const hash = z.string().regex(/^[a-f0-9]{64}$/);
 const sessionId = z.string().regex(/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,100}$/);
+export function parseSessionId(value:unknown):string{return sessionId.parse(value);}
 const agentSchema = z.enum(['codex', 'claude', 'fixture-broken', 'fixture-fix', 'fixture-interrupt']);
 const runnerSchema = z.discriminatedUnion('kind', [z.object({kind:z.literal('local')}).strict(), z.object({kind:z.literal('docker'),image:z.string().regex(/^[a-zA-Z0-9][a-zA-Z0-9_.:/@-]{0,255}$/)}).strict()]);
 const checkpointSchema = z.object({
@@ -102,7 +103,7 @@ export async function loadCheckpoint(store: string, id?: string): Promise<Checkp
   if (resolve(checkpoint.workspace) !== expectedWorkspace) throw new Error('Checkpoint workspace is outside its managed location.');
   await readSnapshot(store, checkpoint.baselineHash);
   await readSnapshot(store, checkpoint.candidateHash);
-  if (checkpoint.contractHash) parseContract(JSON.parse((await getObject(store, checkpoint.contractHash)).toString()));
+  if(checkpoint.contractHash){const contract=parseContract(JSON.parse((await getObject(store,checkpoint.contractHash)).toString()));if(contract.approval){if(contract.approval.baselineHash!==checkpoint.baselineHash)throw new Error('Approved baseline differs from checkpoint baseline.');validateApprovalProposal(contract,JSON.parse((await getObject(store,contract.approval.proposalHash)).toString()));}}
   for (const agent of checkpoint.agents) if (agent.handoff) {
     const context=(await getObject(store,agent.handoff.contextHash)).toString();
     if(agent.command?.input!==context||agent.handoff.contractHash!==checkpoint.contractHash)throw new Error('Handoff integrity failure: stored context differs from the receiving agent input or contract.');
@@ -189,8 +190,9 @@ export async function continuationContext(store: string, checkpoint: Checkpoint)
     return `\n${label}\n${text.slice(0,budget)}${text.length > budget ? '\n[Section truncated; do not infer omitted details.]' : ''}\n`;
   };
   return (heading + acknowledgement + guidance
-    + section('APPROVED REQUIREMENTS', contract ? [...contract.requirements].sort((a,b)=>(a.kind==='must-change'?0:1)-(b.kind==='must-change'?0:1)) : 'No requirements were approved.', 4500)
-    + section('INDEPENDENT EVIDENCE', receipt ? { status: receipt.status, candidateHash: receipt.candidateHash, appliesToCurrentSource: receipt.candidateHash === checkpoint.candidateHash, scope: receipt.candidateHash === checkpoint.candidateHash ? 'Evidence applies to the current snapshot.' : 'Historical evidence only: current source changed and must be verified again.', unresolvedCheckCount: receipt.checks.filter(check=>check.status!=='VERIFIED').length, receiptHash: lastHash, checks: [...receipt.checks].sort((a,b)=>(a.status==='VERIFIED'?1:0)-(b.status==='VERIFIED'?1:0)).map(({ command: _command, ...check }) => check), changes: receipt.changes, limitations: receipt.limitations } : 'No completed verification yet.', 4500)
+    + section('APPROVED SCOPE AND UNRESOLVED INTENT', contract ? {unresolvedCount:contract.unresolved?.length??0,scopeDecisionCount:contract.approval?.resolvedQuestions.length??0,unresolved:contract.unresolved??[],resolvedQuestions:contract.approval?.resolvedQuestions??[]} : 'No human-approved scope exists.',1000)
+    + section('APPROVED REQUIREMENTS', contract ? [...contract.requirements].sort((a,b)=>(a.kind==='must-change'?0:1)-(b.kind==='must-change'?0:1)) : 'No requirements were approved.', 4000)
+    + section('INDEPENDENT EVIDENCE', receipt ? { status: receipt.status, candidateHash: receipt.candidateHash, appliesToCurrentSource: receipt.candidateHash === checkpoint.candidateHash, scope: receipt.candidateHash === checkpoint.candidateHash ? 'Evidence applies to the current snapshot.' : 'Historical evidence only: current source changed and must be verified again.', unresolvedCheckCount: receipt.checks.filter(check=>check.status!=='VERIFIED').length, receiptHash: lastHash, checks: [...receipt.checks].sort((a,b)=>(a.status==='VERIFIED'?1:0)-(b.status==='VERIFIED'?1:0)).map(({ command: _command, ...check }) => check), changes: receipt.changes, limitations: receipt.limitations } : 'No completed verification yet.', 4000)
     + section('NEXT ACTIONS', checkpoint.nextActions, 1400)
     + section('OPEN QUESTIONS', checkpoint.openQuestions, 1000)
     + section('UNVERIFIED PREVIOUS AGENT STATEMENTS', checkpoint.unverifiedStatements.map(s => s.slice(0,500)).slice(-2), 1200)).slice(0,16000);
@@ -236,7 +238,8 @@ async function execute(store: string, checkpoint: Checkpoint, agent: AgentName, 
   try {
     let dependencies: string | undefined;
     try { if ((await stat(join(checkpoint.repo, 'node_modules'))).isDirectory()) dependencies = join(checkpoint.repo, 'node_modules'); } catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
-    const receipt = await executeVerification({ store, baseline: await readSnapshot(store, checkpoint.baselineHash), candidate, contract: await contractFor(store, checkpoint), contractHash: checkpoint.contractHash, dependencies, timeoutMs: options.verificationTimeoutMs, onProgress: options.onProgress, onCheck: options.onCheck }, checkpoint.runner ?? {kind:'local'});
+    const contract=await contractFor(store,checkpoint);
+    const receipt = await executeVerification({ store, baseline: await readSnapshot(store, checkpoint.baselineHash), candidate, contract, contractHash: checkpoint.contractHash, dependencies, timeoutMs: options.verificationTimeoutMs, onProgress: options.onProgress, onCheck: options.onCheck }, checkpoint.runner ?? {kind:'local'});
     const receiptHash = await putObject(store, JSON.stringify(receipt));
     checkpoint.receipts.push(receiptHash);
     const currentSource = await captureSnapshot(checkpoint.workspace, store);
@@ -244,7 +247,7 @@ async function execute(store: string, checkpoint: Checkpoint, agent: AgentName, 
     const unchanged = currentSource.hash === candidate.hash;
     checkpoint.state = unchanged && receipt.status === 'VERIFIED' ? 'verified' : 'needs-work';
     checkpoint.nextActions = unchanged ? receipt.nextActions : ['Source changed during verification. The receipt is historical; rerun verification before accepting the current source.'];
-    checkpoint.openQuestions = [...receipt.limitations, ...(agentRun.handoff&&!agentRun.handoff.acknowledged?['The receiving agent did not acknowledge the supplied checkpoint. Its context receipt is unverified.']:[]), ...(unchanged ? [] : ['Workspace changed while independent checks were running; current source is unverified.'])];
+    checkpoint.openQuestions = [...(contract?.unresolved??[]), ...receipt.limitations, ...(agentRun.handoff&&!agentRun.handoff.acknowledged?['The receiving agent did not acknowledge the supplied checkpoint. Its context receipt is unverified.']:[]), ...(unchanged ? [] : ['Workspace changed while independent checks were running; current source is unverified.'])];
   } catch (error) {
     const detail=(error instanceof Error ? error.message : String(error)).slice(0,8000);
     const failure:Receipt={schemaVersion:1,id:randomUUID(),createdAt:new Date().toISOString(),objective:checkpoint.objective,
@@ -280,7 +283,7 @@ export async function startSession(options: StartSessionOptions): Promise<Checkp
     }
     const contractHash = contract ? await putObject(paths.store, JSON.stringify(contract)) : null;
     const baseline = await captureSnapshot(paths.repo, paths.store);
-    if(contract?.schemaVersion===2){const approval=contract.approval;if(!approval)throw new Error('Approved v2 contract metadata is missing.');if(approval.baselineHash!==baseline.hash)throw new Error('Source changed after contract approval. Review a new verification plan before starting.');await getObject(paths.store,approval.proposalHash);}
+    if(contract?.schemaVersion===2){const approval=contract.approval;if(!approval)throw new Error('Approved v2 contract metadata is missing.');if(approval.baselineHash!==baseline.hash)throw new Error('Source changed after contract approval. Review a new verification plan before starting.');validateApprovalProposal(contract,JSON.parse((await getObject(paths.store,approval.proposalHash)).toString()));}
     const workspace = join(paths.store, 'workspaces', id);
     await materializeSnapshot(paths.store, baseline, workspace);
     await git(['init', '-b', 'sentinel-session'], workspace);
@@ -292,7 +295,7 @@ export async function startSession(options: StartSessionOptions): Promise<Checkp
     await writeFile(join(workspace, '.git', 'info', 'exclude'), '\nnode_modules/\n');
     const initialCandidate = await captureSnapshot(workspace, paths.store);
     const now = new Date().toISOString();
-    const checkpoint: Checkpoint = { schemaVersion: 1, id, objective: options.objective, createdAt: now, updatedAt: now, repo: paths.repo, workspace, baselineHash: baseline.hash, candidateHash: initialCandidate.hash, contractHash, state: 'ready', receipts: [], agents: [], nextActions: ['Run the selected agent, then verify its changes.'], openQuestions: contract ? [] : ['No human-approved acceptance contract was supplied. Test results alone cannot establish the task.'], unverifiedStatements: [], localConsent: options.localConsent, ...(options.runner?{runner:options.runner}:{}), ...(options.isolatedConsent?{isolatedConsent:true}:{}) };
+    const checkpoint: Checkpoint = { schemaVersion: 1, id, objective: options.objective, createdAt: now, updatedAt: now, repo: paths.repo, workspace, baselineHash: baseline.hash, candidateHash: initialCandidate.hash, contractHash, state: 'ready', receipts: [], agents: [], nextActions: ['Run the selected agent, then verify its changes.'], openQuestions: contract ? [...(contract.unresolved??[])] : ['No human-approved acceptance contract was supplied. Test results alone cannot establish the task.'], unverifiedStatements: [], localConsent: options.localConsent, ...(options.runner?{runner:options.runner}:{}), ...(options.isolatedConsent?{isolatedConsent:true}:{}) };
     await saveCheckpoint(paths.store, checkpoint);
     await atomicJson(join(paths.store, 'latest.json'), { schemaVersion: 1, id });
     let agent = options.agent;

@@ -28,7 +28,7 @@ node dist/public-benchmark.js
 
 The normal deadline is 30 seconds per verification command. The recorded run on an overloaded host uses `node dist/public-benchmark.js --timeout-ms 120000`; this changes execution bounds only. The exact deadline, load averages and stable runtime hashes are recorded in the result. CI can repeat the same unchanged cases at the default deadline.
 
-Each case runs twice. Output is `benchmark-results/public/results.json`, a readable `RESULTS.md`, and the content-addressed evidence store. Receipts bind source snapshots, contracts, executed commands and outputs. Temporary evaluation repositories are removed after execution. The benchmark deliberately executes the included, reviewed public project code locally; it is not hostile-code isolation.
+Each case runs twice. Output is `benchmark-results/public/results.json`, a readable `RESULTS.md`, and the content-addressed evidence store. Receipts bind source snapshots, contracts, executed commands and outputs. Temporary evaluation repositories are removed after execution. To replay a retained receipt after removal, use `node benchmarks/public/replay.mjs <receipt-hash> --allow-local` (take the hash from your generated `results.json`). This helper restores the pinned fixture dependencies and invokes the actual `sentinel replay` command; a contradicted result correctly exits 1, with an HTML report under `benchmark-results/public/store/reports/`. The benchmark deliberately executes the included, reviewed public project code locally; it is not hostile-code isolation.
 
 For optional comparisons, install the exact tools into a separate directory:
 
@@ -38,13 +38,39 @@ node benchmarks/public/compare.mjs benchmark-results/public-tools/node_modules
 node benchmarks/public/stryker.mjs benchmark-results/public-tools/node_modules
 ```
 
-The comparison retains raw command records and trustbut receipts under `benchmark-results/public-comparison/`; Stryker retains its full mutation report and log under `benchmark-results/public-stryker/`. Keep the generated package lock if exact transitive dependency replay is required. The published measurement lock is included alongside the summaries. These optional tool installations require network access and are not part of the offline core.
+The comparison retains raw command records and trustbut receipts under `benchmark-results/public-comparison/`; Stryker retains its full mutation report and log under `benchmark-results/public-stryker/`. The exact tool package manifest and lock are included alongside the summaries; copy `comparison-package.json` to a separate tools directory as `package.json`, copy `comparison-package-lock.json` as `package-lock.json`, and use `npm ci --prefix <tools-directory> --ignore-scripts` for exact transitive dependency replay. These optional tool installations require network access and are not part of the offline core.
 
 ## Measured outcomes
 
 Public summaries retain exact source/contract/receipt hashes and tool configuration; raw local receipts remain in the generated store. Absolute execution paths are omitted from published summaries. The publication-ready measurement files live in [`benchmarks/public/measurements/`](../benchmarks/public/measurements/). The table and totals below are generated from actual runs, not expected labels.
 
 <!-- MEASURED_RESULTS -->
+
+Measured 2026-11-01T14:52:43.545Z on darwin/arm64, Node v26.12.0, Vitest 5.0.5. Per-command SENTINEL timeout: 120000 ms. Final host load averages: 98.60 / 162.75 / 147.85. Runtime fingerprints were stable across the run.
+
+| Case | Original Mocha tests | trustbut 0.7.0 | Specified SENTINEL check | SENTINEL overall |
+|---|---|---|---|---|
+| is-number-historical-nonfix | PASS | WARN — dependency warning | CONTRADICTED | CONTRADICTED |
+| is-number-upstream-fix | PASS | WARN — change-not-proven | VERIFIED | VERIFIED |
+| is-number-incomplete-repair | PASS | WARN — change-not-proven | CONTRADICTED | CONTRADICTED |
+| is-number-narrow-contract-miss | PASS | WARN — dependency warning | VERIFIED | VERIFIED |
+| normalize-path-benign-refactor | PASS | WARN — change-not-proven | VERIFIED | VERIFIED |
+| normalize-path-trailing-regression | FAIL (5) | FAIL — change-not-proven, suite-failing, test-regressed | CONTRADICTED | CONTRADICTED |
+| normalize-path-weakened-tests | PASS | WARN — tests-removed, assertions-removed, proofs-unmatched | CONTRADICTED | CONTRADICTED |
+| normalize-path-unrelated-drift | FAIL (4) | FAIL — change-not-proven, suite-failing, test-regressed | REVIEW REQUIRED | CONTRADICTED |
+| normalize-path-insufficient-intent | PASS | WARN — dependency warning | UNVERIFIED | REVIEW REQUIRED |
+
+All **9/9 predeclared outcomes** matched and **9/9 semantic outcomes** agreed on replay. SENTINEL signalled **5/6 defective candidate/contract combinations**, with **1 deliberate specification miss**. It accepted **2/2 correct candidates** without a contradiction; this tiny count is not a population false-positive estimate. Original Mocha tests failed on two defective candidates. trustbut independently reproduced those two regressions and issued a specific removed-assertion warning for the weakened-test candidate.
+
+The three additional green-ordinary-test contradictions are the unchanged historical whitespace defect, the incomplete whitespace repair and the regression concealed by removing trailing-slash assertions. The first two share one historical root bug; the third shares the trailing-slash regression already exercised in another case. Thus this establishes **one additional historical defect class**, not three new upstream bugs. The namespace difference is separately classified for review and also fails existing tests.
+
+One-pass execution totals across nine cases: SENTINEL **161.778 s**; original Mocha **28.430 s**; trustbut **158.581 s**. These are observations under severe workload contention and different verification workloads, not a speed ranking.
+
+StrykerJS 10.1.1: **{"Killed":22,"Survived":2}**, mutation score **91.67%**, **123.400 s**. Its original tests passed; the unchanged historical function still returned `true` for one space, where the issue requires `false`. The surviving changes (`+num` to `-num` and `>= 0` to `> 0` in `n - n + 1`) appear equivalent for the supported primitive numeric-classification domain. They are not counted as defects or assumed repairable coverage gaps. Stryker does not identify the issue-required whitespace result from those mutants.
+
+<!-- END_MEASURED_RESULTS -->
+
+The [post-cleanup replay measurement](../benchmarks/public/measurements/replay.json) also ran the actual CLI after the original temporary source checkout was absent. It preserved the source and contract hashes, reran 138 green ordinary test instances, and reproduced `isNumber(" ") === true` against the required `false`. The expected contradiction exited 1.
 
 ## What the comparison establishes
 

@@ -1,0 +1,99 @@
+
+  SENTINEL  /  verified progress survives
+
+  DISCOVERY · Reading repository evidence (no project code execution)
+  DISCOVERY · 13 source files · 3 test files · npm / vitest
+
+  SENTINEL · Verification plan · PROPOSED, not approved
+  Task: Fix whitespace-only strings being accepted as numbers without rejecting numeric strings or numeric values; isNumber("   ") must return false; isNumber("\r\n\t") must return false.
+  Repository: <PUBLIC_REPOSITORY>
+  Environment: npm · vitest
+
+  MUST-CHANGE
+  1. [included] isNumber("   ") returns false
+     index.js → default
+     ["   "] → false
+     Source: <objective>:1 · isNumber("   ") must return false
+  2. [included] isNumber("\r\n\t") returns false
+     index.js → default
+     ["\r\n\t"] → false
+     Source: <objective>:1 · isNumber("\r\n\t") must return false.
+
+  MUST-PRESERVE
+  3. [included] isNumber("3a") returns false
+     index.js → default
+     ["3a"] → false
+     Source: documented-behaviour.test.ts:6 · expect(isNumber('3a')).toBe(false)
+  4. [included] isNumber("") returns false
+     index.js → default
+     [""] → false
+     Source: documented-behaviour.test.ts:6 · expect(isNumber('')).toBe(false)
+  5. [included] isNumber("   56\r\n  ") returns true
+     index.js → default
+     ["   56\r\n  "] → true
+     Source: documented-behaviour.test.ts:5 · expect(isNumber(' 56\r\n ')).toBe(true)
+  6. [included] isNumber("5e3") returns true
+     index.js → default
+     ["5e3"] → true
+     Source: documented-behaviour.test.ts:5 · expect(isNumber('5e3')).toBe(true)
+  7. [included] isNumber(0) returns true
+     index.js → default
+     [0] → true
+     Source: documented-behaviour.test.ts:4 · expect(isNumber(0)).toBe(true)
+  8. [included] isNumber(37) returns true
+     index.js → default
+     [37] → true
+     Source: documented-behaviour.test.ts:4 · expect(isNumber(37)).toBe(true)
+
+  UNCERTAIN
+  No unresolved objective questions recorded. Coverage remains bounded.
+  Scope: .verb.md: 24 quoted primitive outputs are ambiguous documentation examples; they were not translated into requirements.
+  Scope: README.md: 24 quoted primitive outputs are ambiguous documentation examples; they were not translated into requirements.
+  Proposal generation reads source text; no project code has run. Approval is your decision.
+
+  [Approve] [Edit] [Remove/restore] [Add] [Resolve question] [Quit]: approve
+
+  CONTRACT · Approved 8 requirements.
+  Protected contract: <EVIDENCE_STORE>/contracts/d1d340eee6cff0a6c7aa59e5c7181e3b26abf56f471abd448289568673f088b9.json
+  1. codex ·  (authentication checked on launch)
+  2. claude · 2.1.301 (Claude Code) (authentication checked on launch)
+  Agent [1]: 1
+  EXECUTION · Source and tests will run locally under your OS account. This is not a sandbox.
+  Allow local execution for this session? Type allow: allow
+  Task        Fix whitespace-only strings being accepted as numbers without rejecting numeric strings or numeric values; isNumber("   ") must return false; isNumber("\r\n\t") must return false.
+  Agent       codex
+  Repository  <PUBLIC_REPOSITORY>
+
+  IMPLEMENTATION · Running
+  VERIFICATION · Running
+  ENVIRONMENT FAILURE · Baseline tests
+  ENVIRONMENT FAILURE · Candidate ordinary tests
+  ENVIRONMENT FAILURE · Preserved baseline tests
+  EVIDENCE · Saved · CONTINUATION · Ready
+  TASK → AGENT → CHANGES → VERIFICATION → EVIDENCE → CONTINUATION
+
+  Fix whitespace-only strings being accepted as numbers without rejecting numeric strings or numeric values; isNumber("   ") must return false; isNumber("\r\n\t") must return false.
+
+  ! ENVIRONMENT FAILURE  Baseline tests
+    Test execution did not complete reliably
+  ! ENVIRONMENT FAILURE  Candidate ordinary tests
+    Test execution did not complete reliably
+  ! ENVIRONMENT FAILURE  Preserved baseline tests
+    Test execution did not complete reliably
+  ✓ VERIFIED             isNumber("   ") returns false
+  ✓ VERIFIED             isNumber("\r\n\t") returns false
+  ✓ VERIFIED             isNumber("3a") returns false
+  ✓ VERIFIED             isNumber("") returns false
+  ✓ VERIFIED             isNumber("   56\r\n  ") returns true
+  ✓ VERIFIED             isNumber("5e3") returns true
+  ✓ VERIFIED             isNumber(0) returns true
+  ✓ VERIFIED             isNumber(37) returns true
+
+  ENVIRONMENT FAILURE · 150.37s · local advisory verification
+  Results cover the executed checks. They do not prove arbitrary correctness.
+  Report      <EVIDENCE_STORE>/sessions/s-mvxxqszc-ceee22e0/report.html
+  Session     s-mvxxqszc-ceee22e0 · needs-work
+  Workspace   <EVIDENCE_STORE>/workspaces/s-mvxxqszc-ceee22e0
+  Evidence    5f2dbb1075b2ad4660e4ef981a0950862d8c8c6d00fac0515983a909d8ceaeae
+  Next        ENVIRONMENT FAILURE: Candidate ordinary tests — Test execution did not complete reliably
+  Next        ENVIRONMENT FAILURE: Preserved baseline tests — Test execution did not complete reliably

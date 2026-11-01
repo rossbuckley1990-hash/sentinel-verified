@@ -2,7 +2,7 @@
 
 Versions follow SemVer while 0.x allows documented schema/API changes. Schema version 1 is validated explicitly; incompatible imports must fail or use an explicit migration that preserves historical hashes.
 
-1. Run `npm ci && npm run build && npm test && npm run benchmark`.
+1. Run `npm ci && npm run build && npm test && npm run benchmark && npm run benchmark:public`.
 2. Run `npm audit --omit=dev`. Review security findings rather than suppressing them.
 3. Run `node scripts/capture-demo.mjs` to regenerate the real terminal transcript and SVG excerpt.
 4. Push the candidate commit and require all macOS/Linux, Node 22/24 CI jobs to pass.
@@ -11,3 +11,8 @@ Versions follow SemVer while 0.x allows documented schema/API changes. Schema ve
 7. Tag the verified commit `vX.Y.Z` and push the tag. The Release workflow validates version consistency, rebuilds, reruns checks and publishes a GitHub release with an installable npm tarball. It does not publish to the npm registry.
 
 Do not move an existing release tag. Correct defects in a new patch version. Private vulnerability reporting is enabled on the public GitHub repository.
+
+
+For v0.2, preserve the pinned public evaluation labels, report specification misses and unsuccessful infrastructure attempts, and record live agent authentication separately from protocol tests. Run the configured Docker probes when a reviewed local image is available. The offline core must not require Docker.
+
+Registry publication is a separate authority check (`npm whoami`). A failed authentication check blocks npm publication, not the GitHub release archive. Do not advertise `npx sentinel-verified` until that exact version is published and tested. Validate the GitHub `.tgz` in a fresh install prefix and cache, and include its exact URL in the release instructions.

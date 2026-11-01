@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 2,
+  "objective": "Fix whitespace-only strings being accepted as numbers without rejecting numeric strings or numeric values; isNumber(\"   \") must return false; isNumber(\"\\r\\n\\t\") must return false.",
+  "approvedBy": "Developer via interactive terminal approval",
+  "requirements": [
+    {
+      "id": "discovered-01b70d5bec2b",
+      "kind": "must-change",
+      "description": "isNumber(\"   \") returns false",
+      "module": "index.js",
+      "export": "default",
+      "cases": [
+        {
+          "args": [
+            "   "
+          ],
+          "expected": false
+        }
+      ]
+    },
+    {
+      "id": "discovered-4bb41969232e",
+      "kind": "must-change",
+      "description": "isNumber(\"\\r\\n\\t\") returns false",
+      "module": "index.js",
+      "export": "default",
+      "cases": [
+        {
+          "args": [
+            "\r\n\t"
+          ],
+          "expected": false
+        }
+      ]
+    },
+    {
+      "id": "discovered-138df26b8a03",
+      "kind": "must-preserve",
+      "description": "isNumber(\"3a\") returns false",
+      "module": "index.js",
+      "export": "default",
+      "cases": [
+        {
+          "args": [
+            "3a"
+          ],
+          "expected": false
+        }
+      ]
+    },
+    {
+      "id": "discovered-e8932205aa13",
+      "kind": "must-preserve",
+      "description": "isNumber(\"\") returns false",
+      "module": "index.js",
+      "export": "default",
+      "cases": [
+        {
+          "args": [
+            ""
+          ],
+          "expected": false
+        }
+      ]
+    },
+    {
+      "id": "discovered-0cd16bf5cc3c",
+      "kind": "must-preserve",
+      "description": "isNumber(\"   56\\r\\n  \") returns true",
+      "module": "index.js",
+      "export": "default",
+      "cases": [
+        {
+          "args": [
+            "   56\r\n  "
+          ],
+          "expected": true
+        }
+      ]
+    },
+    {
+      "id": "discovered-6f2ae391ccb4",
+      "kind": "must-preserve",
+      "description": "isNumber(\"5e3\") returns true",
+      "module": "index.js",
+      "export": "default",
+      "cases": [
+        {
+          "args": [
+            "5e3"
+          ],
+          "expected": true
+        }
+      ]
+    },
+    {
+      "id": "discovered-caa7ec4a796c",
+      "kind": "must-preserve",
+      "description": "isNumber(0) returns true",
+      "module": "index.js",
+      "export": "default",
+      "cases": [
+        {
+          "args": [
+            0
+          ],
+          "expected": true
+        }
+      ]
+    },
+    {
+      "id": "discovered-ecc811585b0b",
+      "kind": "must-preserve",
+      "description": "isNumber(37) returns true",
+      "module": "index.js",
+      "export": "default",
+      "cases": [
+        {
+          "args": [
+            37
+          ],
+          "expected": true
+        }
+      ]
+    }
+  ],
+  "allowedPaths": [
+    "index.js"
+  ],
+  "unresolved": [],
+  "approval": {
+    "method": "interactive",
+    "approvedAt": "2026-11-01T14:37:24.245Z",
+    "proposalHash": "88e4fbe3b3137545147492550e277009ab09177f5d9cc3d4278e645676872e6c",
+    "baselineHash": "9e5e07b9cb46c9908db13a56b7b7b6d2283574099766651f43b6bbe018fb93d6",
+    "requirementIds": [
+      "discovered-01b70d5bec2b",
+      "discovered-4bb41969232e",
+      "discovered-138df26b8a03",
+      "discovered-e8932205aa13",
+      "discovered-0cd16bf5cc3c",
+      "discovered-6f2ae391ccb4",
+      "discovered-caa7ec4a796c",
+      "discovered-ecc811585b0b"
+    ],
+    "resolvedQuestions": []
+  }
+}

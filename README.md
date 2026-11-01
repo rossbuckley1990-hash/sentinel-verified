@@ -32,7 +32,7 @@ npm run build
 node dist/cli.js demo
 ```
 
-The offline core needs no model authentication. See [measured installation and demo runs](docs/VALIDATION.md); v0.1 timings are retained separately from the v0.2 release measurements. Node, npm and Git installation time is excluded.
+The offline core needs no model authentication. See [measured installation and demo runs](docs/V0.2-VALIDATION.md); v0.1 timings are retained separately from the v0.2 release measurements. Node, npm and Git installation time is excluded.
 No API key, subscription or model download is needed. The controlled demonstration runs real code and real Vitest tests:
 
 1. A deliberately faulty patch passes the ordinary tests.
@@ -55,7 +55,7 @@ npm link
 sentinel demo
 ```
 
-No npm registry publication is assumed. You can always replace `sentinel` with the absolute path to `node /path/to/sentinel-verified/dist/cli.js`.
+The npm registry account was unauthenticated during release preparation; no registry publication or `npx` availability is claimed. You can always replace `sentinel` with the absolute path to `node /path/to/sentinel-verified/dist/cli.js`.
 
 ## Use your repository
 
@@ -175,7 +175,7 @@ The HTML report presents the same receipt and continuation state. It contains no
 | Configured verifier isolation | Optional Docker runner; host coding-agent execution remains separate. |
 | Signed attestation, remote merge gate | Not supplied by this release. |
 
-A live authenticated Codex 0.163.0 run repaired the controlled project and passed independent verification. Claude 2.1.301 was installed but unauthenticated on the release machine: its adapter has CLI capability/protocol tests, but live Claude execution was not validated.
+A developer-approved live Codex 0.163.0 session repaired the historical public `is-number` bug, survived controlled interruption and passed all 141 supported test instances plus eight independent behavioural requirements on recovery. [Recorded experiment](docs/V0.2-VALIDATION.md). Claude 2.1.301 was installed but unauthenticated on the release machine: its adapter has CLI capability/protocol tests, but live Claude execution was not validated.
 
 See [integration details](docs/INTEGRATIONS.md) for inspected CLI interfaces and the distinction between deterministic tests and live model validation.
 
@@ -193,7 +193,9 @@ In the measured synthetic corpus, SENTINEL flagged **12/12 problem cases** whose
 
 The benchmark includes explicit expected outcomes for legitimate changes, deceptive green tests, invalid behaviour and continuity failures. Results distinguish ordinary Vitest outcomes from SENTINEL's bounded checks. They measure the included corpus, not all software or all agent behaviour. See [benchmark methodology and recorded results](benchmarks/README.md).
 
-The [public-project evaluation](docs/PUBLIC-EVALUATION.md) adds pinned, licensed historical source, independently declared case labels and comparisons with ordinary tests, trustbut and Stryker. It includes a contract-coverage miss. Neither that corpus nor the synthetic benchmark establishes a production detection rate or competitive superiority.
+The [public-project evaluation](docs/PUBLIC-EVALUATION.md) adds pinned, licensed historical source, independently declared case labels and comparisons with ordinary tests, trustbut and Stryker. It matched 9/9 declared outcomes, accepted 2/2 correct candidates, and signalled 5/6 defective candidate/contract combinations. It includes a contract-coverage miss. Neither that corpus nor the synthetic benchmark establishes a production detection rate or competitive superiority.
+
+The [handoff comparison](docs/HANDOFF-COMPARISON.md) measures repeated function executions when a counterexample is retained or omitted. Its informative-summary control removes the difference; no model-productivity advantage is claimed.
 
 ## Design and contribution
 

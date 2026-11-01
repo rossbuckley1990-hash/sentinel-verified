@@ -4,7 +4,7 @@ import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import { acquireSessionLock, loadCheckpoint, parseCheckpoint, readLimitedText, saveCheckpoint } from './session.js';
 import { atomicJson, captureSnapshot, digest, getObject, materializeSnapshot, putObject, readSnapshot, safeRelative } from './store.js';
-import { parseContract } from './schema.js';
+import { parseContract, validateApprovalProposal } from './schema.js';
 import { executionEnvironment, runCommand } from './process.js';
 import type { Checkpoint, Receipt, Snapshot } from './types.js';
 
@@ -117,7 +117,7 @@ function validateBundle(value: unknown): { bundle: Bundle; checkpoint: Checkpoin
     const bytes = get(checkpoint.contractHash);
     if (bytes.length > 1000000) throw new Error('Approved contract exceeds 1 MB.');
     const contract = parseContract(parseJson(bytes));
-    if(contract.approval){get(contract.approval.proposalHash);if(contract.approval.baselineHash!==checkpoint.baselineHash)throw new Error('Approved baseline differs from checkpoint baseline.');}
+    if(contract.approval){validateApprovalProposal(contract,parseJson(get(contract.approval.proposalHash)));if(contract.approval.baselineHash!==checkpoint.baselineHash)throw new Error('Approved baseline differs from checkpoint baseline.');}
     if (contract.objective !== checkpoint.objective) throw new Error('Bundle objective differs from its approved contract.');
   }
   const snapshots = new Map<string, Omit<Snapshot, 'hash'>>();

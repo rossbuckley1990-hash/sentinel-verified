@@ -5,11 +5,12 @@ import os from 'node:os';
 import { discoverProject } from '../src/discovery.js';
 import {
   approvePlan, consentToExecution, readPreferences, rememberAgent,
-  rememberSession, repositorySession, type PromptIO,
+  rememberSession, repositorySession, selectRepositorySession, type PromptIO,
 } from '../src/onboarding.js';
 import { captureSnapshot, digest, getObject } from '../src/store.js';
 import { parseContract } from '../src/schema.js';
 import { runCommand } from '../src/process.js';
+import { startSession } from '../src/session.js';
 import type { Checkpoint } from '../src/types.js';
 
 // Scripted PromptIO is a unit-test simulation of a developer's choices. These
@@ -258,4 +259,30 @@ describe('explicit execution consent', () => {
     await expect(consentToExecution(interactive.io, { kind: 'local' }, false, false)).resolves.toBeUndefined();
     expect(interactive.remaining).toEqual([]);
   });
+});
+
+
+it('retains valid imported session IDs and maps both original and managed repositories',async()=>{
+ const p=await project();const id='s-import-mvxexample-12345678-1234-1234-1234-123456789abc';const cp=checkpoint(p.repo,p.store,id);await fs.mkdir(cp.workspace,{recursive:true});
+ await rememberSession(p.store,cp);expect(await repositorySession(p.store,p.repo)).toBe(id);expect(await repositorySession(p.store,cp.workspace)).toBe(id);
+});
+
+it('selects a valid legacy global session only for its repository and requires explicit cross-repository selection',async()=>{
+ const p=await project();
+ const packageFile=path.join(p.repo,'package.json');
+ const pkg=JSON.parse(await fs.readFile(packageFile,'utf8'));pkg.sentinelFixture='controlled-demo-v1';
+ await fs.writeFile(packageFile,JSON.stringify(pkg));
+ // This invokes the labelled deterministic interruption adapter, not a model.
+ const cp=await startSession({repo:p.repo,store:p.store,objective:'Controlled repository-selection fixture',agent:'fixture-interrupt',localConsent:true});
+ expect(cp.state).toBe('interrupted');
+ expect(await repositorySession(p.store,p.repo)).toBeUndefined();
+ expect(await selectRepositorySession(p.store,p.repo)).toBe(cp.id);
+ expect(await selectRepositorySession(p.store,cp.workspace)).toBe(cp.id);
+ const unrelated=path.join(p.root,'unrelated');await fs.mkdir(unrelated);
+ await expect(selectRepositorySession(p.store,unrelated)).rejects.toThrow('another repository');
+ expect(await selectRepositorySession(p.store,unrelated,cp.id)).toBe(cp.id);
+ const pointerDirectory=path.join(p.store,'repositories',digest(p.repo));await fs.mkdir(pointerDirectory,{recursive:true});
+ await fs.writeFile(path.join(pointerDirectory,'latest.json'),JSON.stringify({schemaVersion:1,id:'../corrupt'}));
+ await expect(selectRepositorySession(p.store,p.repo)).rejects.toThrow();
+ expect(await selectRepositorySession(p.store,p.repo,cp.id)).toBe(cp.id);
 });

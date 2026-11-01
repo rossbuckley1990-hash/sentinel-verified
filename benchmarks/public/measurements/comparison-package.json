@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "@stryker-mutator/core": "10.1.1",
+    "kind-of": "3.0.2",
+    "minimist": "1.2.8",
+    "mocha": "11.7.5",
+    "trustbut": "0.7.0"
+  }
+}

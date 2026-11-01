@@ -29,5 +29,12 @@ jobs:
       - name: Public provenance and outcome evaluation
         if: matrix.os == 'ubuntu-latest' && matrix.node == 22
         run: npm run benchmark:public
+      - name: Retain reproducible benchmark evidence
+        if: always() && matrix.os == 'ubuntu-latest' && matrix.node == 22
+        uses: actions/upload-artifact@v4
+        with:
+          name: sentinel-benchmark-evidence
+          path: benchmark-results/
+          retention-days: 14
       - name: Check package contents
         run: npm pack --dry-run

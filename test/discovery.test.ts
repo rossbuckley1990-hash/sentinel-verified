@@ -76,6 +76,21 @@ describe('static contract discovery',()=>{
   expect(plan.proposed).toHaveLength(1);expect(plan.proposed[0]?.selected).toBe(true);expect(plan.proposed[0]?.requirement.cases[0]?.expected).toBe(true);
   expect(plan.uncertainties.join('\n')).toContain('quoted primitive');expect(plan.uncertainties.join('\n')).toContain('must-change example');
  });
+ it('keeps ambiguous alternatives and trailing prose unresolved instead of selecting the first expected value',async()=>{
+  const root=await fixture({'index.ts':'export function f(value:unknown){return value;}'});
+  for(const suffix of ['true or false','true as appropriate','false only when valid']){
+   const plan=await discoverProject(root,`Fix f; f("known") must return true; f("unknown") must return ${suffix}.`);
+   expect(plan.proposed.filter(p=>p.requirement.kind==='must-change').map(p=>p.requirement.cases[0]?.args)).toEqual([['known']]);
+   expect(plan.uncertaintyDetails.some(q=>q.blocksObjectiveVerification&&q.message.startsWith('Objective: f')&&q.message.includes('ambiguous'))).toBe(true);
+  }
+ });
+ it('preserves explicit literal examples separated by semicolons, periods or newlines without harvesting calls inside strings',async()=>{
+  const root=await fixture({'index.ts':'export function f(value:unknown){return value;}'});
+  const plan=await discoverProject(root,'Fix f; f("a") must return true. f("b") must return false; f("c") must return {"message":"literal. text; f(99) must return 5"}\nf("d") must return 3.14.');
+  expect(plan.proposed.filter(p=>p.requirement.kind==='must-change').map(p=>p.requirement.cases[0]?.args[0]).sort()).toEqual(['a','b','c','d']);
+  expect(plan.proposed.find(p=>p.requirement.cases[0]?.args[0]==='c')?.requirement.cases[0]?.expected).toEqual({message:'literal. text; f(99) must return 5'});
+  expect(plan.uncertaintyDetails.filter(q=>q.blocksObjectiveVerification)).toEqual([]);
+ });
  it.skipIf(process.platform==='win32')('disables executable Git filesystem monitors including inherited config overrides',async()=>{
   const root=await fixture({'index.ts':'export function f(){return true;}'});const marker=path.join(root,'EXECUTED');const script=path.join(root,'monitor.sh');
   expect((await runCommand(['git','add','index.ts'],root)).exitCode).toBe(0);

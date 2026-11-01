@@ -6,7 +6,7 @@ import { createRequire } from 'node:module';
 import { isDeepStrictEqual } from 'node:util';
 import { materializeSnapshot, getObject, readSnapshot, digest } from './store.js';
 import { runCommand, executionEnvironment } from './process.js';
-import { parseContract } from './schema.js';
+import { parseContract, validateApprovalProposal } from './schema.js';
 import type { VerificationOptions, Receipt, Check, Change, CommandRecord, Json, Snapshot, Status, Requirement } from './types.js';
 const require=createRequire(import.meta.url);
 const ownModules=path.resolve(path.dirname(require.resolve('vitest/package.json')),'..');
@@ -101,6 +101,7 @@ export async function verify(options:VerificationOptions):Promise<Receipt>{
  if(!isDeepStrictEqual(canonicalBaseline,baseline)||!isDeepStrictEqual(canonicalCandidate,candidate))throw new Error('Snapshot manifest does not match its content hash');
  if(contractHash){const stored=parseContract(JSON.parse((await getObject(store,contractHash)).toString()));if(!isDeepStrictEqual(stored,contract))throw new Error('Approved contract content does not match its hash');}
  else if(contract)throw new Error('Approved contract requires a content hash');
+ if(contract?.approval){if(contract.approval.baselineHash!==baseline.hash)throw new Error('Approved baseline differs from verification baseline. Review a fresh plan.');validateApprovalProposal(contract,JSON.parse((await getObject(store,contract.approval.proposalHash)).toString()));}
  const scratch=await fs.mkdtemp(path.join(await fs.realpath(store),'execution-'));
  let baseDir=path.join(scratch,'baseline'),candidateDir=path.join(scratch,'candidate');const preservedDir=path.join(scratch,'preserved');
  const checks:Check[]=[];const record=(check:Check)=>{checks.push(check);options.onCheck?.(check);};const timeout=options.timeoutMs??15000;
